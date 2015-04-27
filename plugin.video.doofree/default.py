@@ -4817,7 +4817,8 @@ class thai:
                 episodes += re.compile('<a href="(.+?)" >(.+?)</a>.+?</td>\t\t\t\t\t\t\t<td> \t\t\t\t\t\t\t\t<a href="(.+?)" ><img').findall(episodematch[0])
         print episodes
         for episode in episodes:
-            if (episode[1].find('(HD)') != -1 and (catid == 18 or catid == 27)) or (catid not in [18, 27]):
+            #if (episode[1].find('(HD)') != -1 and (catid == 18 or catid == 27)) or (catid not in [18, 27]):
+            if (catid == 18 or catid == 27) or (catid not in [18, 27]):
                 name = episode[1].decode('iso-8859-11')
                 #name = episode[1]
                 u = 'http://www.seesantv.com/seesantv_2014/' + episode[0]
