@@ -111,7 +111,6 @@ class main:
         print 'action:' + str(action)
 
         if action == None:
-            threading.Thread(self.CheckForAutoUpdate()).start()
             root().get()
         elif action == 'movies_latest':               movies().latest(url)
         # when choosing a movie
@@ -235,114 +234,6 @@ class main:
         dst_file = xbmc.translatePath('special://home/userdata/Thumbnails/' + match[2])
         if os.path.exists(dst_file):
             os.remove(dst_file)
-
-    def CheckForAutoUpdate(self, force = False):
-        GitHubRepo    = 'AutoUpdate'
-        GitHubUser    = 'mpie'
-        GitHubBranch  = 'master'
-        GitHubPath    = 'tree/master/plugin.video.doofree'
-        UpdateVerFile = 'update'
-        RunningFile   = 'running'
-        verCheck=True
-        if verCheck == True:
-            try:
-                print "DooFree auto update - started"
-                html = getUrl('https://github.com/'+GitHubUser+'/'+GitHubRepo+'?files=1', mobile=True).result
-            except: html=''
-
-            m = re.search("View (\d+) commit", html, re.I)
-            if m: gitver = int(m.group(1))
-            else: gitver = 0
-
-            UpdateVerPath = os.path.join(UpdatePath,UpdateVerFile)
-            try: locver = int(self.getUpdateFile(UpdateVerPath))
-            except: locver = 0
-
-            RunningFilePath = os.path.join(UpdatePath, RunningFile)
-            if locver < gitver and (not os.path.exists(RunningFilePath) or os.stat(RunningFilePath).st_mtime + 120 < time.time()) or force:
-                UpdateUrl = 'https://github.com/'+GitHubUser+'/'+GitHubRepo+'/archive/'+GitHubBranch+'.zip'
-                UpdateLocalName = GitHubRepo+'.zip'
-                UpdateDirName   = GitHubRepo+'-'+GitHubBranch
-                UpdateLocalFile = xbmc.translatePath(os.path.join(UpdatePath, UpdateLocalName))
-                self.setFile(RunningFilePath,'')
-                print "auto update - new update available ("+str(gitver)+")"
-                xbmc.executebuiltin("XBMC.Notification(DooFree Update,New Update detected,3000,"+logo+")")
-                xbmc.executebuiltin("XBMC.Notification(DooFree Update,Updating...,3000,"+logo+")")
-
-                try:os.remove(UpdateLocalFile)
-                except:pass
-
-                try: urllib.urlretrieve(UpdateUrl,UpdateLocalFile)
-                except:pass
-
-                if os.path.isfile(UpdateLocalFile):
-                    extractFolder = xbmc.translatePath('special://home/addons')
-                    pluginsrc =  xbmc.translatePath(os.path.join(extractFolder, UpdateDirName))
-                    #self.cleanCache()
-                    if self.unzipAndMove(UpdateLocalFile, extractFolder, pluginsrc):
-                        self.saveUpdateFile(UpdateVerPath, str(gitver))
-                        print "DooFree auto update - update install successful ("+str(gitver)+")"
-                        xbmc.executebuiltin("XBMC.Notification(DooFree Update,Successful,5000,"+logo+")")
-                        xbmc.executebuiltin("XBMC.Container.Refresh")
-                    else:
-                        print "DooFree auto update - update install failed ("+str(gitver)+")"
-                        xbmc.executebuiltin("XBMC.Notification(DooFree Update,Failed,3000,"+logo+")")
-                else:
-                    print "DooFree auto update - cannot find downloaded update ("+str(gitver)+")"
-                    xbmc.executebuiltin("XBMC.Notification(DooFree Update,Failed,3000,"+logo+")")
-                try:os.remove(RunningFilePath)
-                except:pass
-            else:
-                if force: xbmc.executebuiltin("XBMC.Notification(DooFree Update,DooFree is up-to-date,3000,"+logo+")")
-                print "DooFree auto update - DooFree is up-to-date ("+str(locver)+")"
-            return
-
-    def setFile(self, path, content, force=False):
-        if os.path.exists(path) and not force:
-            return False
-        else:
-            try:
-                open(path, 'w+').write(content)
-                return True
-            except: pass
-        return False
-
-    def unzipAndMove(self, _in, _out , src):
-        try:
-            zin = zipfile.ZipFile(_in, 'r')
-            zin.extractall(_out)
-            if src:
-                self.moveFiles(src, _out)
-                shutil.rmtree(src)
-        except Exception, e:
-            print str(e)
-            return False
-        return True
-
-    def moveFiles(self, root_src_dir, root_dst_dir):
-        for src_dir, dirs, files in os.walk(root_src_dir):
-            dst_dir = src_dir.replace(root_src_dir, root_dst_dir)
-            if not os.path.exists(dst_dir):
-                os.mkdir(dst_dir)
-            for file_ in files:
-                src_file = os.path.join(src_dir, file_)
-                dst_file = os.path.join(dst_dir, file_)
-                if os.path.exists(dst_file):
-                    os.remove(dst_file)
-                shutil.move(src_file, dst_dir)
-
-    def getUpdateFile(self, path, default = 0):
-        if os.path.exists(path):
-            try:
-                f = open(path, 'r')
-                return f.read()
-            except: pass
-        return default
-
-    def saveUpdateFile(self, path, value):
-        try:
-            open(path, 'w+').write(value)
-        except: pass
 
 class getUrl(object):
     def __init__(self, url, close=True, proxy=None, post=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
@@ -5893,12 +5784,12 @@ class resolver:
         #hd_rank += [getSetting("hosthd1"), getSetting("hosthd2"), getSetting("hosthd3"), getSetting("hosthd4"), getSetting("hosthd5"), getSetting("hosthd6"), getSetting("hosthd7"), getSetting("hosthd8"), getSetting("hosthd9"), getSetting("hosthd10"), getSetting("hosthd11"), getSetting("hosthd12"), getSetting("hosthd13"), getSetting("hosthd14"), getSetting("hosthd15"), getSetting("hosthd16"), getSetting("hosthd17")]
 	    #hd_rank = ['Hugefiles', 'YIFY', 'Muchmovies', 'Billionuploads', 'GVideo', 'Sweflix', 'Videomega', 'Niter', 'Einthusan', 'VK', 'V-vids', 'Vidbull', 'Filecloud', 'Uploadrocket', 'Kingfiles']
 
-        hd_rank = ['VK', 'GVideo', 'Muchmovies', 'Sweflix', 'Videomega', 'YIFY', 'Einthusan', '180upload', 'Vidplay', 'Uptobox', 'Mrfile', 'Mightyupload', 'Hugefiles', 'Filecloud', 'Uploadrocket', 'Kingfiles']
+        hd_rank = ['GVideo', 'VK', 'Videomega', 'Sweflix', 'Muchmovies', 'YIFY', 'Einthusan', 'Movreel', '180upload', 'Mightyupload', 'Clicknupload', 'Tusfiles', 'Grifthost', 'Openload', 'Uptobox', 'Primeshare', 'iShared', 'Xfileload', 'Mrfile']
 
         hd_rank = [i.lower() for i in hd_rank]
         hd_rank = uniqueList(hd_rank).list
 
-        sd_rank = ['180upload', 'Vidplay', 'Ororo', 'HDTVshows', 'Animeultima', 'Grifthost', 'Primeshare', 'Promptfile', 'Nosvideo', 'Mrfile', 'Mightyupload', 'Cloudyvideos', 'iShared', 'Uptobox', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa']
+        sd_rank = ['Ororo', 'Animeultima', 'Movreel', '180upload', 'Mightyupload', 'Clicknupload', 'Tusfiles', 'Grifthost', 'Openload', 'Uptobox', 'Primeshare', 'iShared', 'Vidplay', 'Xfileload', 'Mrfile', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa']
 
         sd_rank = [i.lower() for i in sd_rank]
         sd_rank = uniqueList(sd_rank).list
