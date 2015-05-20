@@ -1,24 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
-    Genesis Add-on
-    Copyright (C) 2015 lambda
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
-
-import urllib,urllib2,urlparse,re,os,datetime,base64,xbmcaddon
+import urllib,urllib2,urlparse,re,os,sys,datetime,base64,xbmcaddon
 
 try:
     import CommonFunctions as common
@@ -31,17 +13,28 @@ except:
 
 
 class getUrl(object):
-    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='5'):
+    def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+        handlers = []
         if not proxy == None:
-            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
-            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
+            handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
             cookies = cookielib.LWPCookieJar()
-            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            handlers += [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
+        try:
+            if sys.version_info < (2, 7, 9): raise Exception()
+            import ssl; ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            handlers += [urllib2.HTTPSHandler(context=ssl_context)]
+            opener = urllib2.build_opener(*handlers)
+            opener = urllib2.install_opener(opener)
+        except:
+            pass
         try: headers.update(headers)
         except: headers = {}
         if 'User-Agent' in headers:
@@ -99,10 +92,11 @@ class cleantitle:
 class alluc:
     def __init__(self):
         self.base_link = 'https://www.alluc.com'
-        self.download_link = '/api/search/download/?apikey=%s&count=100&from=0&getmeta=0&query=%s'
-        self.stream_link = '/api/search/stream/?apikey=%s&count=100&from=0&getmeta=0&query=%s'
+        #self.download_link = '/api/search/download/?apikey=%s&count=20&from=0&getmeta=0&query=%s+lang%%3Aen+host%%3A%s'
+        #self.stream_link = '/api/search/stream/?apikey=%s&count=20&from=0&getmeta=0&query=%s+lang%%3Aen+host%%3A%s'
+        self.download_link = '/api/search/download/?apikey=%s&count=100&from=0&getmeta=0&query=%s+lang%%3Aen'
+        self.stream_link = '/api/search/stream/?apikey=%s&count=100&from=0&getmeta=0&query=%s+lang%%3Aen'
         self.key_link = 'OGRmNzlkYTkyMDc4MDhkNmMyOTA5Njg5MTJlMjc4Nzc='
-        self.filter_link = '+lang%3Aen'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -132,22 +126,23 @@ class alluc:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:34.0) Gecko/20110101 Firefox/34.0'}
-            query = urllib.quote_plus(url)
+            #params = (base64.urlsafe_b64decode(self.key_link), urllib.quote_plus(url), urllib.quote_plus(','.join(locDict)))
+            params = (base64.urlsafe_b64decode(self.key_link), urllib.quote_plus(url))
 
             links = []
 
-            q = self.base_link + self.download_link % (base64.urlsafe_b64decode(self.key_link), query) + self.filter_link
-            result = getUrl(q, headers=headers).result
-            links += json.loads(result)['result']
+            q = self.base_link + self.download_link % params
+            try: links += json.loads(getUrl(q, headers=headers).result)['result']
+            except: pass
 
-            q = self.base_link + self.stream_link % (base64.urlsafe_b64decode(self.key_link), query) + self.filter_link
-            result = getUrl(q, headers=headers).result
-            links += json.loads(result)['result']
+            q = self.base_link + self.stream_link % params
+            try: links += json.loads(getUrl(q, headers=headers).result)['result']
+            except: pass
 
             title, hdlr = re.compile('(.+?) (\d{4}|S\d*E\d*)$').findall(url)[0]
 
@@ -232,8 +227,8 @@ class alluc:
 
 class icefilms:
     def __init__(self):
-        self.base_link = 'https://ipv6.icefilms.info'
-        self.link_1 = 'https://ipv6.icefilms.info'
+        self.base_link = 'http://ipv6.icefilms.info'
+        self.link_1 = 'http://ipv6.icefilms.info'
         self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.icefilms.info'
         self.link_3 = 'https://icefilms.unblocked.pw'
         self.moviesearch_link = '/movies/a-z/%s'
@@ -248,11 +243,11 @@ class icefilms:
             query = self.moviesearch_link % query
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
-                if 'submenu' in result: break
+                if 'Donate' in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = re.compile('id=%s>.+?href=(.+?)>' % imdb).findall(result)[0]
@@ -273,11 +268,11 @@ class icefilms:
             query = self.tvsearch_link % query
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
-                if 'submenu' in result: break
+                if 'Donate' in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = re.compile('id=%s>.+?href=(.+?)>' % imdb).findall(result)[0]
@@ -294,11 +289,11 @@ class icefilms:
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
-                if 'submenu' in result: break
+                if 'Donate' in result: break
 
             result = result.decode('iso-8859-1').encode('utf-8')
             result = urllib.unquote_plus(result)
@@ -311,7 +306,7 @@ class icefilms:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -319,7 +314,7 @@ class icefilms:
             url = self.video_link % t
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -392,13 +387,14 @@ class primewire:
         self.key_link = '/index.php?search'
         self.link_1 = 'http://www.primewire.ag'
         self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.primewire.ag'
+        self.link_3 = 'https://primewire.unblocked.pw'
         self.moviesearch_link = '/index.php?search_keywords=%s&key=%s&search_section=1'
         self.tvsearch_link = '/index.php?search_keywords=%s&key=%s&search_section=2'
 
     def get_movie(self, imdb, title, year):
         try:
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + self.key_link).result
                 except: result = ''
@@ -447,7 +443,7 @@ class primewire:
     def get_show(self, imdb, tvdb, show, show_alt, year):
         try:
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + self.key_link).result
                 except: result = ''
@@ -501,12 +497,12 @@ class primewire:
         url = url.encode('utf-8')
         return url
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -561,6 +557,7 @@ class movie25:
         self.base_link = 'http://www.movie25.ag'
         self.link_1 = 'http://www.movie25.ag'
         self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.movie25.ag'
+        self.link_3 = 'https://movie25.unblocked.pw'
         self.search_link = '/search.php?key=%s'
 
     def get_movie(self, imdb, title, year):
@@ -568,7 +565,7 @@ class movie25:
             query = self.search_link % urllib.quote_plus(title)
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
@@ -610,12 +607,12 @@ class movie25:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -663,7 +660,7 @@ class movie25:
             url = urlparse.urlparse(url).path
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -691,6 +688,7 @@ class watchseries:
         self.base_link = 'http://watchseries.ag'
         self.link_1 = 'http://watchseries.ag'
         self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://watchseries.ag'
+        self.link_3 = 'https://watchseries.unblocked.pw'
         self.search_link = '/AdvancedSearch/%s-%s/by_popularity/%s'
         self.episode_link = '/episode/%s_s%s_e%s.html'
 
@@ -699,7 +697,7 @@ class watchseries:
             query = self.search_link % (str(int(year)-1), str(int(year)+1), urllib.quote_plus(show))
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + query).result
                 except: result = ''
@@ -751,14 +749,14 @@ class watchseries:
         url = url.encode('utf-8')
         return url
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
             url = url.replace('/json/', '/')
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -806,7 +804,7 @@ class watchseries:
                     return response
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try:
                     opener = urllib2.build_opener(NoRedirection)
@@ -910,12 +908,12 @@ class iwatchonline:
         url = url.encode('utf-8')
         return url
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -965,7 +963,7 @@ class iwatchonline:
             url = urlparse.urlparse(url).path
 
             result = ''
-            links = [self.link_1, self.link_2]
+            links = [self.link_1, self.link_2, self.link_3]
             for base_link in links:
                 try: result = getUrl(base_link + url).result
                 except: result = ''
@@ -1043,7 +1041,7 @@ class gvcenter:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1157,7 +1155,7 @@ class movietube:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1192,9 +1190,9 @@ class movietube:
                         url = [i for i in url if 'docs.google.com' in i]
                         if not len(url) == 2: raise Exception()
 
-                        import commonresolvers
-                        u1 = commonresolvers.googledocs().resolve(url[0])
-                        u2 = commonresolvers.googledocs().resolve(url[1])
+                        from commonresolvers import googledocs
+                        u1 = googledocs().resolve(url[0])
+                        u2 = googledocs().resolve(url[1])
 
                         for i in range(0, len(u1)): sources.append({'source': 'GVideo', 'quality': u1[i]['quality'], 'provider': 'Movietube', 'url': 'stack://%s , %s' % (u1[i]['url'], u2[i]['url'])})
                     except:
@@ -1214,15 +1212,15 @@ class movietube:
                 for u in links:
                     try:
                         if u.startswith('--Doc'):
-                            import commonresolvers
+                            from commonresolvers import googledocs
                             url = self.docs_link % u.split('--', 2)[-1]
-                            url = commonresolvers.googledocs().resolve(url)
+                            url = googledocs().resolve(url)
 
                             for i in url: sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Movietube', 'url': i['url']})
                         else:
-                            import commonresolvers
+                            from commonresolvers import googleplus
                             url = u.split('--', 2)[-1]
-                            i = commonresolvers.googleplus().tag(url)[0]
+                            i = googleplus().tag(url)[0]
 
                             sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Movietube', 'url': i['url']})
                     except:
@@ -1265,7 +1263,7 @@ class moviezone:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1301,8 +1299,8 @@ class moviezone:
 
             for url in links:
                 try:
-                    import commonresolvers
-                    i = commonresolvers.googleplus().tag(url)[0]
+                    from commonresolvers import googleplus
+                    i = googleplus().tag(url)[0]
 
                     sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Moviezone', 'url': i['url']})
                 except:
@@ -1353,7 +1351,7 @@ class yify:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1401,28 +1399,26 @@ class yify:
         except:
             return
 
-class zumvo:
+class afdah:
     def __init__(self):
-        self.base_link = 'http://zumvo.me'
-        self.search_link = '/search/%s'
+        self.base_link = 'https://afdah.org'
+        self.search_link = '/results?q=%s'
+        self.info_link = '/video_info'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.base_link + self.search_link % (urllib.quote_plus(title))
 
-            try: cookie = re.compile('cookie *= *[\'|\"](.+?)[\'|\"]').findall(getUrl(query).result)[0]
-            except: cookie = ''
-
-            result = getUrl(query, cookie=cookie).result
-            result = common.parseDOM(result, "ul", attrs = { "class": "list-film" })[0]
-            result = common.parseDOM(result, "li")
+            result = getUrl(query).result
+            result = common.parseDOM(result, "div", attrs = { "class": "cell_container" })
 
             title = cleantitle().movie(title)
-            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a")[1].split('</span>')[-1], common.parseDOM(i, "div", attrs = { "class": "status" })[0]) for i in result]
-            result = [i for i in result if i[2] == 'HD']
+            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", ret="title")[0]) for i in result]
+            result = [(i[0], re.compile('(.+?) [(](\d{4})[)]').findall(i[1])) for i in result]
+            result = [(i[0], i[1][0][0], i[1][0][1]) for i in result if len(i[1]) > 0]
             result = [i for i in result if title == cleantitle().movie(i[1])]
-            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
+            result = [i[0] for i in result if any(x in i[2] for x in years)][0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result
@@ -1432,31 +1428,28 @@ class zumvo:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
             url = self.base_link + url
 
-            try: cookie = re.compile('cookie *= *[\'|\"](.+?)[\'|\"]').findall(getUrl(url).result)[0]
-            except: cookie = ''
+            result = getUrl(url).result
 
-            result = getUrl(url, cookie=cookie).result
+            video_id = re.compile('video_id *= *[\'|\"](.+?)[\'|\"]').findall(result)[0]
+            post = urllib.urlencode({'video_id': video_id})
 
-            url = common.parseDOM(result, "a", ret="href", attrs = { "class": "btn-watch" })[0]
-            result = getUrl(url, cookie=cookie).result
+            result = getUrl(self.base_link + self.info_link, post=post).result
 
-            url = re.compile('"proxy.link" *: *"zumvo[*](.+?)"').findall(result)[0]
-            import gkdecrypter
-            url = gkdecrypter.decrypter(198,128).decrypt(url,base64.urlsafe_b64decode('NlFQU1NQSGJrbXJlNzlRampXdHk='),'ECB').split('\0')[0]
+            from commonresolvers import googleplus
 
-            import commonresolvers
-            if 'picasaweb.google.com' in url: url = commonresolvers.googleplus().resolve(url)
-            elif 'plus.google.com' in url: url = commonresolvers.googleplus().resolve(url)
-            elif 'docs.google.com' in url: url = commonresolvers.googledocs().resolve(url)
-            else: raise Exception()
+            u = [i for i in result.split('&') if 'videoplayback' in i][0]
+            u = urllib.unquote_plus(u)
+            u = [urllib.unquote_plus(i.split('|')[-1]) for i in u.split(',')]
+            u = [googleplus().tag(i)[0] for i in u]
+            u = [i for i in u if i['quality'] in ['1080p', 'HD']]
 
-            for i in url: sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Zumvo', 'url': i['url']})
+            for i in u: sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Afdah', 'url': i['url']})
 
             return sources
         except:
@@ -1475,7 +1468,7 @@ class zumvo:
 
 class g2g:
     def __init__(self):
-        self.base_link = 'http://g2g.fm'
+        self.base_link = 'http://4do.se'
         self.search_link = '/forum/search.php?titleonly=1&securitytoken=guest&do=process&B1=&q=%s+Online+Streaming'
 
     def get_movie(self, imdb, title, year):
@@ -1504,7 +1497,7 @@ class g2g:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1521,15 +1514,15 @@ class g2g:
             url = common.parseDOM(result, "iframe", ret="src")
 
             if len(url) == 1: 
-                import commonresolvers
-                url = commonresolvers.googledocs().resolve(url)
+                from commonresolvers import googledocs
+                url = googledocs().resolve(url)
 
                 for i in url: sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'G2G', 'url': i['url']})
 
             elif len(url) == 2: 
-                import commonresolvers
-                u1 = commonresolvers.googledocs().resolve(url[0])
-                u2 = commonresolvers.googledocs().resolve(url[1])
+                from commonresolvers import googledocs
+                u1 = googledocs().resolve(url[0])
+                u2 = googledocs().resolve(url[1])
 
                 for i in range(0, len(u1)): sources.append({'source': 'GVideo', 'quality': u1[i]['quality'], 'provider': 'G2G', 'url': 'stack://%s , %s' % (u1[i]['url'], u2[i]['url'])})
 
@@ -1576,7 +1569,7 @@ class muchmovies:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
             url = self.base_link + url
@@ -1621,7 +1614,7 @@ class sweflix:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1674,7 +1667,7 @@ class movieshd:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1693,8 +1686,8 @@ class movieshd:
             mega += re.compile('ref=[\'|\"](.+?)[\'|\"]').findall(result)
             if len(mega) > 0:
                 url = self.videomega_link % mega[0]
-                import commonresolvers
-                url = commonresolvers.videomega().resolve(url)
+                from commonresolvers import videomega
+                url = videomega().resolve(url)
 
             if url == None: raise Exception()
 
@@ -1739,7 +1732,7 @@ class onlinemovies:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1756,8 +1749,8 @@ class onlinemovies:
             url += re.compile('[?]ref=(.+?)[\'|\"]').findall(result)
             url = self.videomega_link % url[0]
 
-            import commonresolvers
-            url = commonresolvers.videomega().resolve(url)
+            from commonresolvers import videomega
+            url = videomega().resolve(url)
             if url == None: raise Exception()
 
             sources.append({'source': 'Videomega', 'quality': 'HD', 'provider': 'Onlinemovies', 'url': url})
@@ -1817,7 +1810,7 @@ class ororo:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
             url = self.base_link + url
@@ -1856,7 +1849,7 @@ class vkbox:
         self.movie_link = '/api/serials/get_movie_data/?id=%s'
         self.show_link = '/api/serials/es?id=%s'
         self.episode_link = '/api/serials/e/?h=%s&u=%01d&y=%01d'
-        self.vk_link = 'https://vk.com/video_ext.php?oid=%s&id=%s&hash=%s'
+        self.vk_link = 'http://vk.com/video_ext.php?oid=%s&id=%s&hash=%s'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -1906,7 +1899,7 @@ class vkbox:
         url = url.encode('utf-8')
         return url
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1926,8 +1919,8 @@ class vkbox:
             url = (str(int(i['apple']) + num), str(int(i['google']) + num), i['microsoft'])
             url = self.vk_link % url
 
-            import commonresolvers
-            url = commonresolvers.vk().resolve(url)
+            from commonresolvers import vk
+            url = vk().resolve(url)
 
             for i in url: sources.append({'source': 'VK', 'quality': i['quality'], 'provider': 'VKBox', 'url': i['url']})
 
@@ -1975,7 +1968,7 @@ class clickplay:
         url = url.encode('utf-8')
         return url
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -1996,8 +1989,8 @@ class clickplay:
 
                     if not 'vk.com' in url: raise Exception()
 
-                    import commonresolvers
-                    url = commonresolvers.vk().resolve(url)
+                    from commonresolvers import vk
+                    url = vk().resolve(url)
 
                     for i in url: sources.append({'source': 'VK', 'quality': i['quality'], 'provider': 'Clickplay', 'url': i['url']})
                 except:
@@ -2068,7 +2061,7 @@ class moviestorm:
         url = url.encode('utf-8')
         return url
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -2180,7 +2173,7 @@ class watchfree:
         url = url.encode('utf-8')
         return url
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -2229,26 +2222,26 @@ class watchfree:
         except:
             return
 
-class merdb:
+class vidics:
     def __init__(self):
-        self.base_link = 'http://www.merdb.ae'
-        self.moviesearch_link = '/advanced_search.php?advanced_search=search&name=%s'
-        self.tvsearch_link = '/tvshow/advanced_search.php?advanced_search=search&name=%s'
-        self.episode_link = 'season-%01d-episode-%01d'
+        self.base_link = 'http://www.vidics.ch'
+        self.moviesearch_link = '/Category-Movies/Genre-Any/Letter-Any/ByPopularity/1/Search-%s.htm'
+        self.tvsearch_link = '/Category-TvShows/Genre-Any/Letter-Any/ByPopularity/1/Search-%s.htm'
+        self.episode_link = '-Season-%01d-Episode-%01d'
 
     def get_movie(self, imdb, title, year):
         try:
             query = self.base_link + self.moviesearch_link % (urllib.quote_plus(title))
 
             result = getUrl(query).result
-            result = common.parseDOM(result, "div", attrs = { "class": "main_list_box" })
+            result = common.parseDOM(result, "div", attrs = { "class": "searchResult" })
 
-            title = 'watch' + cleantitle().movie(title)
-            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", ret="title")[0]) for i in result]
-            result = [(i[0], re.sub('\s\(\s\d{4}\s\)', '', i[1])) for i in result]
+            title = cleantitle().movie(title)
+            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "h2", ret="title")[0], common.parseDOM(i, "span", attrs = { "itemprop": "copyrightYear" })) for i in result]
+            result = [i for i in result if len(i[2]) > 0]
             result = [i for i in result if title == cleantitle().movie(i[1])]
-            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
+            result = [i[0] for i in result if any(x in i[2][0] for x in years)][0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result
@@ -2263,13 +2256,14 @@ class merdb:
             query = self.base_link + self.tvsearch_link % (urllib.quote_plus(show))
 
             result = getUrl(query).result
-            result = common.parseDOM(result, "div", attrs = { "class": "main_list_box" })
+            result = common.parseDOM(result, "div", attrs = { "class": "searchResult" })
 
-            shows = ['watch' + cleantitle().tv(show), 'watch' + cleantitle().tv(show_alt)]
-            years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "a", ret="title")[0]) for i in result]
+            shows = [cleantitle().tv(show), cleantitle().tv(show_alt)]
+            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
+            result = [(common.parseDOM(i, "a", ret="href")[0], common.parseDOM(i, "h2", ret="title")[0], common.parseDOM(i, "span", attrs = { "itemprop": "copyrightYear" })) for i in result]
+            result = [i for i in result if len(i[2]) > 0]
             result = [i for i in result if any(x == cleantitle().tv(i[1]) for x in shows)]
-            result = [i[0] for i in result if any(x in i[1] for x in years)][0]
+            result = [i[0] for i in result if any(x in i[2][0] for x in years)][0]
 
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result
@@ -2280,24 +2274,13 @@ class merdb:
             return
 
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
-        try:
-            url = self.base_link + url
+        if url == None: return
+        url += self.episode_link % (int(season), int(episode))
+        url = common.replaceHTMLCodes(url)
+        url = url.encode('utf-8')
+        return url
 
-            ep = self.episode_link % (int(season), int(episode))
-
-            result = getUrl(url).result
-            result = common.parseDOM(result, "a", ret="href")
-            result = [i for i in result if ep in i][0]
-
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
-            url = common.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
-            return url
-        except:
-            return
-
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -2305,34 +2288,32 @@ class merdb:
 
             result = getUrl(url).result
             result = result.decode('iso-8859-1').encode('utf-8')
-            links = common.parseDOM(result, "tbody")
+            links = common.parseDOM(result, "div", attrs = { "class": "lang" })[0]
+            links = common.parseDOM(links, "div", attrs = { "class": "movie_link.+?" })
+
+            fmt = [common.parseDOM(i, "h4")[0] for i in links]
+            fmt = [re.findall('\w+', i.lower()) for i in fmt]
+            fmt = sum(fmt, [])
+
+            if any(x in ['dvdscr', 'r5', 'r6'] for x in fmt): quality = 'SCR'
+            elif any(x in ['camrip', 'tsrip', 'hdcam', 'hdts', 'dvdcam', 'dvdts', 'cam', 'ts'] for x in fmt): quality = 'CAM'
+            else: quality = 'SD'
 
             for i in links:
                 try:
-                    url = common.parseDOM(i, "a", ret="href")[0]
-                    url = urllib.unquote_plus(url)
-                    url = re.compile('url=(.+?)&').findall(url)[0]
-                    url = base64.urlsafe_b64decode(url.encode('utf-8'))
-                    url = common.replaceHTMLCodes(url)
-                    url = url.encode('utf-8')
-
-                    host = common.parseDOM(i, "a", ret="href")[0]
-                    host = urllib.unquote_plus(host)
-                    host = re.compile('domain=(.+?)&').findall(host)[0]
-                    host = base64.urlsafe_b64decode(host.encode('utf-8'))
-                    host = host.rsplit('.', 1)[0]
+                    host = common.parseDOM(i, "a", attrs = { "target": ".+?" })[0]
+                    host = host.split('.', 1)[0]
                     host = host.strip().lower()
                     if not host in hostDict: raise Exception()
                     host = common.replaceHTMLCodes(host)
                     host = host.encode('utf-8')
 
-                    quality = common.parseDOM(i, "span", ret="class")[0]
-                    if quality == 'quality_cam' or quality == 'quality_ts': quality = 'CAM'
-                    elif quality == 'quality_dvd': quality = 'SD'
-                    else:  raise Exception()
-                    quality = quality.encode('utf-8')
+                    url = common.parseDOM(i, "a", ret="href")[0]
+                    url = common.replaceHTMLCodes(url)
+                    url = urlparse.urljoin(self.base_link, url)
+                    url = url.encode('utf-8')
 
-                    sources.append({'source': host, 'quality': quality, 'provider': 'MerDB', 'url': url})
+                    sources.append({'source': host, 'quality': quality, 'provider': 'Vidics', 'url': url})
                 except:
                     pass
 
@@ -2342,6 +2323,8 @@ class merdb:
 
     def resolve(self, url):
         try:
+            url = getUrl(url, output='geturl').result
+
             import commonresolvers
             url = commonresolvers.get(url).result
             return url
@@ -2410,7 +2393,7 @@ class wso:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -2516,7 +2499,7 @@ class animeultima:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
             url = self.base_link + url
@@ -2532,6 +2515,18 @@ class animeultima:
 
             url = common.parseDOM(result, "div", attrs = { "class": "player-embed" })[0]
             url = common.parseDOM(url, "iframe", ret="src")[0]
+
+            if not 'auengine.com' in url:
+                url = common.parseDOM(result, "div", attrs = { "class": "generic-video-item" })
+                url = [i for i in url if 'auengine video' in i.lower()][0]
+                url = common.parseDOM(url, "a", ret="href")[0]
+                url = urlparse.urljoin(self.base_link, url)
+
+                result = getUrl(url).result
+                result = result.decode('iso-8859-1').encode('utf-8')
+
+                url = common.parseDOM(result, "div", attrs = { "class": "player-embed" })[0]
+                url = common.parseDOM(url, "iframe", ret="src")[0]
 
             result = getUrl(url).result
 
@@ -2582,7 +2577,7 @@ class einthusan:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
             url = self.base_link + url
@@ -2623,7 +2618,7 @@ class tvrelease:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -2735,7 +2730,7 @@ class directdl:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 
@@ -2901,7 +2896,7 @@ class noobroom:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
             url = self.base_link + url
@@ -2970,7 +2965,7 @@ class furk:
         except:
             return
 
-    def get_sources(self, url, hosthdDict, hostDict):
+    def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
             sources = []
 

@@ -5513,7 +5513,7 @@ class resolver:
 
             meta = json.loads(meta)
 
-            if content == 'movie': 
+            if content == 'movie':
                 index().moviesourceList(self.sources, name, imdb, '0', meta)
             else:
                 index().tvsourceList(self.sources, name, imdb, tvdb, meta)
@@ -5619,7 +5619,7 @@ class resolver:
 
         #sourceDict = [('yify', 'true')]
         #sourceDict = [('icefilms', getSetting("icefilms")), ('primewire', getSetting("primewire")), ('movie25', getSetting("movie25")), ('iwatchonline', getSetting("iwatchonline")), ('movietube', getSetting("movietube")), ('moviezone', getSetting("moviezone")), ('zumvo', getSetting("zumvo")), ('view47', getSetting("view47")), ('g2g', getSetting("g2g")), ('muchmovies', getSetting("muchmovies")), ('sweflix', getSetting("sweflix")), ('movieshd', getSetting("movieshd")), ('onlinemovies', getSetting("onlinemovies")), ('yify', getSetting("yify")), ('vkbox', getSetting("vkbox")), ('moviestorm', getSetting("moviestorm")), ('merdb', getSetting("merdb")), ('wso', getSetting("wso")), ('twomovies', getSetting("twomovies")), ('einthusan', getSetting("einthusan")), ('myvideolinks', getSetting("myvideolinks")), ('noobroom', getSetting("noobroom")), ('furk', getSetting("furk"))]
-        sourceDict = [('icefilms', 'true'), ('movie25', 'true'), ('movieshd', 'true'), ('iwatchonline', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('einthusan', 'true')]
+        sourceDict = [('alluc', 'true'), ('gvcenter', 'true'), ('icefilms', 'true'), ('movie25', 'true'), ('movieshd', 'true'), ('iwatchonline', 'true'), ('yify', 'true'), ('vkbox', 'true'), ('einthusan', 'true')]
 
         threads = []
         sourceDict = [i[0] for i in sourceDict if i[1] == 'true']
@@ -5635,7 +5635,8 @@ class resolver:
         global global_sources
         global_sources = []
 
-        sourceDict = [('icefilms', 'true'), ('primewire', 'true'), ('vkbox', 'true')]
+        #sourceDict = [('alluc', 'true')]
+        sourceDict = [('alluc', 'true'), ('icefilms', 'true'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('gvcenter', 'true'), ('vkbox', 'true')]
         #sourceDict = [('icefilms', 'false'), ('primewire', 'true'), ('watchseries', 'true'), ('iwatchonline', 'true'), ('movietube', 'true'), ('ororo', 'true'), ('vkbox', 'false'), ('clickplay', 'true'), ('moviestorm', 'true'), ('merdb', 'true'), ('wso', 'true'), ('twomovies', 'true'), ('animeultima', 'true'), ('tvrelease', 'true'), ('directdl', 'true'), ('noobroom', 'true'), ('furk', 'true')]
         #sourceDict = [('icefilms', getSetting("icefilms_tv")), ('primewire', getSetting("primewire_tv")), ('watchseries', getSetting("watchseries_tv")), ('iwatchonline', getSetting("iwatchonline_tv")), ('movietube', getSetting("movietube_tv")), ('ororo', getSetting("ororo_tv")), ('vkbox', getSetting("vkbox_tv")), ('clickplay', getSetting("clickplay_tv")), ('moviestorm', getSetting("moviestorm_tv")), ('merdb', getSetting("merdb_tv")), ('wso', getSetting("wso_tv")), ('twomovies', getSetting("twomovies_tv")), ('animeultima', getSetting("animeultima_tv")), ('tvrelease', getSetting("tvrelease_tv")), ('directdl', getSetting("directdl_tv")), ('noobroom', getSetting("noobroom_tv")), ('furk', getSetting("furk_tv"))]
 
@@ -5647,6 +5648,7 @@ class resolver:
         [i.join() for i in threads]
 
         self.sources = global_sources
+        print 'sources found:'
         print self.sources
         return self.sources
 
@@ -5692,7 +5694,7 @@ class resolver:
 
         try:
             sources = []
-            sources = commonsource.get_sources(url, self.hosthdDict, self.hostDict)
+            sources = commonsource.get_sources(url, self.hosthdDict, self.hostDict, [])
             if sources == None: sources = []
             global_sources.extend(sources)
             dbcur.execute("DELETE FROM rel_src WHERE source = '%s' AND imdb_id = '%s' AND season = '%s' AND episode = '%s'" % (source, 'tt' + imdb, '', ''))
@@ -5761,7 +5763,7 @@ class resolver:
 
         try:
             sources = []
-            sources = commonsource.get_sources(ep_url, self.hosthdDict, self.hostDict)
+            sources = commonsource.get_sources(ep_url, self.hosthdDict, self.hostDict, [])
             if sources == None: sources = []
             global_sources.extend(sources)
             dbcur.execute("DELETE FROM rel_src WHERE source = '%s' AND imdb_id = '%s' AND season = '%s' AND episode = '%s'" % (source, 'tt' + imdb, season, episode))
@@ -5784,12 +5786,12 @@ class resolver:
         #hd_rank += [getSetting("hosthd1"), getSetting("hosthd2"), getSetting("hosthd3"), getSetting("hosthd4"), getSetting("hosthd5"), getSetting("hosthd6"), getSetting("hosthd7"), getSetting("hosthd8"), getSetting("hosthd9"), getSetting("hosthd10"), getSetting("hosthd11"), getSetting("hosthd12"), getSetting("hosthd13"), getSetting("hosthd14"), getSetting("hosthd15"), getSetting("hosthd16"), getSetting("hosthd17")]
 	    #hd_rank = ['Hugefiles', 'YIFY', 'Muchmovies', 'Billionuploads', 'GVideo', 'Sweflix', 'Videomega', 'Niter', 'Einthusan', 'VK', 'V-vids', 'Vidbull', 'Filecloud', 'Uploadrocket', 'Kingfiles']
 
-        hd_rank = ['GVideo', 'VK', 'Videomega', 'Sweflix', 'Muchmovies', 'YIFY', 'Einthusan', 'Movreel', '180upload', 'Mightyupload', 'Clicknupload', 'Tusfiles', 'Grifthost', 'Openload', 'Uptobox', 'Primeshare', 'iShared', 'Xfileload', 'Mrfile']
+        hd_rank = ['GVideo', 'VK', 'Movietube', 'Moviezone', 'Muchmovies', 'YIFY', 'Einthusan', 'Movreel', '180upload', 'YIFY', 'Tusfiles', 'Grifthost', 'Streamin', 'Uptobox', 'Primeshare', 'iShared', 'Xfileload', 'Mrfile']
 
         hd_rank = [i.lower() for i in hd_rank]
         hd_rank = uniqueList(hd_rank).list
 
-        sd_rank = ['Ororo', 'Animeultima', 'Movreel', '180upload', 'Mightyupload', 'Clicknupload', 'Tusfiles', 'Grifthost', 'Openload', 'Uptobox', 'Primeshare', 'iShared', 'Vidplay', 'Xfileload', 'Mrfile', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa']
+        sd_rank = ['Ororo', 'Animeultima', 'Movreel', '180upload', 'Clicknupload', 'Tusfiles', 'Grifthost', 'Openload', 'Uptobox', 'Primeshare', 'iShared', 'Vidplay', 'Xfileload', 'Mrfile', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa']
 
         sd_rank = [i.lower() for i in sd_rank]
         sd_rank = uniqueList(sd_rank).list
@@ -5821,7 +5823,7 @@ class resolver:
 
             try: label += '%s' % (self.sources[i]['info'])
             except: label += '%s' % (self.sources[i]['quality'])
-            
+
             self.sources[i]['host'] = self.sources[i]['source']
             self.sources[i]['source'] = label.upper()
             count = count + 1
@@ -5897,7 +5899,6 @@ class resolver:
         #'billionuploads',
         'v-vids',
         'vidbull',
-        'hugefiles',
         '180upload',
         'filecloud',
         'uploadrocket',
@@ -5929,7 +5930,6 @@ class resolver:
         'ipithos',
         'ishared',
         #'kingfiles',
-        'mightyupload',
         'mooshare',
         'movdivx',
         'movpod',

@@ -1,24 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
-    Genesis Add-on
-    Copyright (C) 2015 lambda
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
-
-import urllib,urllib2,urlparse,re,os,xbmc,xbmcgui,xbmcaddon,xbmcvfs
+import urllib,urllib2,urlparse,re,os,sys,xbmc,xbmcgui,xbmcaddon,xbmcvfs
 
 try:
     import CommonFunctions as common
@@ -70,16 +52,27 @@ class get(object):
 
 class getUrl(object):
     def __init__(self, url, close=True, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='10'):
+        handlers = []
         if not proxy == None:
-            proxy_handler = urllib2.ProxyHandler({'http':'%s' % (proxy)})
-            opener = urllib2.build_opener(proxy_handler, urllib2.HTTPHandler)
+            handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
+            opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
         if output == 'cookie' or not close == True:
             import cookielib
             cookies = cookielib.LWPCookieJar()
-            handlers = [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
+            handlers += [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
+        try:
+            if sys.version_info < (2, 7, 9): raise Exception()
+            import ssl; ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            handlers += [urllib2.HTTPSHandler(context=ssl_context)]
+            opener = urllib2.build_opener(*handlers)
+            opener = urllib2.install_opener(opener)
+        except:
+            pass
         try: headers.update(headers)
         except: headers = {}
         if 'User-Agent' in headers:
@@ -224,6 +217,99 @@ class captcha:
         except:
             return
 
+class regex:
+    def worker(self, data):
+        try:
+            data = str(data).replace('\r','').replace('\n','').replace('\t','')
+
+            url = re.compile('(.+?)<regex>').findall(data)[0]
+            regex = re.compile('<regex>(.+?)</regex>').findall(data)
+        except:
+            return
+
+        for x in regex:
+            try:
+                name = re.compile('<name>(.+?)</name>').findall(x)[0]
+
+                expres = re.compile('<expres>(.+?)</expres>').findall(x)[0]
+
+                referer = re.compile('<referer>(.+?)</referer>').findall(x)[0]
+                referer = urllib.unquote_plus(referer)
+                referer = common.replaceHTMLCodes(referer)
+                referer = referer.encode('utf-8')
+
+                page = re.compile('<page>(.+?)</page>').findall(x)[0]
+                page = urllib.unquote_plus(page)
+                page = common.replaceHTMLCodes(page)
+                page = page.encode('utf-8')
+
+                result = getUrl(page, referer=referer).result
+                result = str(result).replace('\r','').replace('\n','').replace('\t','')
+                result = str(result).replace('\/','/')
+
+                r = re.compile(expres).findall(result)[0]
+                url = url.replace('$doregex[%s]' % name, r)
+            except:
+                pass
+
+        url = common.replaceHTMLCodes(url)
+        url = url.encode('utf-8')
+        return url
+
+class unwise:
+    def worker(self, str_eval):
+        page_value=""
+        try:        
+            ss="w,i,s,e=("+str_eval+')' 
+            exec (ss)
+            page_value=self.__unwise(w,i,s,e)
+        except: return
+        return page_value
+
+    def __unwise(self,  w, i, s, e):
+        lIll = 0;
+        ll1I = 0;
+        Il1l = 0;
+        ll1l = [];
+        l1lI = [];
+        while True:
+            if (lIll < 5):
+                l1lI.append(w[lIll])
+            elif (lIll < len(w)):
+                ll1l.append(w[lIll]);
+            lIll+=1;
+            if (ll1I < 5):
+                l1lI.append(i[ll1I])
+            elif (ll1I < len(i)):
+                ll1l.append(i[ll1I])
+            ll1I+=1;
+            if (Il1l < 5):
+                l1lI.append(s[Il1l])
+            elif (Il1l < len(s)):
+                ll1l.append(s[Il1l]);
+            Il1l+=1;
+            if (len(w) + len(i) + len(s) + len(e) == len(ll1l) + len(l1lI) + len(e)):
+                break;
+            
+        lI1l = ''.join(ll1l)
+        I1lI = ''.join(l1lI)
+        ll1I = 0;
+        l1ll = [];
+        for lIll in range(0,len(ll1l),2):
+            ll11 = -1;
+            if ( ord(I1lI[ll1I]) % 2):
+                ll11 = 1;
+            l1ll.append(chr(    int(lI1l[lIll: lIll+2], 36) - ll11));
+            ll1I+=1;
+            if (ll1I >= len(l1lI)):
+                ll1I = 0;
+        ret=''.join(l1ll)
+        if 'eval(function(w,i,s,e)' in ret:
+            ret=re.compile('eval\(function\(w,i,s,e\).*}\((.*?)\)').findall(ret)[0] 
+            return self.worker(ret)
+        else:
+            return ret
+
 class js:
     def worker(self, script):
         aSplit = script.split(";',")
@@ -289,7 +375,7 @@ class premiumize:
         try:
             if self.status() == False: raise Exception()
 
-            url = 'https://api.premiumize.me/pm-api/v1.php?method=hosterlist&params[login]=%s&params[pass]=%s' % (self.user, self.password)
+            url = 'http://api.premiumize.me/pm-api/v1.php?method=hosterlist&params[login]=%s&params[pass]=%s' % (self.user, self.password)
 
             result = getUrl(url).result
 
@@ -303,7 +389,7 @@ class premiumize:
         try:
             if self.status() == False: raise Exception()
 
-            url = 'https://api.premiumize.me/pm-api/v1.php?method=directdownloadlink&params[login]=%s&params[pass]=%s&params[link]=%s' % (self.user, self.password, url)
+            url = 'http://api.premiumize.me/pm-api/v1.php?method=directdownloadlink&params[login]=%s&params[pass]=%s&params[link]=%s' % (self.user, self.password, urllib.quote_plus(url))
 
             result = getUrl(url, close=False).result
 
@@ -349,13 +435,13 @@ class realdebrid:
             if self.status() == False: raise Exception()
 
             login_data = urllib.urlencode({'user' : self.user, 'pass' : self.password})
-            login_link = 'https://real-debrid.com/ajax/login.php?%s' % login_data
+            login_link = 'http://real-debrid.com/ajax/login.php?%s' % login_data
             result = getUrl(login_link, close=False).result
             result = json.loads(result)
             error = result['error']
             if not error == 0: raise Exception()
 
-            url = 'https://real-debrid.com/ajax/unrestrict.php?link=%s' % url
+            url = 'http://real-debrid.com/ajax/unrestrict.php?link=%s' % url
             url = url.replace('filefactory.com/stream/', 'filefactory.com/file/')
             result = getUrl(url).result
             result = json.loads(result)
@@ -446,7 +532,7 @@ class clicknupload:
             'netloc': ['clicknupload.com'],
             'host': ['Clicknupload'],
             'quality': 'High',
-            'captcha': False,
+            'captcha': True,
             'a/c': False
         }
 
@@ -468,6 +554,7 @@ class clicknupload:
             k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
             for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
             post.update({'method_free': 'Free Download'})
+            post.update(captcha().worker(result))
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
@@ -640,21 +727,28 @@ class filenuke:
 class googledocs:
     def info(self):
         return {
-            'netloc': ['docs.google.com']
+            'netloc': ['docs.google.com', 'drive.google.com']
         }
 
     def resolve(self, url):
         try:
             url = url.split('/preview', 1)[0]
+            url = url.replace('drive.google.com', 'docs.google.com')
 
             result = getUrl(url).result
             result = re.compile('"fmt_stream_map",(".+?")').findall(result)[0]
 
             u = json.loads(result)
             u = [i.split('|')[-1] for i in u.split(',')]
+            u = sum([self.tag(i) for i in u], [])
 
             url = []
-            for i in u: url += self.tag(i)
+            try: url += [[i for i in u if i['quality'] == '1080p'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'HD'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'SD'][0]]
+            except: pass
 
             if url == []: return
             return url
@@ -671,6 +765,12 @@ class googledocs:
             return [{'quality': '1080p', 'url': url}]
         elif quality in ['22', '84', '136', '298', '120', '95', '247', '302', '45', '102']:
             return [{'quality': 'HD', 'url': url}]
+        elif quality in ['35', '44', '135', '244', '94']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['18', '34', '43', '82', '100', '101', '134', '243', '93']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['5', '6', '36', '83', '133', '242', '92', '132']:
+            return [{'quality': 'SD', 'url': url}]
         else:
             return []
 
@@ -690,15 +790,21 @@ class googleplus:
                 oid = re.compile('/(\d*)/').findall(urlparse.urlparse(url).path)[0]
                 key = urlparse.parse_qs(urlparse.urlparse(url).query)['authkey'][0]
 
-                url = 'https://plus.google.com/photos/%s/albums/%s/%s?authkey=%s' % (oid, aid, pid, key)
+                url = 'http://plus.google.com/photos/%s/albums/%s/%s?authkey=%s' % (oid, aid, pid, key)
 
             result = getUrl(url, mobile=True).result
 
-            u = re.compile('"(http[s]*://.+?videoplayback[?].+?)"').findall(result)
+            u = re.compile('"(http[s]*://.+?videoplayback[?].+?)"').findall(result)[::-1]
             u = [i.replace('\\u003d','=').replace('\\u0026','&') for i in u]
+            u = sum([self.tag(i) for i in u], [])
 
             url = []
-            for i in u: url += self.tag(i)
+            try: url += [[i for i in u if i['quality'] == '1080p'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'HD'][0]]
+            except: pass
+            try: url += [[i for i in u if i['quality'] == 'SD'][0]]
+            except: pass
 
             if url == []: return
             return url
@@ -715,6 +821,12 @@ class googleplus:
             return [{'quality': '1080p', 'url': url}]
         elif quality in ['22', '84', '136', '298', '120', '95', '247', '302', '45', '102']:
             return [{'quality': 'HD', 'url': url}]
+        elif quality in ['35', '44', '135', '244', '94']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['18', '34', '43', '82', '100', '101', '134', '243', '93']:
+            return [{'quality': 'SD', 'url': url}]
+        elif quality in ['5', '6', '36', '83', '133', '242', '92', '132']:
+            return [{'quality': 'SD', 'url': url}]
         else:
             return []
 
@@ -992,10 +1104,10 @@ class movdivx:
             result = getUrl(url).result
 
             post = {}
-            f = common.parseDOM(result, "Form", attrs = { "name": "myForm" })[0]
+            f = common.parseDOM(result, "Form", attrs = { "action": "" })[0]
             k = common.parseDOM(f, "input", ret="name", attrs = { "type": "hidden" })
             for i in k: post.update({i: common.parseDOM(f, "input", ret="value", attrs = { "name": i })[0]})
-            post.update({'method_free': 'Continue to Stream'})
+            post.update({'method_free': 'Free Download'})
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
@@ -1025,8 +1137,15 @@ class movpod:
             url = 'http://movpod.in/embed-%s.html' % url
 
             result = getUrl(url).result
-
             url = re.compile('file *: *"(http.+?)"').findall(result)[-1]
+
+            request = urllib2.Request(url)
+            response = urllib2.urlopen(request, timeout=30)
+            response.close()
+
+            type = str(response.info()["Content-Type"])
+
+            if type == 'text/html': raise Exception()
             return url
         except:
             return
@@ -1101,6 +1220,28 @@ class mrfile:
 
             url = re.compile('(<a\s+href=.+?>Download\s+.+?</a>)').findall(result)[-1]
             url = common.parseDOM(url, "a", ret="href")[0]
+            return url
+        except:
+            return
+
+class mybeststream:
+    def info(self):
+        return {
+            'netloc': ['mybeststream.xyz']
+        }
+
+    def resolve(self, url):
+        try:
+            referer = urlparse.parse_qs(urlparse.urlparse(url).query)['referer'][0]
+            page = url.replace(referer, '').replace('&referer=', '').replace('referer=', '')
+
+            result = getUrl(url, referer=referer).result
+            result = re.compile("}[(]('.+?' *, *'.+?' *, *'.+?' *, *'.+?')[)]").findall(result)[-1]
+            result = unwise().worker(result)
+
+            strm = re.compile("file *: *[\'|\"](.+?)[\'|\"]").findall(result)
+            strm = [i for i in strm if i.startswith('rtmp')][0]
+            url = '%s pageUrl=%s live=1 timeout=10' % (strm, page)
             return url
         except:
             return
@@ -1285,7 +1426,7 @@ class streamin:
             url = 'http://streamin.to/embed-%s.html' % url
 
             result = getUrl(url, mobile=True).result
-            url = re.compile("file *: *'(http.+?)'").findall(result)[-1]
+            url = re.compile("file *: *[\'|\"](http.+?)[\'|\"]").findall(result)[-1]
             return url
         except:
             return
@@ -1401,6 +1542,7 @@ class uploadrocket:
     def resolve(self, url):
         try:
             result = getUrl(url).result
+            result = result.decode('iso-8859-1').encode('utf-8')
 
             post = {}
             f = common.parseDOM(result, "Form", attrs = { "name": "freeorpremium" })[0]
@@ -1410,6 +1552,7 @@ class uploadrocket:
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
+            result = result.decode('iso-8859-1').encode('utf-8')
 
             post = {}
             f = common.parseDOM(result, "Form", attrs = { "name": "F1" })[0]
@@ -1419,6 +1562,7 @@ class uploadrocket:
             post = urllib.urlencode(post)
 
             result = getUrl(url, post=post).result
+            result = result.decode('iso-8859-1').encode('utf-8')
 
             url = common.parseDOM(result, "a", ret="href", attrs = { "onclick": "DL.+?" })[0]
             return url
@@ -1450,6 +1594,7 @@ class uptobox:
             url = common.parseDOM(result, "div", attrs = { "align": ".+?" })
             url = [i for i in url if 'button_upload' in i][0]
             url = common.parseDOM(url, "a", ret="href")[0]
+            url = ['http' + i for i in url.split('http') if 'uptobox.com' in i][0]
             return url
         except:
             return
@@ -1539,7 +1684,7 @@ class videomega:
     def resolve(self, url):
         try:
             url = urlparse.urlparse(url).query
-            url = urlparse.parse_qs(url)['ref'][0]
+            url = urlparse.parse_qsl(url)[0][1]
             url = 'http://videomega.tv/cdn.php?ref=%s' % url
 
             result = getUrl(url, mobile=True).result
@@ -1677,10 +1822,10 @@ class vk:
 
     def resolve(self, url):
         try:
-            url = url.replace('http://', 'https://')
+            url = url.replace('https://', 'http://')
             result = getUrl(url).result
 
-            u = re.compile('url(720|540|480)=(.+?)&').findall(result)
+            u = re.compile('url(720|540|480|360|240)=(.+?)&').findall(result)
 
             url = []
             try: url += [[{'quality': 'HD', 'url': i[1]} for i in u if i[0] == '720'][0]]
@@ -1688,6 +1833,12 @@ class vk:
             try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '540'][0]]
             except: pass
             try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '480'][0]]
+            except: pass
+            if not url == []: return url
+            try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '360'][0]]
+            except: pass
+            if not url == []: return url
+            try: url += [[{'quality': 'SD', 'url': i[1]} for i in u if i[0] == '240'][0]]
             except: pass
 
             if url == []: return
@@ -1791,14 +1942,15 @@ class youtube:
     def resolve(self, url):
         try:
             id = url.split("?v=")[-1].split("/")[-1].split("?")[0].split("&")[0]
-            result = getUrl('http://gdata.youtube.com/feeds/api/videos/%s?v=2' % id).result
+            result = getUrl('http://www.youtube.com/watch?v=%s' % id).result
 
-            state, reason = None, None
-            try: state = common.parseDOM(result, "yt:state", ret="name")[0]
-            except: pass
-            try: reason = common.parseDOM(result, "yt:state", ret="reasonCode")[0]
-            except: pass
-            if state in ['deleted', 'rejected', 'failed'] or reason == 'requesterRegion': return
+            message = common.parseDOM(result, "div", attrs = { "id": "unavailable-submessage" })
+            message = ''.join(message)
+
+            alert = common.parseDOM(result, "div", attrs = { "id": "watch7-notification-area" })
+
+            if len(alert) > 0: raise Exception()
+            if re.search('[a-zA-Z]', message): raise Exception()
 
             url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
             return url
