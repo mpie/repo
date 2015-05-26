@@ -5788,12 +5788,12 @@ class resolver:
         #hd_rank += [getSetting("hosthd1"), getSetting("hosthd2"), getSetting("hosthd3"), getSetting("hosthd4"), getSetting("hosthd5"), getSetting("hosthd6"), getSetting("hosthd7"), getSetting("hosthd8"), getSetting("hosthd9"), getSetting("hosthd10"), getSetting("hosthd11"), getSetting("hosthd12"), getSetting("hosthd13"), getSetting("hosthd14"), getSetting("hosthd15"), getSetting("hosthd16"), getSetting("hosthd17")]
 	    #hd_rank = ['Hugefiles', 'YIFY', 'Muchmovies', 'Billionuploads', 'GVideo', 'Sweflix', 'Videomega', 'Niter', 'Einthusan', 'VK', 'V-vids', 'Vidbull', 'Filecloud', 'Uploadrocket', 'Kingfiles']
 
-        hd_rank = ['GVideo', 'VK', 'Movietube', 'Moviezone', 'Muchmovies', 'YIFY', 'Einthusan', 'Movreel', '180upload', 'YIFY', 'Tusfiles', 'Grifthost', 'Streamin', 'Uptobox', 'Primeshare', 'iShared', 'Xfileload', 'Mrfile']
+        hd_rank = ['GVideo', 'VK', 'Movietube', 'Moviezone', 'Muchmovies', 'YIFY', 'Einthusan', 'Movreel', 'YIFY', 'Tusfiles', 'Grifthost', 'Streamin', 'Uptobox', 'Primeshare', 'iShared', 'Xfileload', 'Mrfile']
 
         hd_rank = [i.lower() for i in hd_rank]
         hd_rank = uniqueList(hd_rank).list
 
-        sd_rank = ['Ororo', 'Animeultima', 'Movreel', '180upload', 'Clicknupload', 'Tusfiles', 'Grifthost', 'Openload', 'Uptobox', 'Primeshare', 'iShared', 'Vidplay', 'Xfileload', 'Mrfile', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa']
+        sd_rank = ['Ororo', 'Animeultima', 'Movreel', '180upload', 'Clicknupload', 'Tusfiles', 'Grifthost', 'Openload', 'Uptobox', 'Primeshare', 'iShared', 'Vidplay', 'Xfileload', 'Mrfile', 'V-vids', 'Ipithos', 'Zettahost', 'Uploadc', 'Zalaa', 'thevideo', 'vidbull', 'Iwatchonline']
 
         sd_rank = [i.lower() for i in sd_rank]
         sd_rank = uniqueList(sd_rank).list
@@ -5822,13 +5822,14 @@ class resolver:
             source = self.sources[i]['source'].lower()
 
             label = '%02d | [B]%s[/B] | ' % (count, self.sources[i]['source'])
-
-            try: label += '%s' % (self.sources[i]['info'])
-            except: label += '%s' % (self.sources[i]['quality'])
+            label += '%s' % (self.sources[i]['quality'])
 
             self.sources[i]['host'] = self.sources[i]['source']
             self.sources[i]['source'] = label.upper()
             count = count + 1
+
+        print 'filtered sources'
+        print self.sources
         return self.sources
 
     def sources_dialog(self):
