@@ -4544,7 +4544,9 @@ class thai:
         item.setInfo(type="Video", infoLabels={ "Title": name})
 
         programId = re.compile('program_id=(\d+)').findall(url)[0]
-        if (len(programId) < 4):
+        if (len(programId) < 2):
+            programId = '0000' + programId
+        elif (len(programId) < 4):
             programId = '00' + programId
         elif (len(programId) < 5):
             programId = '0' + programId
