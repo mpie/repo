@@ -1,5 +1,5 @@
 ------------------------
-DooFree v2.0.7 (21-Jun-15)
+DooFree v2.0.8 (21-Jun-15)
 ------------------------
 
 - Added YIFYstream source.
