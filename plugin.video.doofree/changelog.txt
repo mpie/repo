@@ -1,0 +1,13 @@
+------------------------
+DooFree v2.0.6 (21-Jun-15)
+------------------------
+
+- Added YIFYstream source.
+- Added Mintmovies source.
+- Tweaked Clickplay source.
+- Fixed Afdah source.
+- Removed Movies8 source.
+- Removed TVrelease source.
+- Fixed Google resolvers.
+- Code cosmetics.
+- Removed 180Movies HD from Movies.
