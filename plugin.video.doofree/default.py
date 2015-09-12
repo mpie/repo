@@ -4731,7 +4731,7 @@ class thai:
         # try uk host first
         for host in eu1:
             #fullurl = "http://uk" + str (host) + ".seesantv.com/" + path
-            fullurl = host + d
+            fullurl = host + sd
             found = self.exists(fullurl)
             if (found):
                 xbmc.Player().play(fullurl,item)
