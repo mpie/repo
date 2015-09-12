@@ -4722,18 +4722,54 @@ class thai:
     def play_episode(self, url, channel, hd, sd, item):
         trySD = True
         customChannels=["chOneHD", "chtrue4u", "chworkpoint"]
+        eu1=["http://us99c.seesantv.com/"]
+        eu2=["http://us88c.seesantv.com/"]
         asia=["http://as2.seesantv.com/", "http://as11.seesantv.com/"]
         uk=["http://uk23.seesantv.com/", "http://uk24.seesantv.com/", "http://uk12.seesantv.com/", "http://uk13.seesantv.com/", "http://uk25.seesantv.com/", "http://uk1.seesantv.com/", "http://uk27.seesantv.com/"]
         us=["http://us7.seesantv.com/", "http://us14.seesantv.com/", "http://us15.seesantv.com/"]
 
         # try uk host first
+        for host in eu1:
+            #fullurl = "http://uk" + str (host) + ".seesantv.com/" + path
+            fullurl = host + d
+            found = self.exists(fullurl)
+            if (found):
+                xbmc.Player().play(fullurl,item)
+                trySD = True
+                break
+        if (trySD and found==False):
+            for host in uk:
+                fullurl = host + sd
+                found = self.exists(fullurl)
+                if (found):
+                    xbmc.Player().play(fullurl, item)
+                    break
+
+        # try uk host first
+        for host in eu2:
+            #fullurl = "http://uk" + str (host) + ".seesantv.com/" + path
+            fullurl = host + hd
+            found = self.exists(fullurl)
+            if (found):
+                xbmc.Player().play(fullurl,item)
+                trySD = True
+                break
+        if (trySD and found==False):
+            for host in uk:
+                fullurl = host + sd
+                found = self.exists(fullurl)
+                if (found):
+                    xbmc.Player().play(fullurl, item)
+                    break
+
+        # try uk host
         for host in uk:
             #fullurl = "http://uk" + str (host) + ".seesantv.com/" + path
             fullurl = host + hd
             found = self.exists(fullurl)
             if (found):
                 xbmc.Player().play(fullurl,item)
-                trySD = False
+                trySD = True
                 break
         if (trySD and found==False):
             for host in uk:
@@ -4750,7 +4786,7 @@ class thai:
                 found = self.exists(fullurl)
                 if (found):
                     xbmc.Player().play(fullurl,item)
-                    trySD = False
+                    trySD = True
                     break
             if (trySD and found==False):
                 for host in asia:
@@ -4767,7 +4803,7 @@ class thai:
                 found = self.exists(fullurl)
                 if (found):
                     xbmc.Player().play(fullurl,item)
-                    trySD = False
+                    trySD = True
                     break
             # no HD found so try SD
             if (trySD and found==False):
