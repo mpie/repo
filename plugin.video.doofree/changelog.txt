@@ -1,8 +1,9 @@
 ------------------------
-DooFree v2.0.10 (12-Sep-15)
+DooFree v2.0.11 (12-Sep-15)
 ------------------------
 
 - Fixed Thai shows.
+- Fixed Korean series.
 
 ------------------------
 DooFree v2.0.8 (21-Jun-15)

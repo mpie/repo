@@ -4564,30 +4564,45 @@ class thai:
                 sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
                 found = self.play_episode(url, channel, hd, sd, item)
                 if not found:
-                    channel = 'chtrue4u'
+                    channel = 'ch3sd'
                     hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
                     sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
                     found = self.play_episode(url, channel, hd, sd, item)
                     if not found:
-                        channel = 'chworkpoint'
+                        channel = 'chjkn'
                         hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
                         sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
                         found = self.play_episode(url, channel, hd, sd, item)
                         if not found:
-                            channel = 'chserie'
+                            channel = 'chpptv'
                             hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
                             sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
                             found = self.play_episode(url, channel, hd, sd, item)
                             if not found:
-                                channel = 'chnation'
+                                channel = 'chtrue4u'
                                 hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
                                 sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
                                 found = self.play_episode(url, channel, hd, sd, item)
                                 if not found:
-                                    channel = 'chamarin'
+                                    channel = 'chworkpoint'
                                     hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
                                     sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
                                     found = self.play_episode(url, channel, hd, sd, item)
+                                    if not found:
+                                        channel = 'chserie'
+                                        hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
+                                        sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
+                                        found = self.play_episode(url, channel, hd, sd, item)
+                                        if not found:
+                                            channel = 'chnation'
+                                            hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
+                                            sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
+                                            found = self.play_episode(url, channel, hd, sd, item)
+                                            if not found:
+                                                channel = 'chamarin'
+                                                hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
+                                                sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
+                                                found = self.play_episode(url, channel, hd, sd, item)
         else:
             # US series
             if channel == 'chserie':
@@ -4629,6 +4644,11 @@ class thai:
                     hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
                     sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
                     found = self.play_episode(url, channel, hd, sd, item)
+                    if not found:
+                        channel = 'ch7'
+                        hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
+                        sd = channel + '/' + programId + '/' + date + '-' + programId + '.mp4'
+                        found = self.play_episode(url, channel, hd, sd, item)
                     if not found:
                         channel = 'chthaipbs'
                         hd = channel + '/' + programId + '/' + date + '1-' + programId + '.mp4'
