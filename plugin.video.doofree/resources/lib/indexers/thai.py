@@ -1,0 +1,156 @@
+# -*- coding: utf-8 -*-
+
+'''
+    DooFree Add-on
+    Copyright (C) 2015 Mpie
+'''
+
+
+import os,sys,re,json,urllib,urlparse,base64,datetime
+
+try: action = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))['action']
+except: action = None
+
+from resources.lib.libraries import trakt
+from resources.lib.libraries import control
+from resources.lib.libraries import client
+from resources.lib.libraries import cache
+from resources.lib.libraries import metacache
+from resources.lib.libraries import favourites
+from resources.lib.libraries import workers
+from resources.lib.libraries import views
+
+addonFanart = control.addonFanart()
+sysaddon = sys.argv[0]
+
+class thai:
+    def __init__(self):
+        self.list = []
+        self.main_link       = 'http://www.seesantv.com/seesantv_2014/%s'
+        self.shows_link      = self.main_link % 'program.php?id=%s'
+        self.shows_ajax_link = self.main_link % 'program_ajax3.php?id=%s&page=%s'
+        self.episodes_ajax_link = self.main_link % 'change_page_ajax.php?page=%s&program_id=%s'
+        self.episodes_link = self.main_link % 'program_detail.php?page=%s&id=%s'
+        self.member_id = 196475  # expires 4 oct 2016
+
+    '''
+    List all the shows from a specific category
+    '''
+    def listShows(self, catid, page):
+        limatch = []
+        url = self.shows_link % (catid)
+
+        try: result = client.request(url)
+        except: pass
+
+        pageContent = ''.join(result.splitlines()).replace('\'','"')
+        pages = re.compile('id="a_page_(.+?)" href').findall(pageContent)
+
+        if str(page) in pages:
+            pageUrl = self.shows_ajax_link % (catid, str(page))
+            result = client.request(pageUrl)
+            limatch+=re.compile('<figure>(.+?)</a></li>').findall(result)
+
+        for li_content in limatch:
+            show = re.compile('<a href=".+?id=(.+?)"><img src="(.+?)" alt="(.+?)">').findall(li_content)
+            title = show[0][2].decode('iso-8859-11')
+            showid = show[0][0]
+            image = show[0][1]
+            self.list.append({'name': title, 'showid': showid, 'image': image})
+
+        for show in self.list:
+            name = show['name'].encode('utf-8')
+            showid = show['showid']
+            image = show['image']
+            action = 'listEpisodes'
+            query = '?action=%s&name=%s&catid=%s&showid=%s&image=%s' % (action, name, catid, showid, image)
+            url = '%s%s' % (sysaddon, query)
+            item = control.item(name, iconImage=image, thumbnailImage=image)
+            if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
+            item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
+            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
+
+        nextPage = int(page) + 1
+        if nextPage < len(pages):
+            action = 'listShows'
+            query = '?action=%s&page=%d&name=%s&catid=%s' % (action, nextPage, 'Next Page', catid)
+            url = '%s%s' % (sysaddon, query)
+            item = control.item('Next Page', iconImage='', thumbnailImage='')
+            if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
+            item.setInfo(type="Video", infoLabels={"Title": 'Next Page', "OriginalTitle": 'Next Page'})
+            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
+
+        control.content(int(sys.argv[1]), 'movies')
+        if control.skin == 'skin.confluence': control.execute('Container.SetViewMode(500)')
+        control.directory(int(sys.argv[1]), cacheToDisc=True)
+
+    '''
+    List all shows episodes
+    Page starts at 0
+    '''
+    def listEpisodes(self, catid, showid, page, image):
+        url = self.episodes_link % (page, showid)
+        try: result = client.request(url)
+        except: pass
+        link = ''.join(result.splitlines()).replace('\'','"')
+        link = ''.join(link.splitlines()).replace('<i class="icon-new"></i>','')
+
+        episodematch = re.compile('<table class="program-archive">(.+?)</table>').findall(link)
+        episodes = re.compile('<a href="(.+?)" >(.+?)</a>.+?</td>\t\t\t\t\t\t\t<td> \t\t\t\t\t\t\t\t<a href="(.+?)" ><img').findall(episodematch[0])
+
+        programMeta = re.compile('<div class="program-meta">(.+?)</div>').findall(link)
+        image = re.compile('<img src="(.+?)" alt').findall(programMeta[0])[0]
+
+        # episodes per page
+        for episode in episodes:
+            name = episode[1].decode('iso-8859-11')
+            u = 'http://www.seesantv.com/seesantv_2014/' + episode[0] + '&bitrate=high'
+            self.list.append({'name': name, 'url': urllib.quote_plus(u), 'image': image})
+
+        for episode in self.list:
+            name = episode['name'].encode('utf-8')
+            url = episode['url']
+            image = episode['image']
+            action = 'sourcePage'
+            query = '?action=%s&image=%s&url=%s&name=%s' % (action, image, url, urllib.quote_plus(name))
+            print query
+            url = '%s%s' % (sysaddon, query)
+            item = control.item(name, iconImage=image, thumbnailImage=image)
+            if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
+            item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
+            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=False)
+
+        # Pagination
+        paginator = re.compile('<div class="page_list"  align="center">(.+?)</ul>').findall(link)[0]
+        pages = re.compile('>(\d+)</a>').findall(paginator)
+        nextPage = int(page) + 1
+        if nextPage < len(pages):
+            action = 'listEpisodes'
+            query = '?action=%s&page=%d&name=%s&catid=%s&showid=%s&image=%s' % (action, nextPage, 'Next Page', catid, showid, image)
+            url = '%s%s' % (sysaddon, query)
+            item = control.item('Next Page', iconImage=image, thumbnailImage=image)
+            if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
+            item.setInfo(type="Video", infoLabels={"Title": 'Next Page', "OriginalTitle": 'Next Page'})
+            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
+
+        control.content(int(sys.argv[1]), 'movies')
+        if control.skin == 'skin.confluence': control.execute('Container.SetViewMode(50)')
+        control.directory(int(sys.argv[1]), cacheToDisc=True)
+
+    '''
+    Get the video url by member_id cookie
+    Start playing the video
+    '''
+    def sourcePage(self, url, name, image):
+        print url
+        cookie = 'member_id=%d' % (self.member_id)
+        try: result = client.request(url, cookie=cookie)
+        except: pass
+
+        videoUrl = re.compile('file: "(.+?)"').findall(result)
+        item = control.item(path=url, iconImage=image, thumbnailImage=image)
+        item.setInfo( type='Video', infoLabels = {'title': name} )
+        item.setProperty('Video', 'true')
+        item.setProperty('IsPlayable', 'true')
+        control.playlist.clear()
+        control.player.play(videoUrl[0], item)

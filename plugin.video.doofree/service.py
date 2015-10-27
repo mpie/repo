@@ -6,4 +6,4 @@
 '''
 
 import xbmc
-xbmc.executebuiltin('RunPlugin(plugin://plugin.video.doofree/?action=service)')
+xbmc.executebuiltin('RunPlugin(plugin://plugin.video.doofree2/?action=service)')

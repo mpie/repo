@@ -1,20 +1,7 @@
 ------------------------
-DooFree v2.0.11 (12-Sep-15)
+Doorree v3.0.0 (28-Oct-15)
 ------------------------
 
-- Fixed Thai shows.
-- Fixed Korean series.
-
-------------------------
-DooFree v2.0.8 (21-Jun-15)
-------------------------
-
-- Added YIFYstream source.
-- Added Mintmovies source.
-- Tweaked Clickplay source.
-- Fixed Afdah source.
-- Removed Movies8 source.
-- Removed TVrelease source.
-- Fixed Google resolvers.
+- Disabled english movies and series for now.
+- Thai shows and movies will now load up faster.
 - Code cosmetics.
-- Removed 180Movies HD from Movies.
