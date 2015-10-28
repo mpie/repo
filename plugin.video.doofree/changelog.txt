@@ -1,5 +1,5 @@
 ------------------------
-Doorree v3.0.0 (28-Oct-15)
+DooFree v3.0.1 (28-Oct-15)
 ------------------------
 
 - Disabled english movies and series for now.

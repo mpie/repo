@@ -66,6 +66,7 @@ class navigator:
         self.addDirectoryItem('5', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch5hd&name=5HD&image=ch5hd.png', 'ch5hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('7', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch7hd&name=7HD&image=ch7hd.png', 'ch7hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('8', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/cheight1&name=8HD&image=ch8hd.png', 'ch8hd.png', 'DefaultMovies.png', isFolder=False)
+        self.addDirectoryItem('WorkPoint', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chworkpointHD&name=WORKPOINT_HD&image=workpointhd.jpg', 'workpointhd.jpg', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('MCOT', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chmcothd&name=MCOT_HD&image=ch9hd.png', 'ch9hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('ONE', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chonehd&name=ONE_HD&image=ch1hd.jpg', 'ch1hd.jpg', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('PPTV', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chpptv1&name=PPTV_HD&image=chpptvhd.png', 'chpptvhd.png', 'DefaultMovies.png', isFolder=False)
