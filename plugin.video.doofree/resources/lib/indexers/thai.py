@@ -113,7 +113,7 @@ class thai:
             image = episode['image']
             action = 'sourcePage'
             query = '?action=%s&image=%s&url=%s&name=%s' % (action, image, url, urllib.quote_plus(name))
-            print query
+
             url = '%s%s' % (sysaddon, query)
             item = control.item(name, iconImage=image, thumbnailImage=image)
             if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
@@ -142,7 +142,6 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        print url
         cookie = 'member_id=%d' % (self.member_id)
         try: result = client.request(url, cookie=cookie)
         except: pass
