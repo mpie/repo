@@ -32,6 +32,7 @@ class thai:
         self.episodes_ajax_link = self.main_link % 'change_page_ajax.php?page=%s&program_id=%s'
         self.episodes_link = self.main_link % 'program_detail.php?page=%s&id=%s'
         self.member_id = 196475  # expires 4 oct 2016
+        self.view_server_name = 'uk1'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
 
     '''
     List all the shows from a specific category
@@ -142,11 +143,12 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        cookie = 'member_id=%d' % (self.member_id)
+        cookie = 'member_id=%d;view_server_name=%s' % (self.member_id, self.view_server_name)
         try: result = client.request(url, cookie=cookie)
         except: pass
 
         videoUrl = re.compile('file: "(.+?)"').findall(result)
+        print videoUrl
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo( type='Video', infoLabels = {'title': name} )
         item.setProperty('Video', 'true')

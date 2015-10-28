@@ -1,11 +1,17 @@
 ------------------------
-DooFree v3.0.2 (29-Oct-15)
+DooFree v3.0.3 (28-Oct-15)
+------------------------
+
+- Changed to UK server
+
+------------------------
+DooFree v3.0.2 (28-Oct-15)
 ------------------------
 
 - Fixed slow startup
 
 ------------------------
-DooFree v3.0.1 (28-Oct-15)
+DooFree v3.0.1 (27-Oct-15)
 ------------------------
 
 - Disabled english movies and series for now.
