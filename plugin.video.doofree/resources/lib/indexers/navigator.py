@@ -5,7 +5,7 @@
     Copyright (C) 2015 Mpie
 '''
 
-import os, sys, urlparse, json, urllib2
+import xbmc, os, sys, urlparse, json, urllib2
 
 from resources.lib.libraries import control
 from resources.lib.libraries import views
@@ -34,7 +34,8 @@ class navigator:
         return data
 
     def root(self):
-        views.setView('seasons', {'skin.confluence': 500})
+        self.addDirectoryItem('Movies', 'movieNavigator', 'root_movies.jpg', 'DefaultMovies.png')
+        self.addDirectoryItem('Series', 'tvNavigator', 'root_shows.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Live TV', 'thaiLiveTV', 'root_livetv.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows', 'thaiShows', 'root_thai.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Working on DooFree 3.0 to make things faster', '', '', 'DefaultMovies.png')
@@ -57,8 +58,8 @@ class navigator:
 
         self.addDirectoryItem(30009, 'searchNavigator', 'search.jpg', 'DefaultFolder.png')
         '''
-
         self.endDirectory()
+        views.setView('movies', {'skin.confluence': 500})
 
     def thaiLiveTV(self):
         # live4 is asia, uk99 is uk

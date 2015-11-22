@@ -128,6 +128,7 @@ if action == None:
     from resources.lib.indexers import navigator
     navigator.navigator().root()
 
+# Start thai stuff
 elif action == 'thaiLiveTV':
     from resources.lib.indexers import navigator
     navigator.navigator().thaiLiveTV()
@@ -151,6 +152,14 @@ elif action == 'listEpisodes':
 elif action == 'sourcePage':
     from resources.lib.indexers import thai
     thai.thai().sourcePage(url, name, image)
+# End thai stuff
+
+# Start movie stuff
+
+
+
+
+
 
 
 

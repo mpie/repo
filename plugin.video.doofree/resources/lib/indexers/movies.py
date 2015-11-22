@@ -89,6 +89,92 @@ class movies:
         self.imdblist_link = 'http://www.imdb.com/list/%s/?view=detail&sort=title:asc&title_type=feature,short,tv_movie,tv_special,video,documentary,game&start=1'
         self.imdbwatchlist_link = 'http://www.imdb.com/user/ur%s/watchlist' % self.imdb_user
 
+    def latest(self):
+        url = 'http://ipv6.icefilms.info/movies/added/hd'
+        self.list = cache.get(self.icefilms_list, 24, url)
+        #self.movieList(self.list)
+        self.worker()
+        self.movieDirectory(self.list)
+        return self.list
+
+    def icefilms_list(self, url):
+        # print 'url: ' + url
+
+        # kill the wait dialog
+        control.execute('XBMC.Dialog.Close(busydialog,true)')
+        dialog = control.progressDialog
+        dialog.create(control.addonInfo('name'), 'Please wait until Movie list is cached.')
+        dialog.update(0, 'Please wait until Movie list is cached.', control.lang(30451).encode('utf-8') + '...')
+
+        try:
+            result = client.request(url)
+            result = result.decode('iso-8859-1').encode('utf-8')
+            # <a name=i id=1567437></a><img class=star><a href=/ip.php?v=204188&>The Voices (2014)</a>
+            movies = re.compile('<a name=i id=(.+?)>.+?<a href=(.+?)\&>(.+?) \((.+?)\)</a>').findall(result)
+        except:
+            return
+
+        next = ''
+
+        from datetime import date
+        lastYear = date.today().year - 1
+
+        for imdb, url, title, year in movies:
+            try:
+                if int(year) < int(lastYear): raise Exception()
+                name = '%s (%s)' % (title, year)
+                # print name
+                try: name = name.encode('utf-8')
+                except: pass
+
+                # url = 'https://ipv6.icefilms.info%s' % (url)
+                # url = common.replaceHTMLCodes(url)
+                # url = url.encode('utf-8')
+                url = 'http://www.imdb.com/title/tt%s/' % imdb
+                # print url
+
+                poster = ''
+                genre = '0'
+                duration = '0'
+                rating = '0'
+                votes = '0'
+                mpaa = '0'
+                director = '0'
+                plot = '0'
+                tagline = ''
+                self.list.append({'name': name, 'title': title, 'year': year, 'imdb': imdb, 'tvdb': '0', 'season': '0', 'episode': '0', 'show': '0', 'show_alt': '0', 'date': '0', 'genre': genre, 'url': url, 'poster': poster, 'fanart': '0', 'studio': '0', 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa, 'director': director, 'plot': plot, 'plotoutline': tagline, 'tagline': tagline, 'next': next})
+            except:
+                pass
+
+        threads = []
+        totalLinks = len(self.list)
+        loadedLinks = 0
+        remaining_display = 'Movies loaded :: [B]'+str(loadedLinks)+' / '+str(totalLinks)+'[/B].'
+        dialog.update(0, '[B]Fetching the newest HD movies[/B]', remaining_display)
+        for i in range(0, totalLinks):
+            loadedLinks = loadedLinks + 1
+            percent = (loadedLinks * 100)/totalLinks
+            remaining_display = 'Movies loaded :: [B]'+str(loadedLinks)+' / '+str(totalLinks)+'[/B].'
+            dialog.update(percent,'[B]Fetching the newest HD movies[/B]', remaining_display)
+            if dialog.iscanceled(): return False
+        [i.start() for i in threads]
+        [i.join() for i in threads]
+        return self.list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def get(self, url, idx=True):
         try:
@@ -124,7 +210,7 @@ class movies:
 
 
             elif u in self.scn_link:
-                self.list = cache.get(self.scn_list, 24, url)
+                self.list = self.scn_list(url)
                 if idx == True: self.worker()
 
 
@@ -765,7 +851,7 @@ class movies:
     def scn_list(self, url):
 
         def predb_items():
-            try:
+            #try:
                 years = [(self.datetime).strftime('%Y'), (self.datetime - datetime.timedelta(days = 365)).strftime('%Y')]
                 months = (self.datetime - datetime.timedelta(days = 180)).strftime('%Y%m%d')
 
@@ -773,6 +859,9 @@ class movies:
                 for i in years:
                     result += client.request(self.scn_page % (str(i), '1'))
                     result += client.request(self.scn_page % (str(i), '2'))
+
+                print years
+                print months
 
                 items = client.parseDOM(result, 'div', attrs = {'class': 'post'})
                 items = [(client.parseDOM(i, 'a', attrs = {'class': 'p-title'}), re.compile('(\d{4}-\d{2}-\d{2})').findall(i)) for i in items]
@@ -785,9 +874,11 @@ class movies:
                 items = [x for y,x in enumerate(items) if x not in items[:y]]
                 items = items[:150]
 
+                print items
+
                 return items
-            except:
-                return
+            #except:
+            #    return
 
 
         def predb_list(i):
@@ -879,7 +970,7 @@ class movies:
 
 
         try:
-            items = cache.get(predb_items, 24)
+            items = predb_items()
 
             start = re.compile('start=(\d*)').findall(url)[-1]
             start = int(start)
@@ -914,7 +1005,7 @@ class movies:
                 if i <= total: threads.append(workers.Thread(self.super_info, i))
             [i.start() for i in threads]
             [i.join() for i in threads]
-
+        #print self.list
         self.list = [i for i in self.list if not i['imdb'] == '0']
 
         if len(self.meta) > 0: metacache.insert(self.meta)
