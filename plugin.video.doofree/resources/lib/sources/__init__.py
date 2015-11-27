@@ -394,7 +394,9 @@ class sources:
         try: customsdDict = [control.setting('host50001'), control.setting('host50002'), control.setting('host50003'), control.setting('host50004'), control.setting('host50005'), control.setting('host50006'), control.setting('host50007'), control.setting('host50008'), control.setting('host50009'), control.setting('host50010'), control.setting('host50011'), control.setting('host50012'), control.setting('host50013'), control.setting('host50014'), control.setting('host50015'), control.setting('host50016'), control.setting('host50017'), control.setting('host50018'), control.setting('host50019'), control.setting('host50020')]
         except: customsdDict = []
 
-        hd_rank = []
+        hd_rank = ['gvideo', 'vk', 'yify', 'grifthost', 'mrfile', 'uploadc', 'zalaa', 'kingfiles', 'uploadrocket', 'xfileload']
+        sd_rank = ['gvideo', 'vk', 'yify', 'grifthost', 'mrfile', 'uploadc', 'zalaa', 'kingfiles', 'uploadrocket', 'xfileload']
+        '''
         hd_rank += [i for i in self.rdDict if i in self.hostprDict + self.hosthdDict]
         hd_rank += [i for i in self.pzDict if i in self.hostprDict + self.hosthdDict]
         hd_rank += customhdDict
@@ -402,6 +404,7 @@ class sources:
         hd_rank += self.hosthdDict
         hd_rank = [i.lower() for i in hd_rank]
         hd_rank = [x for y,x in enumerate(hd_rank) if x not in hd_rank[:y]]
+
 
         sd_rank = []
         sd_rank += [i for i in self.rdDict if i in self.hostprDict + self.hosthqDict]
@@ -411,6 +414,7 @@ class sources:
         sd_rank += self.hosthqDict + self.hostmqDict + self.hostlqDict
         sd_rank = [i.lower() for i in sd_rank]
         sd_rank = [x for y,x in enumerate(sd_rank) if x not in sd_rank[:y]]
+        '''
 
         for i in range(len(self.sources)): self.sources[i]['source'] = self.sources[i]['source'].lower()
         self.sources = sorted(self.sources, key=lambda k: k['source'])
