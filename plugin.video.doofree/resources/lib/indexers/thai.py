@@ -32,7 +32,7 @@ class thai:
         self.episodes_ajax_link = self.main_link % 'change_page_ajax.php?page=%s&program_id=%s'
         self.episodes_link = self.main_link % 'program_detail.php?page=%s&id=%s'
         self.member_id = 196475  # expires 4 oct 2016
-        self.view_server_name = 'gm1'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
+        self.view_server_name = 'uk1'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
 
     '''
     List all the shows from a specific category
