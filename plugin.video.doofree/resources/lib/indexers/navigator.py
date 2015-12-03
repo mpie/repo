@@ -61,6 +61,10 @@ class navigator:
         self.endDirectory()
         views.setView('movies', {'skin.confluence': 500})
 
+        from resources.lib.libraries import cache
+        from resources.lib.libraries import changelog
+        cache.get(changelog.get, 600000000, control.addonInfo('version'), table='changelog')
+
     def thaiLiveTV(self):
         # live4 is asia, uk99 is uk
         self.addDirectoryItem('3', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch3hd&name=3HD&image=ch3hd.png', 'ch3hd.png', 'DefaultMovies.png', isFolder=False)
@@ -73,6 +77,7 @@ class navigator:
         self.addDirectoryItem('PPTV', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chpptv1&name=PPTV_HD&image=chpptvhd.png', 'chpptvhd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('NOW26', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chnow261&name=PPTV_HD&image=chnow26hd.jpg', 'chnow26hd.jpg', 'DefaultMovies.png', isFolder=False)
         self.endDirectory()
+        views.setView('movies', {'skin.confluence': 50})
 
     def thaiShows(self):
         self.addDirectoryItem('ละครไทย (ออนแอร์) / Thai Dramas (on air)', 'listShows&catid=18', '', 'DefaultMovies.png')
@@ -89,6 +94,7 @@ class navigator:
         self.addDirectoryItem('ซีรี่ย์ฝรั่ง / US Series (Thai dubbed)', 'listShows&catid=38', '', 'DefaultMovies.png')
         self.addDirectoryItem('ภาพยนตร์แอนนิเมชั่น / Animation', 'listShows&catid=93', '', 'DefaultMovies.png')
         self.endDirectory()
+        views.setView('movies', {'skin.confluence': 50})
 
     def movies(self):
         self.addDirectoryItem(30021, 'movieGenres', 'movieGenres.jpg', 'DefaultMovies.png')
@@ -108,6 +114,7 @@ class navigator:
         self.addDirectoryItem(30035, 'movieSearch', 'movieSearch.jpg', 'DefaultMovies.png')
 
         self.endDirectory()
+        views.setView('movies', {'skin.confluence': 50})
 
 
     def tvshows(self):
@@ -129,6 +136,7 @@ class navigator:
         self.addDirectoryItem(30066, 'tvSearch', 'tvSearch.jpg', 'DefaultTVShows.png')
 
         self.endDirectory()
+        views.setView('movies', {'skin.confluence': 50})
 
 
     def genesis(self):
