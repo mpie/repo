@@ -1,4 +1,12 @@
 ------------------------
+DooFree v3.0.12 (12-Dec-15)
+------------------------
+
+- Changed to server 2
+- Removed Thai entertainment news
+- Added Thai talk shows
+
+------------------------
 DooFree v3.0.10 (03-Dec-15)
 ------------------------
 

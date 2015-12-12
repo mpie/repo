@@ -88,7 +88,7 @@ class navigator:
         self.addDirectoryItem('วาไรตี้โชว์ / Variety Shows', 'listShows&catid=8', '', 'DefaultMovies.png')
         self.addDirectoryItem('เรียลลิตี้โชว์ / Reality & Singing Contest', 'listShows&catid=84', '', 'DefaultMovies.png')
         self.addDirectoryItem('ข่าว / Thai News', 'listShows&catid=4', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ข่าวบันเทิง / Thai Entertainment News', 'listShows&catid=14', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ทอล์กโชว์ / Talk Shows', 'listShows&catid=3', '', 'DefaultMovies.png')
         self.addDirectoryItem('ภาพยนตร์ไทย / Thai Movies', 'listShows&catid=92', '', 'DefaultMovies.png')
         self.addDirectoryItem('ภาพยนตร์ฝรั่งใหม่ / US Movies (Thai dubbed)', 'listShows&catid=98', '', 'DefaultMovies.png')
         self.addDirectoryItem('ซีรี่ย์ฝรั่ง / US Series (Thai dubbed)', 'listShows&catid=38', '', 'DefaultMovies.png')
