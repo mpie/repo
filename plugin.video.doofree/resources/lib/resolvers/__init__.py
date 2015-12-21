@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    Genesis Add-on
+    DooFree Add-on
     Copyright (C) 2015 lambda
 
     This program is free software: you can redistribute it and/or modify
@@ -264,13 +264,6 @@ def info():
         'captcha': False,
         'a/c': False
     }, {
-        'class': 'mrfile',
-        'netloc': ['mrfile.me'],
-        'host': ['Mrfile'],
-        'quality': 'High',
-        'captcha': False,
-        'a/c': False
-    }, {
         'class': 'mybeststream',
         'netloc': ['mybeststream.xyz']
     }, {
@@ -400,13 +393,6 @@ def info():
         'netloc': ['up2stream.com'],
         'host': ['Up2stream'],
         'quality': 'Medium',
-        'captcha': False,
-        'a/c': False
-    }, {
-        'class': 'uploadc',
-        'netloc': ['uploadc.com', 'uploadc.ch', 'zalaa.com'],
-        'host': ['Uploadc', 'Zalaa'],
-        'quality': 'High',
         'captcha': False,
         'a/c': False
     }, {

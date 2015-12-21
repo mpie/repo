@@ -1,4 +1,12 @@
 ------------------------
+DooFree v3.0.14 (21-Dec-15)
+------------------------
+
+- Fixed Nowvideo resolver
+- Removed uploadc resolver
+- Removed mrfile resolver
+
+------------------------
 DooFree v3.0.13 (12-Dec-15)
 ------------------------
 
