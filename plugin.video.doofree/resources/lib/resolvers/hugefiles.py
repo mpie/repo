@@ -1,31 +1,15 @@
 # -*- coding: utf-8 -*-
 
-'''
-    Genesis Add-on
-    Copyright (C) 2015 lambda
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
-
-
 import re,urllib
 from resources.lib.libraries import client
 from resources.lib.libraries import captcha
 
+USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.99 Safari/537.36'
 
 def resolve(url):
     try:
+        media_id = re.search('//.+?/([\w]+)', url).group(1)
+        url = 'http://hugefiles.net/embed-%s.html' % media_id
         result = client.request(url)
 
         post = {}
@@ -39,11 +23,21 @@ def resolve(url):
 
         result = client.request(url, post=post)
 
-        url = re.compile('fileUrl\s*=\s*[\'|\"](.+?)[\'|\"]').findall(result)[0]
-        return url
+        packed = re.search('id="player_code".*?(eval.*?\)\)\))', result, re.DOTALL)
+
+        if packed:
+            js = unpack(packed.group(1))
+            link = re.search('name="src"0="([^"]+)"/>', js.replace('\\',''))
+            if link:
+                # print 'HugeFiles Link Found: %s' % link.group(1)
+                return link.group(1) + '|Referer=%s&User-Agent=%s' % (url, USER_AGENT)
+            else:
+                link = re.search("'file','(.+?)'", js.replace('\\',''))
+                if link:
+                    # print 'HugeFiles Link Found: %s' % link.group(1)
+                    return link.group(1) + '|Referer=%s&User-Agent=%s' % (url, USER_AGENT)
     except:
         return
-
 
 def check(url):
     try:
@@ -54,4 +48,29 @@ def check(url):
     except:
         return False
 
+def unpack(sJavascript):
+    aSplit = sJavascript.split(";',")
+    p = str(aSplit[0])
+    aSplit = aSplit[1].split(",")
+    a = int(aSplit[0])
+    c = int(aSplit[1])
+    k = aSplit[2].split(".")[0].replace("'", '').split('|')
+    e = ''
+    d = ''
+    sUnpacked = str(__unpack(p, a, c, k, e, d))
+    return sUnpacked.replace('\\', '')
+
+def __unpack(p, a, c, k, e, d):
+    while (c > 1):
+        c = c -1
+        if (k[c]):
+            p = re.sub('\\b' + str(__itoa(c, a)) +'\\b', k[c], p)
+    return p
+
+def __itoa(num, radix):
+    result = ""
+    while num > 0:
+        result = "0123456789abcdefghijklmnopqrstuvwxyz"[num % radix] + result
+        num /= radix
+    return result
 
