@@ -1,5 +1,5 @@
 ------------------------
-DooFree v3.0.16 (23-Dec-15)
+DooFree v3.0.17 (23-Dec-15)
 ------------------------
 
 - Fixed Hugefiles resolver
