@@ -32,9 +32,7 @@ def resolve(url):
         result = client.request(url)
         result = result.replace('\n','')
 
-        url = re.compile("'sources' *: *(\[.+?\])").findall(result)[-1]
-        url = ast.literal_eval(url)
-        url = url[-1]['file']
+        url = re.compile('file: \'(https?:\/\/.+?\.mp4)\'').findall(result)[-1]
         return url
     except:
         return

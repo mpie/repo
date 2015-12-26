@@ -371,7 +371,7 @@ def info():
         'class': 'thevideo',
         'netloc': ['thevideo.me'],
         'host': ['Thevideo'],
-        'quality': 'Low',
+        'quality': 'High',
         'captcha': False,
         'a/c': False
     }, {
