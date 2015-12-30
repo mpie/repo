@@ -38,6 +38,7 @@ class navigator:
         self.addDirectoryItem('Series', 'tvNavigator', 'root_shows.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Live TV', 'thaiLiveTV', 'root_livetv.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows', 'thaiShows', 'root_thai.jpg', 'DefaultMovies.png')
+        self.addDirectoryItem('1080P Movies', '1080p', 'hd-logo.png', 'DefaultMovies.png')
         self.addDirectoryItem('Working on DooFree 3.0 to make things faster', '', '', 'DefaultMovies.png')
         '''
         self.addDirectoryItem(30001, 'movieNavigator', 'movies.jpg', 'DefaultMovies.png')

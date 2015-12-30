@@ -506,6 +506,9 @@ class sources:
 
     def sourcesResolve(self, url, provider):
         try:
+            if provider == 'Mpie':
+                return url
+
             provider = provider.lower()
 
             if not provider.endswith(('_mv', '_tv', '_mv_tv')):

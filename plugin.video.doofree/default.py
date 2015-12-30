@@ -154,6 +154,12 @@ elif action == 'sourcePage':
     thai.thai().sourcePage(url, name, image)
 # End thai stuff
 
+# Start 1080p movies
+elif action == '1080p':
+    from resources.lib.indexers import phstreams
+    phstreams.getDirectory('http://zenica.watchkodi.com/Movies/1080p%20Movies.xml')
+# End 1080p movies
+
 # Start movie stuff
 
 
