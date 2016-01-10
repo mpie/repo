@@ -73,6 +73,17 @@ class thai:
 
         nextPage = int(page) + 1
         if nextPage < len(pages):
+            if 'first' in pages:
+                pages.remove('first')
+            if 'pre' in pages:
+                pages.remove('pre')
+            if 'next' in pages:
+                pages.remove('next')
+            if 'last' in pages:
+                pages.remove('last')
+            pages.pop()
+            #pages.pop()
+
             action = 'listShows'
             query = '?action=%s&page=%d&name=%s&catid=%s' % (action, nextPage, 'Next Page', catid)
             url = '%s%s' % (sysaddon, query)
@@ -80,6 +91,16 @@ class thai:
             if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
             item.setInfo(type="Video", infoLabels={"Title": 'Next Page', "OriginalTitle": 'Next Page'})
             control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
+
+            for page in pages:
+                action = 'listShows'
+                pageNumber = int(page) + 1;
+                query = '?action=%s&page=%d&name=%s&catid=%s' % (action, pageNumber, 'Page ' + str(pageNumber), catid)
+                url = '%s%s' % (sysaddon, query)
+                item = control.item('Page ' + str(pageNumber), iconImage='', thumbnailImage='')
+                if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
+                item.setInfo(type="Video", infoLabels={"Title": 'Page ' + str(pageNumber), "OriginalTitle": 'Page ' + str(pageNumber)})
+                control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
 
         control.content(int(sys.argv[1]), 'movies')
         if control.skin == 'skin.confluence': control.execute('Container.SetViewMode(500)')
