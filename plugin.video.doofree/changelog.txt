@@ -1,5 +1,5 @@
 ------------------------
-DooFree v3.0.23 (10-Jan-16)
+DooFree v3.1.0 (10-Jan-16)
 ------------------------
 
 - Added pagination for Thai series
