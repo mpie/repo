@@ -39,25 +39,11 @@ class navigator:
         self.addDirectoryItem('Thai Live TV', 'thaiLiveTV', 'root_livetv.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows', 'thaiShows', 'root_thai.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('1080P Movies', '1080p', 'hd-logo.png', 'DefaultMovies.png')
+        self.addDirectoryItem('Experiment', 'thaiShows2', 'experiment.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Working on DooFree 3.0 to make things faster', '', '', 'DefaultMovies.png')
         '''
-        self.addDirectoryItem(30001, 'movieNavigator', 'movies.jpg', 'DefaultMovies.png')
-        self.addDirectoryItem(30002, 'tvNavigator', 'tvshows.jpg', 'DefaultTVShows.png')
-        self.addDirectoryItem(30003, 'channels', 'channels.jpg', 'DefaultMovies.png')
-        self.addDirectoryItem(30004, 'myNavigator', 'mygenesis.jpg', 'DefaultVideoPlaylists.png')
-
-        if not control.setting('movie_widget') == '0':
-            self.addDirectoryItem(30005, 'movieWidget', 'moviesAdded.jpg', 'DefaultRecentlyAddedMovies.png')
-
         if (traktMode == True and not control.setting('tv_alt_widget') == '0') or (traktMode == False and not control.setting('tv_widget') == '0'):
             self.addDirectoryItem(30006, 'tvWidget', 'calendarsAdded.jpg', 'DefaultRecentlyAddedEpisodes.png')
-
-        if not control.setting('calendar_widget') == '0':
-            self.addDirectoryItem(30007, 'calendars', 'calendar.jpg', 'DefaultRecentlyAddedEpisodes.png')
-
-        self.addDirectoryItem(30008, 'toolNavigator', 'tools.jpg', 'DefaultAddonProgram.png')
-
-        self.addDirectoryItem(30009, 'searchNavigator', 'search.jpg', 'DefaultFolder.png')
         '''
         self.endDirectory()
         views.setView('movies', {'skin.confluence': 500})
@@ -68,9 +54,13 @@ class navigator:
 
     def thaiLiveTV(self):
         # live4 is asia, uk99 is uk
-        self.addDirectoryItem('3', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch3hd&name=3HD&image=ch3hd.png', 'ch3hd.png', 'DefaultMovies.png', isFolder=False)
+        self.addDirectoryItem('3HD', 'playThaiLiveTV&url=http://edge4-04.thaimediaserver.com/chlive3/live3stream_720p_20150924/playlist.m3u8&image=ch3hd.png', 'ch3hd.png', 'DefaultMovies.png', isFolder=False)
+        self.addDirectoryItem('3SD', 'playThaiLiveTV&url=http://edge4-03.thaimediaserver.com/chlive3sd/live3sd_20150924/playlist.m3u8&image=ch3hd.png', 'ch3hd.png', 'DefaultMovies.png', isFolder=False)
+        self.addDirectoryItem('3Family', 'playThaiLiveTV&url=http://edge4-10.thaimediaserver.com/chlive3family/live3family_20150924/playlist.m3u8&image=ch3hd.png', 'ch3hd.png', 'DefaultMovies.png', isFolder=False)
+        self.addDirectoryItem('3HD Alternative', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch3hd&name=3HD&image=ch3hd.png', 'ch3hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('5', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch5hd&name=5HD&image=ch5hd.png', 'ch5hd.png', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('7', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch7hd&name=7HD&image=ch7hd.png', 'ch7hd.png', 'DefaultMovies.png', isFolder=False)
+        self.addDirectoryItem('7HD', 'playThaiLiveTV&url=http://edge4-09.thaimediaserver.com/chlive7/live7stream_720p_20150924/playlist.m3u8&name=7HD&image=ch7hd.png', 'ch7hd.png', 'DefaultMovies.png', isFolder=False)
+        self.addDirectoryItem('7HD Alternative', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/ch7hd&name=7HD&image=ch7hd.png', 'ch7hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('8', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/cheight1&name=8HD&image=ch8hd.png', 'ch8hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('WorkPoint', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chworkpointHD&name=WORKPOINT_HD&image=workpointhd.jpg', 'workpointhd.jpg', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('MCOT', 'playThaiLiveTV&url=rtmp://uk99.seesantv.com/as99/chmcothd&name=MCOT_HD&image=ch9hd.png', 'ch9hd.png', 'DefaultMovies.png', isFolder=False)
@@ -94,6 +84,19 @@ class navigator:
         self.addDirectoryItem('ภาพยนตร์ฝรั่งใหม่ / US Movies (Thai dubbed)', 'listShows&catid=98', '', 'DefaultMovies.png')
         self.addDirectoryItem('ซีรี่ย์ฝรั่ง / US Series (Thai dubbed)', 'listShows&catid=38', '', 'DefaultMovies.png')
         self.addDirectoryItem('ภาพยนตร์แอนนิเมชั่น / Animation', 'listShows&catid=93', '', 'DefaultMovies.png')
+        self.endDirectory()
+        views.setView('movies', {'skin.confluence': 50})
+
+    def thaiShows2(self):
+        self.addDirectoryItem('Thai Drama', 'listShows2&catid=9&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('World Drama', 'listShows2&catid=48&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('News', 'listShows2&catid=4&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('TV Shows', 'listShows2&catid=6&page=1&limit=104&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Film', 'listShows2&catid=2&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Sitcom-Comedy', 'listShows2&catid=5&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Music', 'listShows2&catid=3&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Cartoon', 'listShows2&catid=37&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Other', 'listShows2&catid=7&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
         self.endDirectory()
         views.setView('movies', {'skin.confluence': 50})
 

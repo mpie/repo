@@ -42,6 +42,14 @@ try:
     page = params['page']
 except:
     page = 0
+try:
+    limit = params['limit']
+except:
+    limit = 14
+try:
+    channel = params['channel']
+except:
+    channel = 0
 
 
 
@@ -141,17 +149,33 @@ elif action == 'thaiShows':
     from resources.lib.indexers import navigator
     navigator.navigator().thaiShows()
 
+elif action == 'thaiShows2':
+    from resources.lib.indexers import navigator
+    navigator.navigator().thaiShows2()
+
 elif action == 'listShows':
     from resources.lib.indexers import thai
     thai.thai().listShows(catid, page)
+
+elif action == 'listShows2':
+    from resources.lib.indexers import thai2
+    thai2.thai().listShows(catid, page, limit, channel)
 
 elif action == 'listEpisodes':
     from resources.lib.indexers import thai
     thai.thai().listEpisodes(catid, showid, page, image)
 
+elif action == 'listEpisodes2':
+    from resources.lib.indexers import thai2
+    thai2.thai().listEpisodes(showid, page, image)
+
 elif action == 'sourcePage':
     from resources.lib.indexers import thai
     thai.thai().sourcePage(url, name, image)
+
+elif action == 'sourcePage2':
+    from resources.lib.indexers import thai2
+    thai2.thai().sourcePage(url, name, image)
 # End thai stuff
 
 # Start 1080p movies
