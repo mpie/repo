@@ -165,4 +165,4 @@ class thai:
         item.setProperty('Video', 'true')
         item.setProperty('IsPlayable', 'true')
         control.playlist.clear()
-        control.player.play(videoUrl[0], item)
+        control.player.play(videoUrl[0] + '|Referer:' + url, item)
