@@ -1,4 +1,12 @@
 ------------------------
+DooFree v3.2.0 (20-Feb-16)
+------------------------
+
+- Added Thai Shows 2 section (faster streams)
+- Removed 1080p folder
+- Removed Featured movies
+
+------------------------
 DooFree v3.1.2 (18-Feb-16)
 ------------------------
 

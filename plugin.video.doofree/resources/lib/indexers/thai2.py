@@ -6,7 +6,7 @@
 '''
 
 
-import os,sys,re,json,urllib,urlparse,base64,datetime
+import os,sys,re,json,urllib,urlparse,cookielib,urllib2
 
 try: action = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))['action']
 except: action = None
@@ -23,9 +23,11 @@ class thai:
         self.main_link       = 'http://service.thaiflix.com/api/v1/%s'
         self.cdn             = 'http://cdn.thaiflix.com/media/files/images-large/%s'
         self.shows_link      = self.main_link % 'medias/newest?page=%s&pageLimit=%s&channel_id=%s&category_id=%s'
-        self.episodes_link   = self.main_link % 'medias/%s/media-items?page=%s'
-        #self.stream_link     = 'http://edge4-07.thaimediaserver.com/AsianSeries16/_definst_/vod/'
-        self.stream_link     = 'http://edge4-02.thaimediaserver.com/AsianSeries16/_definst_/vod/'
+        self.episodes_link   = 'http://www.dootv.com/ajax/mediaItemRow_json_ajax.php?media_id=%s'
+        self.stream_link_sd1     = 'http://01-0115-03.thaimediaserver.com/streaming/21ca59dbdf10c176696b54f69b292bf0/56c7b7cc%s'
+        self.stream_link_sd2     = 'http://edge4-04.thaimediaserver.com/%s/_definst_/vod%s'
+        self.stream_link_hd     = 'http://edge6-09.thaimediaserver.com/%s/_definst_/vod/HD%s'
+        self.player_link     = self.main_link % 'player/?media_id=%d&customers_id=137288&media_item_id=%d&HD=1&server=EU'
 
     '''
     List all the shows from a specific category
@@ -77,33 +79,19 @@ class thai:
     Page starts at 0
     '''
     def listEpisodes(self, showid, page, image):
-        '''
-        u='HD/AsianSeries16/160112-UnemployedRomance/UnemployedRomance-Disc4-(15-Jan-2016)_HD.mp4/playlist.m3u8'
-        item = control.item(path='', iconImage=image, thumbnailImage=image)
-        item.setInfo( type='Video', infoLabels = {'title': 'bla'} )
-        item.setProperty('Video', 'true')
-        item.setProperty('IsPlayable', 'true')
-        control.playlist.clear()
-        control.player.play(u, item)
-        return
-        url = self.episodes_link % (showid, page)
-        print url
-        return
-        '''
-        url = self.episodes_link % (showid, page)
+        url = self.episodes_link % (showid)
         try: result = client.request(url)
         except: pass
-
-        print result
-        return
-        data = json.loads(result)
-        paginationInfo = data['pagination']
-        shows = data['data']
+        result = re.compile('(.+?)]').findall(result)[0] + ']'
+        shows = json.loads(result)
 
         # episodes per page
         for show in shows:
-            name = show['title_en']
-            u = self.stream_link % (show['media_id'], show['media_item_id'])
+            if 'Not Show' == show['item_title']:
+                continue
+            name = show['media_title'] + ' ' + show['item_title']
+            u = self.player_link % (show['media_id'], show['media_item_id'])
+
             self.list.append({'name': name, 'url': urllib.quote_plus(u), 'image': image})
 
         for episode in self.list:
@@ -119,17 +107,6 @@ class thai:
             item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
             control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=False)
 
-        # Pagination
-        nextPage = int(page) + 1
-        if nextPage <= paginationInfo['totalPages']:
-            action = 'listEpisodes2'
-            query = '?action=%s&page=%d&name=%s&showid=%s&image=%s' % (action, nextPage, 'Next Page', showid, image)
-            url = '%s%s' % (sysaddon, query)
-            item = control.item('Next Page', iconImage=image, thumbnailImage=image)
-            if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
-            item.setInfo(type="Video", infoLabels={"Title": 'Next Page', "OriginalTitle": 'Next Page'})
-            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
-
         control.content(int(sys.argv[1]), 'movies')
         if control.skin == 'skin.confluence': control.execute('Container.SetViewMode(50)')
         control.directory(int(sys.argv[1]), cacheToDisc=True)
@@ -139,15 +116,26 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        cookie = 'member_id=%d;view_server_name=%s' % (self.member_id, self.view_server_name)
-        try: result = client.request(url, cookie=cookie)
-        except: pass
+        print url
 
-        videoUrl = re.compile('file: "(.+?)"').findall(result)
-        print videoUrl
-        item = control.item(path=url, iconImage=image, thumbnailImage=image)
+        username = 'b359980@trbvn.com'
+        password = 'rinus123'
+
+        cj = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+        login_data = urllib.urlencode({'email' : username, 'password' : password, 'remember' : 'false'})
+        opener.open('http://service.thaiflix.com/api/v1/auth/login', login_data)
+        resp = opener.open(url)
+        data = json.loads(resp.read())
+
+        if 'url2' in data['file']:
+            location = data['file']['url2']
+        else:
+            location = data['file']['url1']
+
+        item = control.item(iconImage=image, thumbnailImage=image)
         item.setInfo( type='Video', infoLabels = {'title': name} )
         item.setProperty('Video', 'true')
         item.setProperty('IsPlayable', 'true')
         control.playlist.clear()
-        control.player.play(videoUrl[0], item)
+        control.player.play(location, item)
