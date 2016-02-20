@@ -1,5 +1,5 @@
 ------------------------
-DooFree v3.2.1 (20-Feb-16)
+DooFree v3.2.2 (20-Feb-16)
 ------------------------
 
 - Added Thai Shows 2 section (faster streams)
