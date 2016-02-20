@@ -1,8 +1,14 @@
 ------------------------
+DooFree v3.2.3 (20-Feb-16)
+------------------------
+
+- Added more thai live tv channels
+
+------------------------
 DooFree v3.2.2 (20-Feb-16)
 ------------------------
 
-- Added Thai Shows 2 section (faster streams)
+- Added Thai Shows 2 section (faster streams and better quality)
 - Removed 1080p folder
 - Removed Featured movies
 
