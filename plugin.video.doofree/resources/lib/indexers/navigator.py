@@ -100,7 +100,16 @@ class navigator:
         views.setView('movies', {'skin.confluence': 50})
 
     def thaiShows2(self):
-        self.addDirectoryItem('Thai Drama', 'listShows2&catid=9&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (on air)', 'listShows2&catid=8&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2015)', 'listShows2&catid=287&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2014)', 'listShows2&catid=70&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2013)', 'listShows2&catid=49&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2012)', 'listShows2&catid=47&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2011)', 'listShows2&catid=46&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2010)', 'listShows2&catid=45&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2009)', 'listShows2&catid=44&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (2008)', 'listShows2&catid=43&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
+        self.addDirectoryItem('Thai Drama (classic)', 'listShows2&catid=42&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
         self.addDirectoryItem('World Drama', 'listShows2&catid=48&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
         self.addDirectoryItem('News', 'listShows2&catid=4&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
         self.addDirectoryItem('TV Shows', 'listShows2&catid=6&page=1&limit=104&channel=0', '', 'DefaultMovies.png')
