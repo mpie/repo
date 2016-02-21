@@ -1,8 +1,15 @@
 ------------------------
+DooFree v3.2.5 (21-Feb-16)
+------------------------
+
+- Fixed movie and serie feeds
+- Added lots of categories in Thai show 2
+
+------------------------
 DooFree v3.2.4 (20-Feb-16)
 ------------------------
 
-- Created a new menu structure for thai show 2
+- Created a new menu structure for Thai show 2
 
 ------------------------
 DooFree v3.2.3 (20-Feb-16)

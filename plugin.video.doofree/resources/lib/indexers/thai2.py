@@ -23,6 +23,7 @@ class thai:
         self.main_link       = 'http://service.thaiflix.com/api/v1/%s'
         self.cdn             = 'http://cdn.thaiflix.com/media/files/images-large/%s'
         self.shows_link      = self.main_link % 'medias/newest?page=%s&pageLimit=%s&channel_id=%s&category_id=%s'
+        self.shows_link_old      = self.main_link % 'medias/recently_updated?page=%s&pageLimit=%s&channel_id=%s&category_id=%s'
         self.episodes_link   = 'http://www.dootv.com/ajax/mediaItemRow_json_ajax.php?media_id=%s'
         self.stream_link_sd1     = 'http://01-0115-03.thaimediaserver.com/streaming/21ca59dbdf10c176696b54f69b292bf0/56c7b7cc%s'
         self.stream_link_sd2     = 'http://edge4-04.thaimediaserver.com/%s/_definst_/vod%s'
@@ -85,11 +86,12 @@ class thai:
         result = re.compile('(.+?)]').findall(result)[0] + ']'
         shows = json.loads(result)
 
+        self.list.append({'name': '[UPPERCASE][COLOR orange]Try again if a show does not play![/COLOR][/UPPERCASE]', 'url': '', 'image': ''})
         # episodes per page
         for show in shows:
             if 'Not Show' == show['item_title']:
                 continue
-            name = show['media_title'] + ' ' + show['item_title']
+            name = show['date_added'] + ' ' + show['item_title']
             u = self.player_link % (show['media_id'], show['media_item_id'])
 
             self.list.append({'name': name, 'url': urllib.quote_plus(u), 'image': image})
