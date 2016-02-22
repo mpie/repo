@@ -232,10 +232,10 @@ class sources:
             match = dbcur.fetchone()
             t1 = int(re.sub('[^0-9]', '', str(match[5])))
             t2 = int(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-            update = abs(t2 - t1) > 60
-            if update == False:
-                sources = json.loads(match[4])
-                return global_sources.extend(sources)
+            # update = abs(t2 - t1) > 60
+            # if update == False:
+            #     sources = json.loads(match[4])
+            #     return global_sources.extend(sources)
         except:
             pass
 
@@ -283,10 +283,10 @@ class sources:
             match = dbcur.fetchone()
             t1 = int(re.sub('[^0-9]', '', str(match[5])))
             t2 = int(datetime.datetime.now().strftime("%Y%m%d%H%M"))
-            update = abs(t2 - t1) > 60
-            if update == False:
-                sources = json.loads(match[4])
-                return global_sources.extend(sources)
+            # update = abs(t2 - t1) > 60
+            # if update == False:
+            #     sources = json.loads(match[4])
+            #     return global_sources.extend(sources)
         except:
             pass
 

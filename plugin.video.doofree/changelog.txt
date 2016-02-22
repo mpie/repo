@@ -1,8 +1,20 @@
 ------------------------
+DooFree v3.2.7 (22-Feb-16)
+------------------------
+
+- Disabled movies and series cache
+
+------------------------
+DooFree v3.2.6 (21-Feb-16)
+------------------------
+
+- Fixed serie feeds
+
+------------------------
 DooFree v3.2.5 (21-Feb-16)
 ------------------------
 
-- Fixed movie and serie feeds
+- Fixed movie feeds
 - Added lots of categories in Thai show 2
 
 ------------------------
