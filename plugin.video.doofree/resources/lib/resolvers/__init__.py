@@ -375,6 +375,13 @@ def info():
         'captcha': False,
         'a/c': False
     }, {
+        'class': 'directDLMovie',
+        'netloc': ['directdlmovie.com'],
+        'host': ['DirectDLMovie'],
+        'quality': 'High',
+        'captcha': False,
+        'a/c': False
+    }, {
         'class': 'turbovideos',
         'netloc': ['turbovideos.net'],
         'host': ['Turbovideos'],

@@ -166,7 +166,7 @@ class sources:
 
         if content == 'movie':
             sourceDict = [i for i in sourceDict if i.endswith(('_mv', '_mv_tv'))]
-            try: sourceDict = [(i, control.setting(re.sub('_mv_tv$|_mv$|_tv$', '', i))) for i in sourceDict]
+            try: sourceDict = [(i, 'true') for i in sourceDict]
             except: sourceDict = [(i, 'true') for i in sourceDict]
         else:
             sourceDict = [i for i in sourceDict if i.endswith(('_tv', '_mv_tv'))]
@@ -394,7 +394,7 @@ class sources:
         try: customsdDict = [control.setting('host50001'), control.setting('host50002'), control.setting('host50003'), control.setting('host50004'), control.setting('host50005'), control.setting('host50006'), control.setting('host50007'), control.setting('host50008'), control.setting('host50009'), control.setting('host50010'), control.setting('host50011'), control.setting('host50012'), control.setting('host50013'), control.setting('host50014'), control.setting('host50015'), control.setting('host50016'), control.setting('host50017'), control.setting('host50018'), control.setting('host50019'), control.setting('host50020')]
         except: customsdDict = []
 
-        hd_rank = ['thevideo', 'hugefiles','gvideo', 'vk', 'yify', 'uptobox', 'grifthost', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
+        hd_rank = ['directdlmovie', 'thevideo', 'hugefiles','gvideo', 'vk', 'yify', 'uptobox', 'grifthost', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
         sd_rank = hd_rank
         '''
         hd_rank += [i for i in self.rdDict if i in self.hostprDict + self.hosthdDict]
