@@ -247,6 +247,7 @@ class sources:
         except:
             pass
 
+        url = None
         try:
             if url == None: url = call.get_movie(imdb, title, year)
             if url == None: raise Exception()
@@ -298,6 +299,7 @@ class sources:
         except:
             pass
 
+        url = None
         try:
             if url == None: url = call.get_show(imdb, tvdb, tvshowtitle, year)
             if url == None: raise Exception()
