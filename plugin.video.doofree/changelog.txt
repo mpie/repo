@@ -1,4 +1,10 @@
 ------------------------
+DooFree v3.2.9 (24-Feb-16)
+------------------------
+
+- Cracked AdFly encryption as an alternative to DirectDLMovie source!
+
+------------------------
 DooFree v3.2.8 (23-Feb-16)
 ------------------------
 

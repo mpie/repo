@@ -3,7 +3,7 @@
 
 import re,urllib,urlparse
 
-from resources.lib.libraries import cleantitle
+from resources.lib import resolvers
 from resources.lib.libraries import client
 
 
@@ -15,15 +15,21 @@ class source:
 
     def get_movie(self, imdb, title, year):
         try:
+            title = title.replace(':', '');
+            if 'No Escape' in title:
+                title = '"' + title + '"'
+
             query = self.search_link % urllib.quote_plus(title)
             query = urlparse.urljoin(self.base_link, query)
 
             result = client.source(query)
             result = client.parseDOM(result, 'li', attrs = {'class': 'izlenme'})
-            result = client.parseDOM(result, 'a', ret='href')[0]
+            result = client.parseDOM(result, 'a', ret='href')
 
-            url = re.compile('//.+?/(.+)').findall(result)[0]
-            url = url.encode('utf-8')
+            url = []
+            for page in result:
+                p = re.compile('//.+?/(.+)').findall(page)[0]
+                url.append(p.encode('utf-8'))
 
             return url
         except:
@@ -35,33 +41,36 @@ class source:
 
             if url == None: return sources
 
-            url = urlparse.urljoin(self.base_link, '/' + url)
+            for page in url:
+                p = urlparse.urljoin(self.base_link, '/' + page)
+                result = client.source(p)
 
-            result = client.source(url)
+                links = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'emd_dl_green_light'})
+                source = 'DirectDLMovie'
 
-            links = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'emd_dl_green_light'})
+                if len(links) == 0:
+                    links = re.compile('<a href="(.+)" target.+?direct download link').findall(result)
+                    source = 'AdFly'
 
-            for i in links:
-                try:
-                    url = client.replaceHTMLCodes(i)
-                    url = url.encode('utf-8')
+                for i in links:
+                    try:
+                        p = client.replaceHTMLCodes(i)
+                        p = p.encode('utf-8')
 
-                    if not url.endswith(('mp4', 'mkv')): raise Exception()
+                        fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\)|\]|\s)', '', i)
+                        fmt = re.split('\.|\(|\)|\[|\]|\s|\-|\_', fmt)
+                        fmt = [x.lower() for x in fmt]
 
-                    fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\)|\]|\s)', '', i)
-                    fmt = re.split('\.|\(|\)|\[|\]|\s|\-|\_', fmt)
-                    fmt = [x.lower() for x in fmt]
+                        if '1080p' in fmt: quality = '1080p'
+                        elif '720p' in fmt or 'hd' in fmt: quality = 'HD'
+                        else: quality = 'SD'
 
-                    if '1080p' in fmt: quality = '1080p'
-                    elif '720p' in fmt or 'hd' in fmt: quality = 'HD'
-                    else: quality = 'SD'
+                        if '3d' in fmt: info = '3D'
+                        else: info = ''
 
-                    if '3d' in fmt: info = '3D'
-                    else: info = ''
-
-                    sources.append({'source': 'DirectDLMovie', 'quality': quality, 'provider': 'DirectDLMovie', 'url': url, 'info': info})
-                except:
-                    pass
+                        sources.append({'source': source, 'quality': quality, 'provider': 'DirectDLMovie', 'url': p, 'info': info})
+                    except:
+                        pass
 
             return sources
         except:
@@ -69,21 +78,14 @@ class source:
 
 
     def resolve(self, url):
-
         try:
-            content = re.compile('(.+?)\?S\d*E\d*$').findall(url)
+            u = urlparse.urlparse(url).netloc
+            u = u.replace('www.', '').replace('embed.', '')
+            u = u.lower()
 
-            if len(content) == 0: return url
+            if u == 'adf.ly':
+                url = resolvers.request(url)
 
-            url, season, episode = re.compile('(.+?)\?S(\d*)E(\d*)$').findall(url)[0]
-
-            match = ['S%sE%s' % (season, episode), 'S%s E%s' % (season, episode)]
-
-            result = client.source(url)
-            result = client.parseDOM(result, 'a', ret='href')
-            result = [i for i in result if any(x in i for x in match)][0]
-
-            url = '%s/%s' % (url, result)
             return url
         except:
             return

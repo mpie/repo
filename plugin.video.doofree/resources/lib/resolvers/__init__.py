@@ -1,24 +1,5 @@
 # -*- coding: utf-8 -*-
 
-'''
-    DooFree Add-on
-    Copyright (C) 2015 lambda
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
-
-
 import re,urllib,urlparse
 
 from resources.lib.libraries import client
@@ -30,11 +11,6 @@ def request(url):
     try:
         if '</regex>' in url:
             import regex ; url = regex.resolve(url)
-
-        rd = realdebrid.resolve(url)
-        if not rd == None: return rd
-        pz = premiumize.resolve(url)
-        if not pz == None: return pz
 
         if url.startswith('rtmp'):
             if len(re.compile('\s*timeout=(\d*)').findall(url)) == 0: url += ' timeout=10'
@@ -378,6 +354,13 @@ def info():
         'class': 'directDLMovie',
         'netloc': ['directdlmovie.com'],
         'host': ['DirectDLMovie'],
+        'quality': 'High',
+        'captcha': False,
+        'a/c': False
+    }, {
+        'class': 'AdFly',
+        'netloc': ['adf.ly'],
+        'host': ['AdFly'],
         'quality': 'High',
         'captcha': False,
         'a/c': False
