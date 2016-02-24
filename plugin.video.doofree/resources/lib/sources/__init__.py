@@ -391,32 +391,8 @@ class sources:
     def sourcesFilter(self):
         self.sourcesReset()
 
-        try: customhdDict = [control.setting('hosthd50001'), control.setting('hosthd50002'), control.setting('hosthd50003'), control.setting('hosthd50004'), control.setting('hosthd50005'), control.setting('hosthd50006'), control.setting('hosthd50007'), control.setting('hosthd50008'), control.setting('hosthd50009'), control.setting('hosthd50010'), control.setting('hosthd50011'), control.setting('hosthd50012'), control.setting('hosthd50013'), control.setting('hosthd50014'), control.setting('hosthd50015'), control.setting('hosthd50016'), control.setting('hosthd50017'), control.setting('hosthd50018'), control.setting('hosthd50019'), control.setting('hosthd50020')]
-        except: customhdDict = []
-        try: customsdDict = [control.setting('host50001'), control.setting('host50002'), control.setting('host50003'), control.setting('host50004'), control.setting('host50005'), control.setting('host50006'), control.setting('host50007'), control.setting('host50008'), control.setting('host50009'), control.setting('host50010'), control.setting('host50011'), control.setting('host50012'), control.setting('host50013'), control.setting('host50014'), control.setting('host50015'), control.setting('host50016'), control.setting('host50017'), control.setting('host50018'), control.setting('host50019'), control.setting('host50020')]
-        except: customsdDict = []
-
         hd_rank = ['directdlmovie', 'adfly', 'thevideo', 'nosvideo','gvideo', 'vk', 'yify', 'uptobox', 'grifthost', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
         sd_rank = hd_rank
-        '''
-        hd_rank += [i for i in self.rdDict if i in self.hostprDict + self.hosthdDict]
-        hd_rank += [i for i in self.pzDict if i in self.hostprDict + self.hosthdDict]
-        hd_rank += customhdDict
-        hd_rank += [i['source'] for i in self.sources if i['quality'] in ['1080p', 'HD'] and not i['source'] in customhdDict + self.hostprDict + self.hosthdDict]
-        hd_rank += self.hosthdDict
-        hd_rank = [i.lower() for i in hd_rank]
-        hd_rank = [x for y,x in enumerate(hd_rank) if x not in hd_rank[:y]]
-
-
-        sd_rank = []
-        sd_rank += [i for i in self.rdDict if i in self.hostprDict + self.hosthqDict]
-        sd_rank += [i for i in self.pzDict if i in self.hostprDict + self.hosthqDict]
-        sd_rank += customsdDict
-        sd_rank += [i['source'] for i in self.sources if i['quality'] == 'SD' and not i['source'] in customsdDict + self.hostprDict + self.hosthqDict + self.hostmqDict + self.hostlqDict]
-        sd_rank += self.hosthqDict + self.hostmqDict + self.hostlqDict
-        sd_rank = [i.lower() for i in sd_rank]
-        sd_rank = [x for y,x in enumerate(sd_rank) if x not in sd_rank[:y]]
-        '''
 
         for i in range(len(self.sources)): self.sources[i]['source'] = self.sources[i]['source'].lower()
         self.sources = sorted(self.sources, key=lambda k: k['source'])
@@ -425,10 +401,10 @@ class sources:
         for host in hd_rank: filter += [i for i in self.sources if i['quality'] == '1080p' and i['source'] == host]
         for host in hd_rank: filter += [i for i in self.sources if i['quality'] == 'HD' and i['source'] == host]
         for host in sd_rank: filter += [i for i in self.sources if i['quality'] == 'SD' and i['source'] == host]
-        if len(filter) < 10: filter += [i for i in self.sources if i['quality'] == 'SCR']
+        for host in hd_rank: filter += [i for i in self.sources if i['quality'] == 'SCR' and i['source'] == host]
         if len(filter) < 10: filter += [i for i in self.sources if i['quality'] == 'CAM']
         self.sources = filter
-
+        print filter
         try: playback_quality = control.setting('playback_quality')
         except: playback_quality = '0'
 
