@@ -23,16 +23,20 @@ class source:
             query = urlparse.urljoin(self.base_link, query)
 
             result = client.source(query)
-            result = client.parseDOM(result, 'div', attrs = {'class': 'thumbn'})
-            result = client.parseDOM(result, 'img', ret='alt')
+            thumbs = client.parseDOM(result, 'div', attrs = {'class': 'thumbn'})
+            images = client.parseDOM(thumbs, 'img', ret='alt')
+
+            list = client.parseDOM(result, 'li', attrs = {'class': 'izlenme'})
+            pages = client.parseDOM(list, 'a', ret='href')
 
             url = []
-            for description in result:
+            for idx, description in enumerate(images):
                 description = description.replace('.', ' ')
                 description = re.sub(' +',' ', description)
+
                 if title in description:
-                    filename = description.replace(' ', '.')
-                    url.append(filename.encode('utf-8'))
+                    u = pages[idx]
+                    url.append(u.encode('utf-8'))
 
             return url
         except:
@@ -44,28 +48,35 @@ class source:
 
             if url == None: return sources
 
-            for filename in url:
-                try:
-                    filename = filename.replace('(','').replace(')', '')
-                    file = self.download_link % (filename) + self.hd_suffix
+            for p in url:
+                result = client.source(p)
 
-                    fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\)|\]|\s)', '', filename)
-                    fmt = re.split('\.|\(|\)|\[|\]|\s|\-|\_', fmt)
-                    fmt = [x.lower() for x in fmt]
+                links = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'emd_dl_green_light'})
+                source = 'DirectDLMovie'
 
-                    if '1080p' in fmt: quality = '1080p'
-                    elif '720p' in fmt or 'hd' in fmt: quality = 'HD'
-                    elif 'dvdscr' in fmt:
-                        quality = 'SCR'
-                        file = self.download_link % (filename) + self.dvdscr_suffix
-                    else: quality = 'SD'
+                if len(links) == 0:
+                    links = re.compile('<a href="(.+)" target.+?direct download link').findall(result)
+                    source = 'AdFly'
 
-                    if '3d' in fmt: info = '3D'
-                    else: info = ''
+                for i in links:
+                    try:
+                        p = client.replaceHTMLCodes(i)
+                        p = p.encode('utf-8')
 
-                    sources.append({'source': 'DirectDLMovie', 'quality': quality, 'provider': 'DirectDLMovie', 'url': file, 'info': info})
-                except:
-                    pass
+                        fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\)|\]|\s)', '', i)
+                        fmt = re.split('\.|\(|\)|\[|\]|\s|\-|\_', fmt)
+                        fmt = [x.lower() for x in fmt]
+
+                        if '1080p' in fmt: quality = '1080p'
+                        elif '720p' in fmt or 'hd' in fmt: quality = 'HD'
+                        else: quality = 'SD'
+
+                        if '3d' in fmt: info = '3D'
+                        else: info = ''
+
+                        sources.append({'source': source, 'quality': quality, 'provider': 'DirectDLMovie', 'url': p, 'info': info})
+                    except:
+                        pass
 
             return sources
         except:
