@@ -46,6 +46,7 @@ class source:
 
             for filename in url:
                 try:
+                    filename = filename.replace('(','').replace(')', '')
                     file = self.download_link % (filename) + self.hd_suffix
 
                     fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4}|S\d*E\d*)(\.|\)|\]|\s)', '', filename)
