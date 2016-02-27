@@ -391,7 +391,7 @@ class sources:
     def sourcesFilter(self):
         self.sourcesReset()
 
-        hd_rank = ['directdlmovie', 'adfly', 'thevideo', 'nosvideo','gvideo', 'vk', 'yify', 'uptobox', 'grifthost', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
+        hd_rank = ['afdah', 'directdlmovie', 'adfly', 'thevideo', 'nosvideo','gvideo', 'vk', 'yify', 'uptobox', 'grifthost', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
         sd_rank = hd_rank
 
         for i in range(len(self.sources)): self.sources[i]['source'] = self.sources[i]['source'].lower()
@@ -404,7 +404,7 @@ class sources:
         for host in hd_rank: filter += [i for i in self.sources if i['quality'] == 'SCR' and i['source'] == host]
         if len(filter) < 10: filter += [i for i in self.sources if i['quality'] == 'CAM']
         self.sources = filter
-        print filter
+
         try: playback_quality = control.setting('playback_quality')
         except: playback_quality = '0'
 

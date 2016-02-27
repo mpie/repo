@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import re,urllib,urlparse,random
+import re,urllib,urlparse,random,subprocess,json
 
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
-from resources.lib.resolvers import googleplus
 
 
 class source:
@@ -12,7 +11,7 @@ class source:
         self.base_link_1 = 'https://afdah.org'
         self.base_link_2 = 'https://xmovies8.org'
         self.search_link = '/results?q=%s'
-        self.info_link = '/video_info'
+        self.info_link = '/video_info/iframe'
 
 
     def get_movie(self, imdb, title, year):
@@ -22,9 +21,10 @@ class source:
             query = self.search_link % (urllib.quote_plus(title))
             query = urlparse.urljoin(self.base_link, query)
 
-            result = client.source(query)
+            p = subprocess.Popen(['curl', query], stdout=subprocess.PIPE)
+            out, err = p.communicate()
 
-            result = client.parseDOM(result, 'div', attrs = {'class': 'cell_container'})
+            result = client.parseDOM(out, 'div', attrs = {'class': 'cell_container'})
 
             title = cleantitle.movie(title)
             years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
@@ -40,6 +40,7 @@ class source:
             except: url = result
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
+
             return url
         except:
             return
@@ -55,20 +56,27 @@ class source:
 
             url = urlparse.urljoin(self.base_link, url)
 
-            result = client.source(url)
+            p = subprocess.Popen(['curl', url], stdout=subprocess.PIPE)
+            out, err = p.communicate()
 
-            video_id = re.compile('video_id *= *[\'|\"](.+?)[\'|\"]').findall(result)[0]
-            post = urllib.urlencode({'video_id': video_id})
+            video_id = re.compile('video_id *= *[\'|\"](.+?)[\'|\"]').findall(out)[0]
+            iframeUrl = urlparse.urljoin(self.base_link, self.info_link)
 
-            result = client.source(urlparse.urljoin(self.base_link, self.info_link), post=post)
+            p = subprocess.Popen(['curl', iframeUrl, '--data', 'v=' + video_id, '-H', 'referer: ' + url], stdout=subprocess.PIPE)
+            out, err = p.communicate()
 
-            u = [i for i in result.split('&') if 'google' in i][0]
-            u = urllib.unquote_plus(u)
-            u = [urllib.unquote_plus(i.split('|')[-1]) for i in u.split(',')]
-            u = [googleplus.tag(i)[0] for i in u]
-            u = [i for i in u if i['quality'] in ['1080p', 'HD']]
+            result = json.loads(out)
 
-            for i in u: sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Afdah', 'url': i['url']})
+            for k,v in result.iteritems():
+                if int(k) == 1080:
+                    quality = '1080p'
+                elif int(k) == 720:
+                    quality = 'HD'
+                else:
+                    quality = 'SD'
+
+                u = v.replace('//html5player.org/embed?url=', '').replace('%3A', ':').replace('%2F', '/').replace('%3D', '=')
+                sources.append({'source': 'GVideo', 'quality': quality, 'provider': 'Afdah', 'url': u})
 
             return sources
         except:
@@ -76,15 +84,4 @@ class source:
 
 
     def resolve(self, url):
-        try:
-            if url.startswith('stack://'): return url
-
-            url = client.request(url, output='geturl')
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
-            return url
-        except:
-            return
-
-
-
+        return url

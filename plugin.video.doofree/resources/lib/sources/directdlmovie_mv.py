@@ -17,7 +17,7 @@ class source:
 
     def get_movie(self, imdb, title, year):
         try:
-            title = title.replace(':', '');
+            title = title.replace(':', '')
 
             query = self.search_link % urllib.quote_plus(title)
             query = urlparse.urljoin(self.base_link, query)
@@ -32,7 +32,10 @@ class source:
             url = []
             for idx, description in enumerate(images):
                 description = description.replace('.', ' ')
+                description = description.replace(':', ' ')
                 description = re.sub(' +',' ', description)
+                description = description.lower()
+                title = title.lower()
 
                 if title in description:
                     u = pages[idx]
@@ -57,6 +60,8 @@ class source:
                 if len(links) == 0:
                     links = re.compile('<a href="(.+)" target.+?direct download link').findall(result)
                     source = 'AdFly'
+                    quality = 'HD'
+                    info = ''
 
                 for i in links:
                     try:
@@ -67,13 +72,14 @@ class source:
                         fmt = re.split('\.|\(|\)|\[|\]|\s|\-|\_', fmt)
                         fmt = [x.lower() for x in fmt]
 
-                        if '1080p' in fmt: quality = '1080p'
-                        elif '720p' in fmt or 'hd' in fmt: quality = 'HD'
-                        else: quality = 'SD'
+                        if source not in 'AdFly':
+                            if '1080p' in fmt: quality = '1080p'
+                            elif '720p' in fmt or 'hd' in fmt: quality = 'HD'
+                            else: quality = 'SD'
 
-                        if '3d' in fmt: info = '3D'
-                        else: info = ''
-
+                            if '3d' in fmt: info = '3D'
+                            else: info = ''
+                        print source
                         sources.append({'source': source, 'quality': quality, 'provider': 'DirectDLMovie', 'url': p, 'info': info})
                     except:
                         pass

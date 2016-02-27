@@ -1,4 +1,10 @@
 ------------------------
+DooFree v3.3.4 (27-Feb-16)
+------------------------
+
+- Added Afdah as HD quality source for older movies
+
+------------------------
 DooFree v3.3.3 (26-Feb-16)
 ------------------------
 
