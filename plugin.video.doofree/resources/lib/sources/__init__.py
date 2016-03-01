@@ -3,6 +3,9 @@
 
 import sys,pkgutil,re,json,urllib,urlparse,datetime,time
 
+try: import xbmc
+except: pass
+
 try:
     from sqlite3 import dbapi2 as database
 except:
@@ -81,11 +84,12 @@ class sources:
             imdb = 'tt' + re.sub('[^0-9]', '', str(imdb))
 
             content = 'movie' if tvshowtitle == None else 'episode'
-
+            print 'hieo'
             self.sources = self.getSources(name, title, year, imdb, tmdb, tvdb, tvrage, season, episode, tvshowtitle, alter, date)
+            print 'aaaaap'
             if self.sources == []: raise Exception()
             self.sources = self.sourcesFilter()
-
+            print self.sources
             meta = json.loads(meta)
 
             infoMenu = control.lang(30502).encode('utf-8') if content == 'movie' else control.lang(30503).encode('utf-8')
@@ -163,19 +167,14 @@ class sources:
 
         content = 'movie' if tvshowtitle == None else 'episode'
 
-
         if content == 'movie':
             sourceDict = [i for i in sourceDict if i.endswith(('_mv', '_mv_tv'))]
-            try: sourceDict = [(i, 'true') for i in sourceDict]
+            try: sourceDict = [(i, control.setting(re.sub('_mv_tv$|_mv$|_tv$', '', i))) for i in sourceDict]
             except: sourceDict = [(i, 'true') for i in sourceDict]
         else:
             sourceDict = [i for i in sourceDict if i.endswith(('_tv', '_mv_tv'))]
             try: sourceDict = [(i, control.setting(re.sub('_mv_tv$|_mv$|_tv$', '', i) + '_tv')) for i in sourceDict]
             except: sourceDict = [(i, 'true') for i in sourceDict]
-
-
-        global global_sources
-        global_sources = []
 
         threads = []
 
@@ -193,26 +192,45 @@ class sources:
             for source in sourceDict: threads.append(workers.Thread(self.getEpisodeSource, title, year, imdb, tvdb, season, episode, tvshowtitle, date, re.sub('_mv_tv$|_mv$|_tv$', '', source), __import__(source, globals(), locals(), [], -1).source()))
 
 
-        try: timeout = int(control.setting('sources_timeout_20'))
-        except: timeout = 20
-
+        try: timeout = int(control.setting('sources_timeout_40'))
+        except: timeout = 40
 
         [i.start() for i in threads]
-        #[i.join() for i in threads] ; self.sources = global_sources ; return self.sources
 
+        control.idle()
+
+        sourceLabel = [re.sub('_mv_tv$|_mv$|_tv$', '', i) for i in sourceDict]
+        sourceLabel = [re.sub('v\d+$', '', i).upper() for i in sourceLabel]
+
+
+        self.progressDialog = control.progressDialog
+        self.progressDialog.create(control.addonInfo('name'), '')
+        self.progressDialog.update(0)
+
+        string1 = control.lang(30512).encode('utf-8')
+        string2 = control.lang(30513).encode('utf-8')
+        string3 = control.lang(30514).encode('utf-8')
 
         for i in range(0, timeout * 2):
-            is_alive = [x.is_alive() for x in threads]
-            if all(x == False for x in is_alive): break
-            time.sleep(0.5)
+            try:
+                if xbmc.abortRequested == True: return sys.exit()
 
-        for i in range(0, 5 * 2):
-            is_alive = len([i for i in threads if i.is_alive() == True])
-            if is_alive < 10: break
-            time.sleep(0.5)
+                try: info = [sourceLabel[int(re.sub('[^0-9]', '', str(x.getName()))) - 1] for x in threads if x.is_alive() == True]
+                except: info = []
 
+                if len(info) > 5: info = len(info)
 
-        self.sources = global_sources
+                self.progressDialog.update(int((100 / float(len(threads))) * len([x for x in threads if x.is_alive() == False])), str('%s: %s %s' % (string1, int(i * 0.5), string2)), str('%s: %s' % (string3, str(info).translate(None, "[]'"))))
+
+                if self.progressDialog.iscanceled(): break
+
+                is_alive = [x.is_alive() for x in threads]
+                if all(x == False for x in is_alive): break
+                time.sleep(0.5)
+            except:
+                pass
+
+        self.progressDialog.close()
 
         return self.sources
 
@@ -235,7 +253,7 @@ class sources:
             update = abs(t2 - t1) > 60
             if update == False:
                 sources = json.loads(match[4])
-                return global_sources.extend(sources)
+                return self.sources.extend(sources)
         except:
             pass
 
@@ -260,7 +278,7 @@ class sources:
             sources = []
             sources = call.get_sources(url, self.hosthdfullDict, self.hostsdfullDict, self.hostlocDict)
             if sources == None: sources = []
-            global_sources.extend(sources)
+            self.sources.extend(sources)
             dbcur.execute("DELETE FROM rel_src WHERE source = '%s' AND imdb_id = '%s' AND season = '%s' AND episode = '%s'" % (source, imdb, '', ''))
             dbcur.execute("INSERT INTO rel_src Values (?, ?, ?, ?, ?, ?)", (source, imdb, '', '', json.dumps(sources), datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
             dbcon.commit()
@@ -286,7 +304,7 @@ class sources:
             update = abs(t2 - t1) > 60
             if update == False:
                 sources = json.loads(match[4])
-                return global_sources.extend(sources)
+                return self.sources.extend(sources)
         except:
             pass
 
@@ -329,7 +347,7 @@ class sources:
             sources = []
             sources = call.get_sources(ep_url, self.hosthdfullDict, self.hostsdfullDict, self.hostlocDict)
             if sources == None: sources = []
-            global_sources.extend(sources)
+            self.sources.extend(sources)
             dbcur.execute("DELETE FROM rel_src WHERE source = '%s' AND imdb_id = '%s' AND season = '%s' AND episode = '%s'" % (source, imdb, season, episode))
             dbcur.execute("INSERT INTO rel_src Values (?, ?, ?, ?, ?, ?)", (source, imdb, season, episode, json.dumps(sources), datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
             dbcon.commit()

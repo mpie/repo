@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
 
-'''
-    Genesis Add-on
-    Copyright (C) 2015 lambda
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
-
 
 import os,xbmc,xbmcaddon,xbmcplugin,xbmcgui,xbmcvfs
 
@@ -162,8 +144,22 @@ def selectDialog(list, heading=addonInfo('name')):
     return dialog.select(heading, list)
 
 
+def version():
+    num = ''
+    try: version = addon('xbmc.addon').getAddonInfo('version')
+    except: version = '999'
+    for i in version:
+        if i.isdigit(): num += i
+        else: break
+    return int(num)
+
+
 def refresh():
     return execute('Container.Refresh')
+
+
+def idle():
+    return execute('Dialog.Close(busydialog)')
 
 
 def queueItem():
@@ -176,6 +172,7 @@ def openPlaylist():
 
 def openSettings(query=None, id=addonInfo('id')):
     try:
+        idle()
         execute('Addon.OpenSettings(%s)' % id)
         if query == None: raise Exception()
         c, f = query.split('.')
@@ -183,4 +180,5 @@ def openSettings(query=None, id=addonInfo('id')):
         execute('SetFocus(%i)' % (int(f) + 200))
     except:
         return
+
 

@@ -1,4 +1,11 @@
 ------------------------
+DooFree v3.3.6 (1-Mar-16)
+------------------------
+
+- Added option to clear cache and source
+- Implemented a better sources loading screen
+
+------------------------
 DooFree v3.3.5 (1-Mar-16)
 ------------------------
 
