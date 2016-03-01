@@ -20,22 +20,32 @@ class source:
 
             query = self.search_link % (urllib.quote_plus(title))
             query = urlparse.urljoin(self.base_link, query)
-
+            print query
             p = subprocess.Popen(['curl', query], stdout=subprocess.PIPE)
             out, err = p.communicate()
 
             result = client.parseDOM(out, 'div', attrs = {'class': 'cell_container'})
 
+            titles = []
             title = cleantitle.movie(title)
+            titles.append(title)
+            titles.append(title.replace('episodei', 'episode1'))
+            titles.append(title.replace('episodeii', 'episode2'))
+            titles.append(title.replace('episodeiii', 'episode3'))
             years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
 
             result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in result]
+            #print result
             result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
+            #print result
             result = [(i[0], re.compile('(.+?) [(](\d{4})[)]').findall(i[1])) for i in result]
+            #print result
             result = [(i[0], i[1][0][0], i[1][0][1]) for i in result if len(i[1]) > 0]
-            result = [i for i in result if title == cleantitle.movie(i[1])]
+            #print result
+            result = [i for i in result if (cleantitle.movie(i[1]) in titles)]
+            #print result
             result = [i[0] for i in result if any(x in i[2] for x in years)][0]
-
+            print result
             try: url = re.compile('//.+?(/.+)').findall(result)[0]
             except: url = result
             url = client.replaceHTMLCodes(url)

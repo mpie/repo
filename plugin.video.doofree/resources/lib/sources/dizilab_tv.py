@@ -13,12 +13,11 @@ class source:
         self.base_link = 'http://dizilab.com'
         self.search_link = '/arsiv?limit=&tur=&orderby=&ulke=&order=&yil=&dizi_adi=%s'
 
-
     def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
             query = self.search_link % (urllib.quote_plus(tvshowtitle))
             query = urlparse.urljoin(self.base_link, query)
-
+            print query
             result = cloudflare.source(query)
             result = client.parseDOM(result, 'div', attrs = {'class': 'tv-series-single'})
 
@@ -41,7 +40,6 @@ class source:
         except:
             return
 
-
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             if url == None: return
@@ -59,7 +57,6 @@ class source:
             return url
         except:
             return
-
 
     def get_sources(self, url, hosthdDict, hostDict, locDict):
         try:
@@ -84,7 +81,6 @@ class source:
             return sources
         except:
             return sources
-
 
     def resolve(self, url):
         try:

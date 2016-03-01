@@ -1,4 +1,13 @@
 ------------------------
+DooFree v3.3.5 (1-Mar-16)
+------------------------
+
+Performance patch!
+
+- Re-enabled caching
+- Disabled unnecessary sources
+
+------------------------
 DooFree v3.3.4 (27-Feb-16)
 ------------------------
 
