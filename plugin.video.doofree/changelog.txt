@@ -1,4 +1,10 @@
 ------------------------
+DooFree v3.3.8 (6-Mar-16)
+------------------------
+
+- Temporary disabled DiziLab. They are migrating to a new server. None of their videos are working atm.
+
+------------------------
 DooFree v3.3.7 (1-Mar-16)
 ------------------------
 
