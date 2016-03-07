@@ -1,4 +1,10 @@
 ------------------------
+DooFree v3.3.9 (7-Mar-16)
+------------------------
+
+- Change Thai tv shows english server to german server for now.
+
+------------------------
 DooFree v3.3.8 (6-Mar-16)
 ------------------------
 
