@@ -1,14 +1,20 @@
 ------------------------
+DooFree v3.4.0 (12-Mar-16)
+------------------------
+
+- Added a cartoon source (KissCartoon)
+
+------------------------
 DooFree v3.3.9 (7-Mar-16)
 ------------------------
 
-- Change Thai tv shows english server to german server for now.
+- Change Thai tv shows english server to german server for now
 
 ------------------------
 DooFree v3.3.8 (6-Mar-16)
 ------------------------
 
-- Temporary disabled DiziLab. They are migrating to a new server. None of their videos are working atm.
+- Temporary disabled DiziLab. They are migrating to a new server. None of their videos are working atm
 
 ------------------------
 DooFree v3.3.7 (1-Mar-16)
