@@ -1,4 +1,13 @@
 ------------------------
+DooFree v3.4.1 (23-Mar-16)
+------------------------
+
+- Put Dizilab back. Hope they will finish their video migration soon
+- Added a new HD TV Shows source (SeriesTV US)
+
+Cheers! Mpie
+
+------------------------
 DooFree v3.4.0 (12-Mar-16)
 ------------------------
 
