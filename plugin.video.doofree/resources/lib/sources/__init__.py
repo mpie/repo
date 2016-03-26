@@ -84,12 +84,12 @@ class sources:
             imdb = 'tt' + re.sub('[^0-9]', '', str(imdb))
 
             content = 'movie' if tvshowtitle == None else 'episode'
-            print 'hieo'
+
             self.sources = self.getSources(name, title, year, imdb, tmdb, tvdb, tvrage, season, episode, tvshowtitle, alter, date)
-            print 'aaaaap'
+
             if self.sources == []: raise Exception()
             self.sources = self.sourcesFilter()
-            print self.sources
+
             meta = json.loads(meta)
 
             infoMenu = control.lang(30502).encode('utf-8') if content == 'movie' else control.lang(30503).encode('utf-8')

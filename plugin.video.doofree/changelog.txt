@@ -1,9 +1,14 @@
 ------------------------
-DooFree v3.4.1 (26-Mar-16)
+DooFree v3.4.3 (27-Mar-16)
+------------------------
+
+- Added another HD TV Shows source (FMovies) enjoy!
+
+------------------------
+DooFree v3.4.2 (26-Mar-16)
 ------------------------
 
 - Fixed SeriesTV US source
--
 
 ------------------------
 DooFree v3.4.1 (23-Mar-16)
