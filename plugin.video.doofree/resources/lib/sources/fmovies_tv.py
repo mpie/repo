@@ -35,7 +35,7 @@ class source:
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             if url == None: return
-            url = '%s S%01dE%01d' % (url, int(season), int(episode))
+            url = '%s S%01dE%02d' % (url, int(season), int(episode))
             url = url.replace("Marvel's ", '')
             url = url.replace("DC's ", '')
             url = client.replaceHTMLCodes(url)
@@ -98,7 +98,6 @@ class source:
                                             headers = self.XHR
                                             headers['Referer'] = url
                                             result = client.source(hash_url, headers=headers)
-                                break
 
             js_data = json.loads(result)
             links = {}
