@@ -78,7 +78,8 @@ class source:
                             season = season.replace('S1', '').replace('S', '')
                             episode = episode.replace('E', '')
 
-                            clean_match_title = cleantitle.tv(match_title+'&type=series')
+                            clean_match_title = cleantitle.tv(match_title)
+                            url = url.replace('&type=series', '')
                             clean_original = cleantitle.tv(url+season)
                             original_s1 = url + '1'
                             original_s1 = original_s1.replace(' ','')
