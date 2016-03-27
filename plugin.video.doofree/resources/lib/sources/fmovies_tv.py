@@ -4,6 +4,7 @@ import re,urllib,json,urlparse
 
 from resources.lib.libraries import client
 from resources.lib import resolvers
+from resources.lib.libraries import cleantitle
 
 
 class source:
@@ -34,8 +35,9 @@ class source:
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             if url == None: return
-            url = '%s S%01dE%02d' % (url, int(season), int(episode))
+            url = '%s S%01dE%01d' % (url, int(season), int(episode))
             url = url.replace("Marvel's ", '')
+            url = url.replace("DC's ", '')
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -75,20 +77,28 @@ class source:
                         if is_season:
                             season = season.replace('S1', '').replace('S', '')
                             episode = episode.replace('E', '')
-                            if (season > 1) and not (re.search(season, match_title)): continue
 
-                            result = client.source(match_url)
-                            fragment = client.parseDOM(result, 'ul', {'class': 'episodes'})
-                            if fragment:
-                                episodes = re.compile('data-id="(.+?)" href="(.+?)"\>(\d+?)\<\/a\>').findall(fragment[0])
-                                for hash_id, url, epi in episodes:
-                                    if epi == episode:
-                                        query = {'id': hash_id, 'update': '0'}
-                                        query.update(self.get_token(query))
-                                        hash_url = self.base_link + self.hash_url + '?' + urllib.urlencode(query)
-                                        headers = self.XHR
-                                        headers['Referer'] = url
-                                        result = client.source(hash_url, headers=headers)
+                            clean_match_title = cleantitle.tv(match_title)
+                            clean_original = cleantitle.tv(url+season)
+                            original_s1 = url + '1'
+                            original_s1 = original_s1.replace(' ','')
+                            clean_original_s1 = cleantitle.tv(original_s1)
+
+                            if clean_original == clean_match_title or clean_original_s1 == clean_match_title:
+                                result = client.source(match_url)
+                                episode_fragment = client.parseDOM(result, 'ul', {'class': 'episodes'})
+
+                                if episode_fragment:
+                                    episodes = re.compile('data-id="(.+?)" href="(.+?)"\>(\d+?)\<\/a\>').findall(episode_fragment[0])
+                                    for hash_id, url, epi in episodes:
+                                        if epi == episode:
+                                            query = {'id': hash_id, 'update': '0'}
+                                            query.update(self.get_token(query))
+                                            hash_url = self.base_link + self.hash_url + '?' + urllib.urlencode(query)
+                                            headers = self.XHR
+                                            headers['Referer'] = url
+                                            result = client.source(hash_url, headers=headers)
+                                break
 
             js_data = json.loads(result)
             links = {}
