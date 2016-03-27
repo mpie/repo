@@ -53,7 +53,8 @@ class thai:
             limatch+=re.compile('<figure>(.+?)</a></li>').findall(result)
 
         for li_content in limatch:
-            show = re.compile('<a href=".+?id=(.+?)"><img src="(.+?)" alt="(.+?)">').findall(li_content)
+            show = re.compile('<a href=".+?id=(.+?)"><img src="(.+?)" alt="(.+?)" w').findall(li_content)
+            print show
             title = show[0][2].decode('iso-8859-11')
             showid = show[0][0]
             image = show[0][1]

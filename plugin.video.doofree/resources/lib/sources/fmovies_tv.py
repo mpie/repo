@@ -35,7 +35,7 @@ class source:
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             if url == None: return
-            url = '%s S%01dE%02d' % (url, int(season), int(episode))
+            url = '"%s S%01dE%02d"&type=series' % (url, int(season), int(episode))
             url = url.replace("Marvel's ", '')
             url = url.replace("DC's ", '')
             url = client.replaceHTMLCodes(url)
@@ -78,7 +78,7 @@ class source:
                             season = season.replace('S1', '').replace('S', '')
                             episode = episode.replace('E', '')
 
-                            clean_match_title = cleantitle.tv(match_title)
+                            clean_match_title = cleantitle.tv(match_title+'&type=series')
                             clean_original = cleantitle.tv(url+season)
                             original_s1 = url + '1'
                             original_s1 = original_s1.replace(' ','')
