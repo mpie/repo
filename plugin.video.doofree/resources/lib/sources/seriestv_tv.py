@@ -51,7 +51,7 @@ class source:
                 try:
                     result = cloudflare.source(url)
 
-                    iframeUrl = client.parseDOM(result, 'iframe', ret='data-lazy-src')[0]
+                    iframeUrl = client.parseDOM(result, 'iframe', ret='src')[0]
                     headers = {'Referer': url}
                     result = client.source(iframeUrl, headers=headers)
 
