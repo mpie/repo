@@ -23,7 +23,7 @@ class source:
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             if url == None: return
-            url = '%s Season %01d Episode %01d Full' % (url, int(season), int(episode))
+            url = '%s Season %01d Episode %01d Watch Online' % (url, int(season), int(episode))
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -37,12 +37,18 @@ class source:
 
             if url == None: return sources
 
-            query = url.replace('\'', '').replace('.', ' ')
+            query = url.replace('\'', '')
+            query = query.replace('Marvels ', '').replace('E.L.D.', 'E.L.D')
             query = re.sub('\s+',' ',query)
             query = self.base_link + self.search_link % urllib.quote_plus('"'+query+'"')
 
             result = cloudflare.source(query)
             amount = client.parseDOM(result, 'h1', attrs = {'class': 'border-radius-5'})
+
+            if '1 video' not in amount[0]:
+                query = query.replace('Watch+Online', 'Full')
+                result = cloudflare.source(query)
+                amount = client.parseDOM(result, 'h1', attrs = {'class': 'border-radius-5'})
 
             if '1 video' in amount[0]:
                 item = client.parseDOM(result, 'li', attrs = {'class': 'border-radius-5 box-shadow'})
@@ -63,6 +69,7 @@ class source:
                         sources.append({'source': 'gvideo', 'quality': quality, 'provider': 'SeriesTV', 'url': match[0].replace(' ','')})
                 except:
                     pass
+
 
             return sources
         except:
