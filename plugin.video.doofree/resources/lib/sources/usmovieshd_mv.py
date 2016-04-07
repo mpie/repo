@@ -15,7 +15,7 @@ class source:
         try:
             title = title.replace(':', '').replace(' - ', ' ')
             title = re.sub('\s+',' ',title)
-            query = self.search_link % urllib.quote_plus(title)
+            query = self.search_link % urllib.quote_plus(title + ' ' + year)
             query = urlparse.urljoin(self.base_link, query)
 
             result = cloudflare.source(query)
