@@ -196,7 +196,7 @@ class navigator:
         views.setView('movies', {'skin.confluence': 50})
 
 
-    def genesis(self):
+    def DooFree(self):
         if traktMode == True:
             self.addDirectoryItem(30081, 'movies&url=traktcollection', 'moviesTraktcollection.jpg', 'DefaultMovies.png', context=(30191, 'moviesToLibrary&url=traktcollection'))
             self.addDirectoryItem(30082, 'movies&url=traktwatchlist', 'moviesTraktwatchlist.jpg', 'DefaultMovies.png', context=(30191, 'moviesToLibrary&url=traktwatchlist'))

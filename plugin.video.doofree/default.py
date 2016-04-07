@@ -205,7 +205,7 @@ elif action == 'tvNavigator':
 
 elif action == 'myNavigator':
     from resources.lib.indexers import navigator
-    navigator.navigator().genesis()
+    navigator.navigator().DooFree()
 
 elif action == 'toolNavigator':
     from resources.lib.indexers import navigator
