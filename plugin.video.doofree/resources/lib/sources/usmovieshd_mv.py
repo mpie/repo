@@ -21,12 +21,7 @@ class source:
             result = cloudflare.source(query)
             amount = client.parseDOM(result, 'h1', attrs = {'class': 'border-radius-5'})
 
-            if 'videos' not in amount[0]:
-                query = query.replace('Watch+Online', 'Full')
-                result = cloudflare.source(query)
-                amount = client.parseDOM(result, 'h1', attrs = {'class': 'border-radius-5'})
-            print query
-            if 'videos' in amount[0]:
+            if 'video' in amount[0]:
                 item = client.parseDOM(result, 'li', attrs = {'class': 'border-radius-5 box-shadow'})
                 url = client.parseDOM(item, 'a', ret='href')[0]
 
