@@ -1,4 +1,10 @@
 ------------------------
+DooFree v3.5.1 (08-Apr-16)
+------------------------
+
+- Disabled FMovies for now. It seems they have strengthen their security
+
+------------------------
 DooFree v3.5.0 (07-Apr-16)
 ------------------------
 
