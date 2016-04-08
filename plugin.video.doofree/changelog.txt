@@ -1,4 +1,10 @@
 ------------------------
+DooFree v3.5.2 (08-Apr-16)
+------------------------
+
+- Enabled FMovies again. Bypassed security for now :)
+
+------------------------
 DooFree v3.5.1 (08-Apr-16)
 ------------------------
 
