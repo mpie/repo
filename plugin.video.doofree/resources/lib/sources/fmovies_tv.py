@@ -13,6 +13,8 @@ class source:
         self.search_link = '/search?keyword=%s'
         self.hash_url = '/ajax/episode/info'
         self.XHR = {'X-Requested-With': 'XMLHttpRequest'}
+        self.windowTOKEN = '64.6.102.E.109.7.111.4.118.6.105.5.101.5.115.0.46.6.116.E.111.4.2.8.4.3.3.9.0.3.4.8.0.3.0.7.3.6.4.D.4.5.0.3.0.6.2.C.2.3.0.2.3.6.2.7.3.4.4.F.3.7.1.2.1.3.0.7.2.6.1.C.4.7.0.1.3.3.3.7.0.5.0.4.1.4.1.1.0.4.3.6.4.6.1.9.2.6.3.6.1.2.1.F.4.5.3.4.1.4.4.8.0.3.4.3.0.6.4.E.1.7.2.3.1.3.1.D.1'
+        self.windowTOKEN_KEY = 6061
 
     def get_movie(self, imdb, title, year):
         try:
@@ -51,7 +53,7 @@ class source:
         for key in data:
             if not key.startswith('_'):
                 for i, c in enumerate(data[key]):
-                    n += ord(c) * (i + 123456 + len(data[key]))
+                    n += ord(c) * (i + self.windowTOKEN_KEY + len(data[key]))
 
         return {'_token': hex(n)[2:]}
 
@@ -99,7 +101,7 @@ class source:
                                         query = {'id': hash_id, 'update': '0'}
 
                                         query.update(self.get_token(query))
-                                        hash_url = self.base_link + self.hash_url + '?' + urllib.urlencode(query) + '&_xtoken=64.6.102.E.109.7.111.4.118.6.105.5.101.5.115.0.46.6.116.E.111.4.2.8.4.3.3.9.0.3.4.8.0.3.0.7.3.6.4.D.4.5.0.3.0.6.2.C.2.3.0.2.3.6.2.7.3.4.4.F.3.7.1.2.1.3.0.7.2.6.1.C.4.7.0.1.3.3.3.7.0.5.0.4.1.4.1.1.0.4.3.6.4.6.1.9.2.6.3.6.1.2.1.F.4.5.3.4.1.4.4.8.0.3.4.3.0.6.4.E.1.7.2.3.1.3.1.D.1'
+                                        hash_url = self.base_link + self.hash_url + '?' + urllib.urlencode(query)
                                         headers = self.XHR
                                         headers['Referer'] = url
                                         result = client.source(hash_url, headers=headers)

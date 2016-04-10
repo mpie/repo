@@ -1,4 +1,11 @@
 ------------------------
+DooFree v3.5.3 (10-Apr-16)
+------------------------
+
+- Bypassed FMovies new security again
+- Disabled seriesTV and USMoviesHD sources for now as the site seems to be down
+
+------------------------
 DooFree v3.5.2 (08-Apr-16)
 ------------------------
 
