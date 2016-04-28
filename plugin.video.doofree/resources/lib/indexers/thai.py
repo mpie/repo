@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2015 Mpie
+    Copyright (C) 2016 Mpie
 '''
 
 
@@ -33,6 +33,7 @@ class thai:
         self.episodes_link = self.main_link % 'program_detail.php?page=%s&id=%s'
         self.member_id = 196985  # expires 25 aug 2017
         self.view_server_name = 'gm1'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
+        self.replace_server = 'gm99'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
 
     '''
     List all the shows from a specific category
@@ -54,7 +55,7 @@ class thai:
 
         for li_content in limatch:
             show = re.compile('<a href=".+?id=(.+?)"><img src="(.+?)" alt="(.+?)" w').findall(li_content)
-            print show
+            #print show
             title = show[0][2].decode('iso-8859-11')
             showid = show[0][0]
             image = show[0][1]
@@ -155,15 +156,16 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        cookie = 'member_id=%d;view_server_name=%s' % (self.member_id, self.view_server_name)
-        try: result = client.request(url, cookie=cookie)
+        cookie = 'view_server_name=%s; member_id=%d' % (self.view_server_name, self.member_id)
+
+        try: result = client.source(url, cookie=cookie)
         except: pass
 
-        videoUrl = re.compile('file: "(.+?)"').findall(result)
-        print videoUrl
+        videoUrl = re.compile('file: "(.+?)"').findall(result)[0]
+        videoUrl = videoUrl.replace('us88', self.replace_server)
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo( type='Video', infoLabels = {'title': name} )
         item.setProperty('Video', 'true')
         item.setProperty('IsPlayable', 'true')
         control.playlist.clear()
-        control.player.play(videoUrl[0] + '|Referer:' + url, item)
+        control.player.play(videoUrl + '|Referer:' + url, item)

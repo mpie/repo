@@ -1,6 +1,13 @@
 ------------------------
+DooFree v3.5.5 (28-Apr-16)
+------------------------
+
+- Changed to German server for Thai shows
+
+------------------------
 DooFree v3.5.4 (20-Apr-16)
 ------------------------
+
 - Temp update for series
 
 ------------------------
