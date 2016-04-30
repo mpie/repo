@@ -16,7 +16,7 @@ class source:
         self.windowTOKEN = '64.6.102.E.109.7.111.4.118.6.105.5.101.5.115.0.46.6.116.E.111.4.2.8.4.3.3.9.0.3.4.8.0.3.0.7.3.6.4.D.4.5.0.3.0.6.2.C.2.3.0.2.3.6.2.7.3.4.4.F.3.7.1.2.1.3.0.7.2.6.1.C.4.7.0.1.3.3.3.7.0.5.0.4.1.4.1.1.0.4.3.6.4.6.1.9.2.6.3.6.1.2.1.F.4.5.3.4.1.4.4.8.0.3.4.3.0.6.4.E.1.7.2.3.1.3.1.D.1'
         #self.windowTOKEN_KEY = 5493 # monday
         #self.windowTOKEN_KEY = 6521 # wednessday
-        self.windowTOKEN_KEY = 7928 # thursday
+        self.windowTOKEN_KEY = 7928 # thursday-saturday
 
     def get_movie(self, imdb, title, year):
         try:
@@ -76,7 +76,7 @@ class source:
             fragments = re.compile('<div class="col-lg-3 col-md-4 col-sm-6 col-xs1-8 col-xs-12">(.+?)</a> </div>').findall(result)
 
             for fragment in fragments:
-                    link = re.compile('class="name" href="(.+?)"').findall(fragment)[0]
+                    link = self.base_link + re.compile('class="name" href="(.+?)"').findall(fragment)[0]
                     title = re.compile('class="name" href=".*">(.+)').findall(fragment)[0]
                     is_season = re.compile('class="status">(.+)<span>').findall(fragment)[0]
 
@@ -94,8 +94,7 @@ class source:
                         if clean_original == clean_match_title or clean_original_s1 == clean_match_title:
                             result = client.source(link)
 
-                            episode_fragment = re.compile('Server F2 </label> <div class="col-md-20 col-sm-19"> <ul class="episodes">(.+?)</ul>').findall(result)[0]
-
+                            episode_fragment = re.compile('Server F2 </label> <div class="col-md-20 col-sm-19"> <ul class="episodes range active" data-range-id="0">(.+?)</ul>').findall(result)[0]
                             if episode_fragment:
                                 episodes = re.compile('data-id="(.+?)" href="(.+?)">(\d+)').findall(episode_fragment)
                                 for hash_id, url, epi in episodes:
