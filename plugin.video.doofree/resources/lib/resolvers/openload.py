@@ -40,7 +40,6 @@ def resolve(url):
         dtext = re.findall('window.vs=(.*?);', dtext)[0]
         dtext = conv(dtext)
         url = dtext.replace("https", "http")
-        url = re.findall('(.+)\|', url)[0]
 
         return url
     except:

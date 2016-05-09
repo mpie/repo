@@ -86,6 +86,7 @@ class source:
     def resolve(self, url):
         try:
             url = resolvers.request(url)
+            url = re.findall('(.+)\|', url)[0]
 
             return url
         except:
