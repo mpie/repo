@@ -5,7 +5,7 @@ import re,urllib,urlparse
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import cloudflare
 from resources.lib.libraries import client
-from resources.lib.resolvers import googleplus
+from resources.lib import resolvers
 
 
 class source:
@@ -68,15 +68,16 @@ class source:
 
             result = cloudflare.source(url)
 
-            links = re.compile('file\s*:\s*"(.+?)"').findall(result)
-            links = [i for i in links if 'google' in i]
+            links = re.compile('<a href="(.+?)?alternatif=(.+?)">').findall(result)
+            url = links[-1][0] + 'alternatif=' + links[-1][1]
 
-            for link in links:
-                try:
-                    i = googleplus.tag(link)[0]
-                    sources.append({'source': 'GVideo', 'quality': i['quality'], 'provider': 'Dizilab', 'url': i['url']})
-                except:
-                    pass
+            result = cloudflare.source(url)
+            iframe_link = re.compile('<iframe.+src="(.+).mp4"').findall(result)[0]
+
+            try:
+                sources.append({'source': 'openload', 'quality': 'HD', 'provider': 'Dizilab', 'url': iframe_link + '.mp4'})
+            except:
+                pass
 
             return sources
         except:
@@ -84,11 +85,8 @@ class source:
 
     def resolve(self, url):
         try:
-            if url.startswith('stack://'): return url
+            url = resolvers.request(url)
 
-            url = client.request(url, output='geturl')
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
             return url
         except:
             return
