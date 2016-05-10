@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import re,urllib,json,urlparse,xbmc
+import re,urllib,json,urlparse,xbmc,urllib2,subprocess
 
 from resources.lib.libraries import client
 from resources.lib import resolvers
@@ -99,17 +99,25 @@ class source:
                             episode_fragment = re.compile('Server F2 </label> <div class="col-md-20 col-sm-19"> <ul class="episodes range active" data-range-id="0">(.+?)</ul>').findall(result)[0]
                             if episode_fragment:
                                 episodes = re.compile('data-id="(.+?)" href="(.+?)">(\d+)').findall(episode_fragment)
+
                                 for hash_id, url, epi in episodes:
                                     if epi == episode:
                                         query = {'id': hash_id, 'update': '0'}
 
                                         query.update(self.get_token(query))
+
                                         hash_url = self.base_link + self.hash_url + '?' + urllib.urlencode(query)
                                         headers = self.XHR
                                         headers['Referer'] = url
-                                        result = client.source(hash_url, headers=headers)
+                                        headers['Host'] = 'fmovies.to'
+                                        headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36'
+                                        headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+
+                                        p = subprocess.Popen(['curl', hash_url], stdout=subprocess.PIPE)
+                                        result, err = p.communicate()
 
             js_data = json.loads(result)
+
             links = {}
             link_type = js_data['type']
             target = js_data['target']
@@ -155,7 +163,8 @@ class source:
             grab_url = grab_url + '?' + urllib.urlencode(query)
             headers = self.XHR
             headers['Referer'] = referer
-            result = client.source(grab_url, headers=headers)
+            p = subprocess.Popen(['curl', grab_url], stdout=subprocess.PIPE)
+            result, err = p.communicate()
             js_data = json.loads(result)
 
             if 'data' in js_data:
