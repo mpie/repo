@@ -57,7 +57,7 @@ class source:
         for key in data:
             if not key.startswith('_'):
                 for i, c in enumerate(data[key]):
-                    n += ord(c) * (i + tokenKEY + len(data[key]))
+                    n += ord(c) * tokenKEY + len(data[key])
 
         return {'_token': hex(n)[2:]}
 
