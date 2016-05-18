@@ -9,7 +9,7 @@ from resources.lib.libraries import client
 class source:
     def __init__(self):
         self.base_link_1 = 'https://afdah.org'
-        self.base_link_2 = 'https://xmovies8.org'
+        self.base_link_2 = 'https://afdah.org'
         self.search_link = '/results?q=%s'
         self.info_link = '/video_info/iframe'
 
