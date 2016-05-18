@@ -1,35 +1,19 @@
 # -*- coding: utf-8 -*-
 
-'''
-    DooFree Add-on
-    Copyright (C) 2016 Mpie
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+import re,sys,urllib2,urlparse,HTMLParser,random
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+from resources.lib.libraries import cache
 
 
-import re,sys,urllib2,HTMLParser
-
-
-def request(url, close=True, error=False, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='30'):
+def request(url, close=True, error=False, proxy=None, post=None, headers=None, mobile=False, safe=False, referer=None, cookie=None, output='', timeout='30'):
     try:
         handlers = []
         if not proxy == None:
             handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
-        if output == 'cookie' or not close == True:
+        if output == 'cookie' or output == 'extended' or not close == True:
             import cookielib
             cookies = cookielib.LWPCookieJar()
             handlers += [urllib2.HTTPHandler(), urllib2.HTTPSHandler(), urllib2.HTTPCookieProcessor(cookies)]
@@ -51,21 +35,22 @@ def request(url, close=True, error=False, proxy=None, post=None, headers=None, m
         if 'User-Agent' in headers:
             pass
         elif not mobile == True:
-            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.99 Safari/537.36'
+            #headers['User-Agent'] = agent()
+            headers['User-Agent'] = cache.get(randomagent, 1)
         else:
             headers['User-Agent'] = 'Apple-iPhone/701.341'
-        if 'referer' in headers:
+        if 'Referer' in headers:
             pass
         elif referer == None:
-            headers['referer'] = url
+            headers['Referer'] = '%s://%s/' % (urlparse.urlparse(url).scheme, urlparse.urlparse(url).netloc)
         else:
-            headers['referer'] = referer
+            headers['Referer'] = referer
         if not 'Accept-Language' in headers:
             headers['Accept-Language'] = 'en-US'
-        if 'cookie' in headers:
+        if 'Cookie' in headers:
             pass
         elif not cookie == None:
-            headers['cookie'] = cookie
+            headers['Cookie'] = cookie
 
         request = urllib2.Request(url, data=post, headers=headers)
 
@@ -77,17 +62,37 @@ def request(url, close=True, error=False, proxy=None, post=None, headers=None, m
         if output == 'cookie':
             result = []
             for c in cookies: result.append('%s=%s' % (c.name, c.value))
-            print c
             result = "; ".join(result)
         elif output == 'response':
-            result = (str(response), response.read())
+            if safe == True:
+                result = (str(response.code), response.read(224 * 1024))
+            else:
+                result = (str(response.code), response.read())
         elif output == 'chunk':
-            content = int(response.headers['Content-Length'])
+            try: content = int(response.headers['Content-Length'])
+            except: content = (2049 * 1024)
+            if content < (2048 * 1024): return
             result = response.read(16 * 1024)
+        elif output == 'title':
+            result = response.read(1 * 1024)
+            result = parseDOM(result, 'title')[0]
+        elif output == 'extended':
+            cookie = []
+            for c in cookies: cookie.append('%s=%s' % (c.name, c.value))
+            cookie = "; ".join(cookie)
+            content = response.headers
+            result = response.read()
+            return (result, headers, content, cookie)
         elif output == 'geturl':
             result = response.geturl()
+        elif output == 'headers':
+            content = response.headers
+            return content
         else:
-            result = response.read()
+            if safe == True:
+                result = response.read(224 * 1024)
+            else:
+                result = response.read()
         if close == True:
             response.close()
 
@@ -96,8 +101,8 @@ def request(url, close=True, error=False, proxy=None, post=None, headers=None, m
         return
 
 
-def source(url, close=True, error=False, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='15'):
-    return request(url, close, error, proxy, post, headers, mobile, referer, cookie, output, timeout)
+def source(url, close=True, error=False, proxy=None, post=None, headers=None, mobile=False, safe=False, referer=None, cookie=None, output='', timeout='30'):
+    return request(url, close, error, proxy, post, headers, mobile, safe, referer, cookie, output, timeout)
 
 
 def parseDOM(html, name=u"", attrs={}, ret=False):
@@ -213,7 +218,23 @@ def replaceHTMLCodes(txt):
     return txt
 
 
+def randomagent():
+    BR_VERS = [
+        ['%s.0' % i for i in xrange(18, 43)],
+        ['37.0.2062.103', '37.0.2062.120', '37.0.2062.124', '38.0.2125.101', '38.0.2125.104', '38.0.2125.111', '39.0.2171.71', '39.0.2171.95', '39.0.2171.99', '40.0.2214.93', '40.0.2214.111',
+         '40.0.2214.115', '42.0.2311.90', '42.0.2311.135', '42.0.2311.152', '43.0.2357.81', '43.0.2357.124', '44.0.2403.155', '44.0.2403.157', '45.0.2454.101', '45.0.2454.85', '46.0.2490.71',
+         '46.0.2490.80', '46.0.2490.86', '47.0.2526.73', '47.0.2526.80'],
+        ['11.0']]
+    WIN_VERS = ['Windows NT 10.0', 'Windows NT 7.0', 'Windows NT 6.3', 'Windows NT 6.2', 'Windows NT 6.1', 'Windows NT 6.0', 'Windows NT 5.1', 'Windows NT 5.0']
+    FEATURES = ['; WOW64', '; Win64; IA64', '; Win64; x64', '']
+    RAND_UAS = ['Mozilla/5.0 ({win_ver}{feature}; rv:{br_ver}) Gecko/20100101 Firefox/{br_ver}',
+                'Mozilla/5.0 ({win_ver}{feature}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{br_ver} Safari/537.36',
+                'Mozilla/5.0 ({win_ver}{feature}; Trident/7.0; rv:{br_ver}) like Gecko']
+    index = random.randrange(len(RAND_UAS))
+    return RAND_UAS[index].format(win_ver=random.choice(WIN_VERS), feature=random.choice(FEATURES), br_ver=random.choice(BR_VERS[index]))
+
+
 def agent():
-    return 'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'
+    return 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
 
 

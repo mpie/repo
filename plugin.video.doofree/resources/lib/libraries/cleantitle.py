@@ -21,12 +21,14 @@
 
 import re,unicodedata
 
+
 def get(title):
     if title == None: return
     title = re.sub('(&#[0-9]+)([^;^0-9]+)', '\\1;\\2', title)
     title = title.replace('&quot;', '\"').replace('&amp;', '&')
     title = re.sub('\n|([[].+?[]])|([(].+?[)])|\s(vs|v[.])\s|(:|;|-|"|,|\'|\_|\.|\?)|\s', '', title).lower()
     return title
+
 
 def movie(title):
     title = re.sub('\n|([[].+?[]])|([(].+?[)])|\s(vs|v[.])\s|(:|;|-|"|,|\'|\_|\.|\?)|\s', '', title).lower()
@@ -35,6 +37,12 @@ def movie(title):
 
 def tv(title):
     title = re.sub('\n|\s(|[(])(UK|US|AU|\d{4})(|[)])$|\s(vs|v[.])\s|(:|;|-|"|,|\'|\_|\.|\?)|\s', '', title).lower()
+    return title
+
+
+def query(title):
+    if title == None: return
+    title = title.replace('\'', '').rsplit(':', 1)[0]
     return title
 
 
