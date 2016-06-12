@@ -1,4 +1,11 @@
 ------------------------
+DooFree v3.6.3 (12-Jun-16)
+------------------------
+
+- Disabled pelispedia (too slow)
+- Added putlocker and xmovies source
+
+------------------------
 DooFree v3.6.2 (18-May-16)
 ------------------------
 
