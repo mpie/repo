@@ -16,7 +16,8 @@ class source:
         self.search_link = '/js/dizi.js'
         self.video_link = '/ajax/dataEmbed.asp'
 
-    def get_show(self, imdb, tvdb, tvshowtitle, year):
+
+    def tvshow(self, imdb, tvdb, tvshowtitle, year):
         try:
             result = cache.get(self.sezonlukdizi_tvcache, 120)
 
@@ -28,16 +29,16 @@ class source:
             url = urlparse.urlparse(url).path
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
-
             return url
         except:
             return
+
 
     def sezonlukdizi_tvcache(self):
         try:
             url = urlparse.urljoin(self.base_link, self.search_link)
 
-            result = cloudflare.source(url)
+            result = client.request(url)
             result = re.compile('{(.+?)}').findall(result)
             result = [(re.findall('u\s*:\s*(?:\'|\")(.+?)(?:\'|\")', i), re.findall('d\s*:\s*(?:\'|\")(.+?)(?:\'|\")', i)) for i in result]
             result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
@@ -49,7 +50,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, premiered, season, episode):
+    def episode(self, url, imdb, tvdb, title, premiered, season, episode):
         if url == None: return
 
         url = '%s%01d-sezon-%01d-bolum.html' % (url.replace('.html', ''), int(season), int(episode))
@@ -58,7 +59,7 @@ class source:
         return url
 
 
-    def get_sources(self, url, hostDict, hostprDict, locDict):
+    def sources(self, url, hostDict, hostprDict):
         try:
             sources = []
 
@@ -66,7 +67,7 @@ class source:
 
             url = urlparse.urljoin(self.base_link, url)
 
-            result = cloudflare.source(url)
+            result = client.request(url)
             result = re.sub(r'[^\x00-\x7F]+', ' ', result)
 
             pages = []
@@ -78,14 +79,14 @@ class source:
             try:
                 r = client.parseDOM(result, 'div', attrs = {'id': 'playerMenu'})[0]
                 r = client.parseDOM(r, 'div', ret='data-id', attrs = {'class': 'item'})[0]
-                r = cloudflare.source(urlparse.urljoin(self.base_link, self.video_link), post=urllib.urlencode( {'id': r} ))
+                r = client.request(urlparse.urljoin(self.base_link, self.video_link), post=urllib.urlencode( {'id': r} ))
                 pages.append(client.parseDOM(r, 'iframe', ret='src')[0])
             except:
                 pass
 
             for page in pages:
                 try:
-                    result = cloudflare.source(page)
+                    result = client.request(page)
 
                     captions = re.search('kind\s*:\s*(?:\'|\")captions(?:\'|\")', result)
                     if not captions: raise Exception()

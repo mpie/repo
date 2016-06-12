@@ -68,9 +68,8 @@ class source:
                     url = '%s/movie/%s' % (self.base_link, match)
 
                 result = client.request(url, limit='1')
-                print result
                 result = client.parseDOM(result, 'title')[0]
-                print result
+
                 if '%TITLE%' in result: raise Exception()
 
                 result, headers, content, cookie = client.request(url, output='extended')
