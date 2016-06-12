@@ -46,7 +46,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, premiered, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, season, episode):
         if url == None: return
 
         url = '/%s/%01d-sezon/%01d-bolum' % (url.replace('/', ''), int(season), int(episode))
@@ -55,7 +55,7 @@ class source:
         return url
 
 
-    def get_sources(self, url, hostDict, hostprDict):
+    def get_sources(self, url, hostDict, hostprDict, locDict):
         try:
             sources = []
 

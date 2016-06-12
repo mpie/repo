@@ -77,13 +77,12 @@ class source:
         except:
             return
 
-    def get_episode(self, url, imdb, tvdb, title, premiered, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, season, episode):
         try:
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
             tvshowtitle = cleantitle.get(data['tvshowtitle'])
-            year = re.findall('(\d{4})', premiered)[0]
             season = '%01d' % int(season)
             episode = '%01d' % int(episode)
 
@@ -92,7 +91,6 @@ class source:
             result = [i for i in result if tvshowtitle == i[1]]
             result = [i[0] for i in result if season == '%01d' % int(i[2])]
             result = [(i, re.findall('(\d{4})', [x for x in i.split('/') if not x == ''][-1])[0]) for i in result]
-            result = [i[0] for i in result if i[1] == year][0]
 
             url = urlparse.urljoin(self.base_link, result)
             url = urlparse.urlparse(url).path

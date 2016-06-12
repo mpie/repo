@@ -4,7 +4,6 @@
 import re,urllib,urlparse,json
 
 from resources.lib.libraries import cleantitle
-from resources.lib.libraries import cloudflare
 from resources.lib.libraries import client
 from resources.lib.libraries import cache
 
@@ -50,7 +49,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, premiered, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, season, episode):
         if url == None: return
 
         url = '%s%01d-sezon-%01d-bolum.html' % (url.replace('.html', ''), int(season), int(episode))
@@ -59,7 +58,7 @@ class source:
         return url
 
 
-    def get_sources(self, url, hostDict, hostprDict):
+    def get_sources(self, url, hostDict, hostprDict, locDict):
         try:
             sources = []
 
