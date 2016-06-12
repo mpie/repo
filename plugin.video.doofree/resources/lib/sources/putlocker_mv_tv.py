@@ -23,7 +23,7 @@ class source:
             return
 
 
-    def get_tvshow(self, imdb, tvdb, tvshowtitle, year):
+    def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
             url = {'imdb': imdb, 'tvdb': tvdb, 'tvshowtitle': tvshowtitle, 'year': year}
             url = urllib.urlencode(url)
@@ -32,7 +32,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             if url == None: return
 

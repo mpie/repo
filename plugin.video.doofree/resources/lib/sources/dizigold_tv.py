@@ -16,7 +16,7 @@ class source:
         self.player_link = 'http://player.dizigold.net/?id=%s&s=1&dil=or'
 
 
-    def get_tvshow(self, imdb, tvdb, tvshowtitle, year):
+    def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
             result = cache.get(self.dizigold_tvcache, 120)
 
@@ -46,7 +46,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         if url == None: return
 
         url = '/%s/%01d-sezon/%01d-bolum' % (url.replace('/', ''), int(season), int(episode))

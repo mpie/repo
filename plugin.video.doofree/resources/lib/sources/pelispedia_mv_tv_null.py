@@ -117,7 +117,7 @@ class source:
         except:
             return
 
-    def get_episode(self, url, imdb, tvdb, title, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         if url == None: return
 
         url = [i for i in url.split('/') if not i == ''][-1]

@@ -16,7 +16,7 @@ class source:
         self.video_link = '/ajax/dataEmbed.asp'
 
 
-    def get_tvshow(self, imdb, tvdb, tvshowtitle, year):
+    def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
             result = cache.get(self.sezonlukdizi_tvcache, 120)
 
@@ -49,7 +49,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         if url == None: return
 
         url = '%s%01d-sezon-%01d-bolum.html' % (url.replace('.html', ''), int(season), int(episode))

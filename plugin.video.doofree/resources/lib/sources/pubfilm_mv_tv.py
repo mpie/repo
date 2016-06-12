@@ -77,7 +77,7 @@ class source:
         except:
             return
 
-    def get_episode(self, url, imdb, tvdb, title, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
