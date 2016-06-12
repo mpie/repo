@@ -6,7 +6,7 @@ import re,sys,cookielib,urllib,urllib2,urlparse,HTMLParser,time,random
 from resources.lib.libraries import cache
 
 
-def request(url, close=True, redirect=True, error=False, proxy=None, post=None, headers=None, mobile=False, limit=None, referer=None, cookie=None, output='', timeout='30'):
+def request(url, close=True, error=False, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='30', redirect=True, limit=None):
     try:
         handlers = []
 
@@ -343,3 +343,6 @@ def parseJSString(s):
         return val
     except:
         pass
+
+def source(url, close=True, error=False, proxy=None, post=None, headers=None, mobile=False, referer=None, cookie=None, output='', timeout='30'):
+    return request(url, close, error, proxy, post, headers, mobile, referer, cookie, output, timeout)
