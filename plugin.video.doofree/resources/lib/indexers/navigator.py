@@ -39,6 +39,7 @@ class navigator:
         self.addDirectoryItem('Thai Live TV', 'thaiLiveTV', 'root_livetv.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows', 'thaiShows', 'root_thai.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows 2', 'thaiShows2', 'root_thai.jpg', 'DefaultMovies.png')
+        self.addDirectoryItem('Cartoons', 'cartoons', 'cartoons.png', 'DefaultMovies.png')
         self.addDirectoryItem(30119, 'clearSources', 'experiment.jpg', 'DefaultAddonProgram.png')
         #self.addDirectoryItem('1080P Movies', '1080p', 'hd-logo.png', 'DefaultMovies.png')
         #self.addDirectoryItem('Experiment', 'thaiShows2', 'experiment.jpg', 'DefaultMovies.png')

@@ -184,6 +184,47 @@ elif action == '1080p':
     phstreams.getDirectory('http://zenica.watchkodi.com/Movies/1080p%20Movies.xml')
 # End 1080p movies
 
+# Start cartoons
+elif action == 'cartoons':
+    from resources.lib.indexers import phtoons
+    phtoons.indexer().root()
+elif action == 'phtoons.cartoons':
+    from resources.lib.libraries import views
+    from resources.lib.indexers import phtoons
+    phtoons.indexer().cartoons(url)
+    views.setView('movies', {'skin.confluence': 500})
+
+elif action == 'phtoons.cartoongenres':
+    from resources.lib.indexers import phtoons
+    phtoons.indexer().cartoongenres()
+
+elif action == 'phtoons.cartoonstreams':
+    from resources.lib.indexers import phtoons
+    fanart = ''
+    phtoons.indexer().cartoonstreams(url, image, fanart)
+
+elif action == 'phtoons.cartoonplay':
+    from resources.lib.indexers import phtoons
+    phtoons.indexer().cartoonplay(url)
+
+elif action == 'phtoons.anime':
+    from resources.lib.indexers import phtoons
+    phtoons.indexer().anime(url)
+
+elif action == 'phtoons.animegenres':
+    from resources.lib.indexers import phtoons
+    phtoons.indexer().animegenres()
+
+elif action == 'phtoons.animestreams':
+    from resources.lib.indexers import phtoons
+    fanart = ''
+    phtoons.indexer().animestreams(url, image, fanart)
+
+elif action == 'phtoons.animeplay':
+    from resources.lib.indexers import phtoons
+    phtoons.indexer().animeplay(url)
+# End cartoons
+
 # Start movie stuff
 
 
