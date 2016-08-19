@@ -5,49 +5,30 @@ import re,urllib,urlparse,random,subprocess,json
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
 
-
 class source:
     def __init__(self):
-        self.base_link_1 = 'https://afdah.org'
-        self.base_link_2 = 'https://afdah.org'
+        self.domains = ['fmovie.co', 'afdah.org', 'xmovies8.org', 'putlockerhd.co']
+        self.base_link = 'https://fmovie.co'
         self.search_link = '/results?q=%s'
-        self.info_link = '/video_info/iframe'
 
 
     def get_movie(self, imdb, title, year):
         try:
-            self.base_link = random.choice([self.base_link_1, self.base_link_2])
-
             query = self.search_link % (urllib.quote_plus(title))
             query = urlparse.urljoin(self.base_link, query)
-            print query
-            p = subprocess.Popen(['curl', query], stdout=subprocess.PIPE)
-            out, err = p.communicate()
 
-            result = client.parseDOM(out, 'div', attrs = {'class': 'cell_container'})
+            t = cleantitle.get(title)
 
-            titles = []
-            title = cleantitle.movie(title)
-            titles.append(title)
-            titles.append(title.replace('episodei', 'episode1'))
-            titles.append(title.replace('episodeii', 'episode2'))
-            titles.append(title.replace('episodeiii', 'episode3'))
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
+            r = client.request(query)
 
-            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in result]
-            #print result
-            result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
-            #print result
-            result = [(i[0], re.compile('(.+?) [(](\d{4})[)]').findall(i[1])) for i in result]
-            #print result
-            result = [(i[0], i[1][0][0], i[1][0][1]) for i in result if len(i[1]) > 0]
-            #print result
-            result = [i for i in result if (cleantitle.movie(i[1]) in titles)]
-            #print result
-            result = [i[0] for i in result if any(x in i[2] for x in years)][0]
-            print result
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
+            r = client.parseDOM(r, 'div', attrs = {'class': 'cell_container'})
+            r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in r]
+            r = [(i[0][0], i[1][0]) for i in r if len(i[0]) > 0 and len(i[1]) > 0]
+            r = [(i[0], re.findall('(.+?) \((\d{4})', i[1])) for i in r]
+            r = [(i[0], i[1][0][0], i[1][0][1]) for i in r if len(i[1]) > 0]
+            r = [i[0] for i in r if t == cleantitle.get(i[1]) and year == i[2]][0]
+
+            url = re.findall('(?://.+?|)(/.+)', r)[0]
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
 
@@ -62,31 +43,25 @@ class source:
 
             if url == None: return sources
 
-            self.base_link = random.choice([self.base_link_1, self.base_link_2])
+            referer = urlparse.urljoin(self.base_link, url)
 
-            url = urlparse.urljoin(self.base_link, url)
+            headers = {'X-Requested-With': 'XMLHttpRequest'}
 
-            p = subprocess.Popen(['curl', url], stdout=subprocess.PIPE)
-            out, err = p.communicate()
+            post = urlparse.parse_qs(urlparse.urlparse(referer).query).values()[0][0]
+            post = urllib.urlencode({'v': post})
 
-            video_id = re.compile('video_id *= *[\'|\"](.+?)[\'|\"]').findall(out)[0]
-            iframeUrl = urlparse.urljoin(self.base_link, self.info_link)
+            url = urlparse.urljoin(self.base_link, '/video_info/iframe')
 
-            p = subprocess.Popen(['curl', iframeUrl, '--data', 'v=' + video_id, '-H', 'referer: ' + url], stdout=subprocess.PIPE)
-            out, err = p.communicate()
+            r = client.request(url, post=post, headers=headers, referer=referer)
 
-            result = json.loads(out)
+            r = re.findall('"(\d+)"\s*:\s*"([^"]+)', r)
+            r = [(urllib.unquote(i[1].split('url=')[-1]), i[0])  for i in r]
 
-            for k,v in result.iteritems():
-                if int(k) == 1080:
-                    quality = '1080p'
-                elif int(k) == 720:
-                    quality = 'HD'
-                else:
-                    quality = 'SD'
+            links = [(i[0], '1080p') for i in r if int(i[1]) >= 1080]
+            links += [(i[0], 'HD') for i in r if 720 <= int(i[1]) < 1080]
+            links += [(i[0], 'SD') for i in r if 480 <= int(i[1]) < 720]
 
-                u = v.replace('//html5player.org/embed?url=', '').replace('%3A', ':').replace('%2F', '/').replace('%3D', '=')
-                sources.append({'source': 'GVideo', 'quality': quality, 'provider': 'Afdah', 'url': u})
+            for i in links: sources.append({'source': 'gvideo', 'quality': i[1], 'provider': 'Afdah', 'url': i[0], 'direct': True, 'debridonly': False})
 
             return sources
         except:
@@ -94,4 +69,10 @@ class source:
 
 
     def resolve(self, url):
-        return url
+        try:
+            url = client.request(url, output='geturl')
+            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
+            else: url = url.replace('https://', 'http://')
+            return url
+        except:
+            return
