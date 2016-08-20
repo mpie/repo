@@ -69,7 +69,7 @@ class source:
                 sources.append({'source': 'GVideo', 'quality': quality, 'provider': 'KissCartoon', 'url': u})
             except:
                 pass
-        print sources
+            
         return sources
 
     def resolve(self, url):

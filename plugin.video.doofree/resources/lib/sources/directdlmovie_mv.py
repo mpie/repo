@@ -22,7 +22,8 @@ class source:
             query = self.search_link % urllib.quote_plus(title)
             query = urlparse.urljoin(self.base_link, query)
 
-            result = client.source(query)
+            result = client.request(query)
+
             thumbs = client.parseDOM(result, 'div', attrs = {'class': 'thumbn'})
             images = client.parseDOM(thumbs, 'img', ret='alt')
 
@@ -52,14 +53,14 @@ class source:
             if url == None: return sources
 
             for p in url:
-                result = client.source(p)
+                result = client.request(p)
 
-                links = client.parseDOM(result, 'a', ret='href', attrs = {'class': 'emd_dl_green_light'})
-                source = 'DirectDLMovie'
+                links = re.compile('href="(.+).mkv"').findall(result)
+                source = 'directdlmovie'
 
                 if len(links) == 0:
-                    links = re.compile('<a href="(.+)" target.+?direct download link').findall(result)
-                    source = 'AdFly'
+                    links = re.compile('<a href="(.+).mkv" target.+?direct download link').findall(result)
+                    source = 'adfly'
                     quality = 'HD'
                     info = ''
 
@@ -79,8 +80,8 @@ class source:
 
                             if '3d' in fmt: info = '3D'
                             else: info = ''
-                        print source
-                        sources.append({'source': source, 'quality': quality, 'provider': 'DirectDLMovie', 'url': p, 'info': info})
+
+                        sources.append({'source': source, 'quality': quality, 'provider': 'DirectDLMovie', 'url': p + '.mkv', 'info': info})
                     except:
                         pass
 

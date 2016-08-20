@@ -16,7 +16,6 @@ class source:
 
 
     def get_movie(self, imdb, title, year):
-        print title
         try:
             tk = cache.get(self.cartoonhd_token, 8)
 

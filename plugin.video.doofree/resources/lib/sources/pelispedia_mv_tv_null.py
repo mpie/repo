@@ -101,7 +101,6 @@ class source:
         return result
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
-        print tvshowtitle
         try:
             result = cache.get(self.pelispedia_tvcache, 120)
 

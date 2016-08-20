@@ -1,4 +1,14 @@
 ------------------------
+DooFree v3.7.6 (20-Aug-16)
+------------------------
+
+- Re-enabled Torba CDN. Just visit the link from the popup and retry the video. (If that doesn't work. Try to restart kodi)
+- If MoviesHD source is taking a long time loading. Go to http://movieshd.tv and verify that you're not a robot by ticking the checkbox.
+
+That's all for this month update.
+Cheers! -M-
+
+------------------------
 DooFree v3.7.5 (20-Aug-16)
 ------------------------
 
