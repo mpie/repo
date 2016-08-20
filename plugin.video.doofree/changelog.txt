@@ -1,5 +1,5 @@
 ------------------------
-DooFree v3.7.4 (20-Aug-16)
+DooFree v3.7.5 (20-Aug-16)
 ------------------------
 
 - Added lots of new HD movies and series sources
