@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import re,urllib,urlparse,json,base64,time,string,random
 
 from resources.lib.libraries import cleantitle
@@ -15,26 +14,6 @@ class source:
         self.base_link = 'http://www.putlocker.systems'
         self.search_link = '/api/v1/cautare/apr'
 
-    def putlocker_token(self):
-        try:
-            token = client.request(self.base_link)
-            token = re.findall("var\s+tok\s*=\s*'([^']+)", token)[0]
-            return token
-        except:
-            return
-
-    def putlocker_set(self):
-        return ''.join([random.choice(string.ascii_letters) for _ in xrange(25)])
-
-    def putlocker_rt(self, s, shift=13):
-        s2 = ''
-        for c in s:
-            limit = 122 if c in string.ascii_lowercase else 90
-            new_code = ord(c) + shift
-            if new_code > limit:
-                new_code -= 26
-            s2 += chr(new_code)
-        return s2
 
     def get_movie(self, imdb, title, year):
         try:
@@ -64,7 +43,6 @@ class source:
             url = re.findall('(?://.+?|)(/.+)', r)[0]
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
-            print url
             return url
         except:
             return
@@ -103,7 +81,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, premiered, season, episode):
         try:
             if url == None: return
 
@@ -117,7 +95,31 @@ class source:
             return
 
 
-    def get_sources(self, url, hostDict, hostprDict, locDict):
+    def putlocker_token(self):
+        try:
+            token = client.request(self.base_link)
+            token = re.findall("var\s+tok\s*=\s*'([^']+)", token)[0]
+            return token
+        except:
+            return
+
+
+    def putlocker_set(self):
+        return ''.join([random.choice(string.ascii_letters) for _ in xrange(25)])
+
+
+    def putlocker_rt(self, s, shift=13):
+        s2 = ''
+        for c in s:
+            limit = 122 if c in string.ascii_lowercase else 90
+            new_code = ord(c) + shift
+            if new_code > limit:
+                new_code -= 26
+            s2 += chr(new_code)
+        return s2
+
+
+    def get_sources(self, url, hostDict, hostprDict, lowDict):
         try:
             sources = []
 
