@@ -158,11 +158,12 @@ class thai:
     def sourcePage(self, url, name, image):
         cookie = 'view_server_name=%s; member_id=%d' % (self.view_server_name, self.member_id)
 
-        try: result = client.source(url, cookie=cookie)
+        try: result = client.request(url, cookie=cookie)
         except: pass
 
         videoUrl = re.compile('file: "(.+?)"').findall(result)[0]
         videoUrl = videoUrl.replace('us88', self.replace_server)
+        videoUrl = videoUrl.replace('http://.', 'http://' + self.replace_server + '.seesantv.com')
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo( type='Video', infoLabels = {'title': name} )
         item.setProperty('Video', 'true')
