@@ -264,7 +264,7 @@ class sources:
             url = url[4]
         except:
             pass
-
+        
         try:
             if url == None: url = call.get_movie(imdb, title, year)
             if url == None: raise Exception()
@@ -407,7 +407,7 @@ class sources:
     def sourcesFilter(self):
         self.sourcesReset()
 
-        hd_rank = ['afdah', 'directdlmovie', 'openload', 'adfly', 'thevideo', 'nosvideo','gvideo', 'vk', 'yify', 'uptobox', 'grifthost', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
+        hd_rank = ['afdah', 'directdlmovie', 'cdn', 'nosvideo','gvideo', 'vk', 'yify', 'openload', 'videomega', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
         sd_rank = hd_rank
 
         for i in range(len(self.sources)): self.sources[i]['source'] = self.sources[i]['source'].lower()
