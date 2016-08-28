@@ -264,7 +264,7 @@ class sources:
             url = url[4]
         except:
             pass
-        
+
         try:
             if url == None: url = call.get_movie(imdb, title, year)
             if url == None: raise Exception()
@@ -497,7 +497,6 @@ class sources:
         except:
             return
 
-
     def sourcesResolve(self, url, provider):
         try:
             if provider == 'Mpie':
@@ -513,11 +512,21 @@ class sources:
             source = __import__(provider, globals(), locals(), [], -1).source()
             url = source.resolve(url)
 
-            try: headers = dict(urlparse.parse_qsl(url.rsplit('|', 1)[1]))
-            except: headers = dict('')
+            try:
+                headers = url.rsplit('|', 1)[1]
+            except:
+                headers = ''
 
-            result = client.request(url.split('|')[0], headers=headers, output='chunk', timeout='30')
-            if result == None: raise Exception()
+            headers = urllib.quote_plus(headers).replace('%3D', '=') if ' ' in headers else headers
+            headers = dict(urlparse.parse_qsl(headers))
+
+            if url.startswith('http') and '.m3u8' in url:
+                result = client.request(url.split('|')[0], headers=headers, output='geturl', timeout='20')
+                if result == None: raise Exception()
+
+            elif url.startswith('http'):
+                result = client.request(url.split('|')[0], headers=headers, output='chunk', timeout='20')
+                if result == None: raise Exception()
             return url
         except:
             return
