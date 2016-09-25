@@ -10,8 +10,8 @@ from resources.lib.libraries import directstream
 
 class source:
     def __init__(self):
-        self.domains = ['movieshd.tv', 'movieshd.is', 'movieshd.watch']
-        self.base_link = 'http://movieshd.watch'
+        self.domains = ['movieshd.tv', 'movieshd.is', 'movieshd.watch', 'flixanity.is', 'flixanity.me']
+        self.base_link = 'http://www.flixanity.me'
 
 
     def get_movie(self, imdb, title, year):
@@ -63,8 +63,7 @@ class source:
                 match = (title.translate(None, '\/:*?"\'<>|!,')).replace(' ', '-').replace('--', '-').lower()
 
                 if 'tvshowtitle' in data:
-                    url = '%s/show/%s/season/%01d/episode/%01d' % (
-                    self.base_link, match, int(data['season']), int(data['episode']))
+                    url = '%s/show/%s/season/%01d/episode/%01d' % (self.base_link, match, int(data['season']), int(data['episode']))
                 else:
                     url = '%s/movie/%s' % (self.base_link, match)
 
@@ -82,11 +81,11 @@ class source:
 
                 r = client.request(url, output='extended')
 
-            cookie = r[4]
-            headers = r[3]
-            result = r[0]
 
-            auth = re.findall('__utmx=(.+)', cookie)[0].split(';')[0]
+            cookie = r[4] ; headers = r[3] ; result = r[0]
+
+            try: auth = re.findall('__utmx=(.+)', cookie)[0].split(';')[0]
+            except: auth = 'false'
             auth = 'Bearer %s' % urllib.unquote_plus(auth)
 
             headers['Authorization'] = auth
@@ -95,6 +94,7 @@ class source:
             headers['Accept'] = 'application/json, text/javascript, */*; q=0.01'
             headers['Cookie'] = cookie
             headers['Referer'] = url
+
 
             u = '/ajax/embeds.php'
             u = urlparse.urljoin(self.base_link, u)
@@ -118,24 +118,16 @@ class source:
             r = str(json.loads(r))
             r = client.parseDOM(r, 'iframe', ret='.+?') + client.parseDOM(r, 'IFRAME', ret='.+?')
 
+
             links = []
 
             for i in r:
-                try:
-                    links += [{'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'url': i,
-                               'direct': True}]
-                except:
-                    pass
+                try: links += [{'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'url': i, 'direct': True}]
+                except: pass
 
-            links += [{'source': 'openload.co', 'quality': 'SD', 'url': i, 'direct': False} for i in r if
-                      'openload.co' in i]
+            links += [{'source': 'openload.co', 'quality': 'SD', 'url': i, 'direct': False} for i in r if 'openload.co' in i]
 
-            links += [{'source': 'videomega.tv', 'quality': 'SD', 'url': i, 'direct': False} for i in r if
-                      'videomega.tv' in i]
-
-            for i in links: sources.append(
-                {'source': i['source'], 'quality': i['quality'], 'provider': 'MoviesHD', 'url': i['url'],
-                 'direct': i['direct'], 'debridonly': False})
+            for i in links: sources.append({'source': i['source'], 'quality': i['quality'], 'provider': 'MoviesHD', 'url': i['url'], 'direct': i['direct'], 'debridonly': False})
 
             return sources
         except:
