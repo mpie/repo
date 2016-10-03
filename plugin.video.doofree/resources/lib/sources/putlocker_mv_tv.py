@@ -32,13 +32,13 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, premiered, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             if url == None: return
 
             url = urlparse.parse_qs(url)
             url = dict([(i, url[i][0]) if url[i] else (i, '') for i in url])
-            url['title'], url['premiered'], url['season'], url['episode'] = title, premiered, season, episode
+            url['title'], url['premiered'], url['season'], url['episode'] = title, date, season, episode
             url = urllib.urlencode(url)
             return url
         except:

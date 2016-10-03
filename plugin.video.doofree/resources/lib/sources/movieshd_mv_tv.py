@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import re,urllib,urlparse,json,base64,time,string,random
+import re,urllib,urlparse,json,base64,time
 
-from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
-from resources.lib.libraries import cache
 from resources.lib.libraries import directstream
 
 

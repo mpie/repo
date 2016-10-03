@@ -48,27 +48,11 @@ class source:
         except:
             return
 
-
-    def pubfilm_tvcache(self):
-        try:
-            url = urlparse.urljoin(self.base_link, self.tvsearch_link_2)
-            url = url % urllib.quote_plus(tvshowtitle)
-            url = client.request(url)
-            url = zip(client.parseDOM(url, 'a', ret='href', attrs={'rel': '.+?'}), client.parseDOM(url, 'a', attrs={'rel': '.+?'}))
-            url = [i[0] for i in url if i[1] == tvshowtitle][0]
-
-            url = urlparse.urljoin(self.base_link, url)
-            url = re.findall('(?://.+?|)(/.+)', url)[0]
-            return url
-        except:
-            return
-
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
-
-            year = re.findall('(\d{4})', premiered)[0]
+            year = re.findall('(\d{4})', date)[0]
             season = '%01d' % int(season) ; episode = '%01d' % int(episode)
             tvshowtitle = '%s %s: Season %s' % (data['tvshowtitle'], year, season)
 
@@ -78,6 +62,23 @@ class source:
 
             url += '?episode=%01d' % int(episode)
             url = url.encode('utf-8')
+            return url
+        except:
+            return
+
+    def pidtv_tvcache(self, tvshowtitle):
+        try:
+
+            headers = {'X-Requested-With': 'XMLHttpRequest'}
+            post = urllib.urlencode({'aspp': tvshowtitle, 'action': 'ajaxsearchpro_search', 'options': 'qtranslate_lang=0&set_exactonly=checked&set_intitle=None&customset%5B%5D=post', 'asid': '1', 'asp_inst_id': '1_1'})
+            url = urlparse.urljoin(self.base_link, self.tvsearch_link)
+            url = client.request(url, post=post, headers=headers)
+            url = zip(client.parseDOM(url, 'a', ret='href', attrs={'class': 'asp_res_url'}), client.parseDOM(url, 'a', attrs={'class': 'asp_res_url'}))
+            url = [(i[0], re.findall('(.+?: Season \d+)', i[1].strip())) for i in url]
+            url = [i[0] for i in url if len(i[1]) > 0 and tvshowtitle == i[1][0]][0]
+
+            url = urlparse.urljoin(self.base_link, url)
+            url = re.findall('(?://.+?|)(/.+)', url)[0]
             return url
         except:
             return

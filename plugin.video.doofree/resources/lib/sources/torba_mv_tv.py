@@ -56,7 +56,7 @@ class source:
             return
 
 
-    def get_episode(self, url, imdb, tvdb, title, premiered, season, episode):
+    def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         if url == None: return
 
         url = '%s/%01d/%01d' % (url, int(season), int(episode))
