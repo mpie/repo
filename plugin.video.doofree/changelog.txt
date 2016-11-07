@@ -1,4 +1,11 @@
 ------------------------
+DooFree v3.8.6 (7-Nov-16)
+------------------------
+
+- Added LiveTV (HBO, Film1, FoxSports, Sky Channels and more)
+Experimental though. Watch it, while it's still online
+
+------------------------
 DooFree v3.8.5 (2-Nov-16)
 ------------------------
 

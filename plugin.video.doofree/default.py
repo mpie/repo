@@ -178,6 +178,14 @@ elif action == 'sourcePage2':
     thai2.thai().sourcePage(url, name, image)
 # End thai stuff
 
+elif action == 'liveTV':
+    from resources.lib.indexers import livetv
+    livetv.livetv().makelist()
+
+elif action == 'watchLiveTV':
+    from resources.lib.indexers import livetv
+    livetv.livetv().watchLiveTV(name, url)
+
 # Start 1080p movies
 elif action == '1080p':
     from resources.lib.indexers import phstreams

@@ -5,10 +5,11 @@
     Copyright (C) 2015 Mpie
 '''
 
-import xbmc, os, sys, urlparse, json, urllib2
+import xbmc, os, sys, urlparse, json, urllib2, re
 
 from resources.lib.libraries import control
 from resources.lib.libraries import views
+from resources.lib.libraries import client
 
 artPath = control.artPath()
 
@@ -39,6 +40,7 @@ class navigator:
         self.addDirectoryItem('Thai Live TV', 'thaiLiveTV', 'root_livetv.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows', 'thaiShows', 'root_thai.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows 2', 'thaiShows2', 'root_thai.jpg', 'DefaultMovies.png')
+        self.addDirectoryItem('Live TV', 'liveTV', 'root_livetv.png', 'DefaultMovies.png')
         self.addDirectoryItem('Cartoons', 'cartoons', 'cartoons.png', 'DefaultMovies.png')
         self.addDirectoryItem(30119, 'clearSources', 'experiment.jpg', 'DefaultAddonProgram.png')
         #self.addDirectoryItem('1080P Movies', '1080p', 'hd-logo.png', 'DefaultMovies.png')
@@ -224,6 +226,17 @@ class navigator:
 
         self.endDirectory()
 
+    def liveTV(self):
+        url = 'http://urhd.tv/'
+
+        html = client.request(url)
+        html = client.replaceHTMLCodes(html)
+
+        items = re.findall('channels="(\[.+?\])"', html)[0]
+        items = json.loads(items)
+        items = [(i['display_name'].replace('_', ' ').replace('-', ' '), i['slug']) for i in items if i['alive'] == True]
+        print items
+        return items
 
     def tools(self):
         self.addDirectoryItem(30111, 'openSettings&query=0.0', 'settings.jpg', 'DefaultAddonProgram.png')
