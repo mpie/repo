@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-import sys,pkgutil,re,json,urllib,urlparse,datetime,time
+import sys,pkgutil,re,json,urllib,urlparse,datetime,time,shutil,os
 
 try: import xbmc
 except: pass
@@ -393,6 +393,10 @@ class sources:
             if not yes: return
 
             control.makeFile(control.dataPath)
+
+            shutil.rmtree(control.thumbnailsPath, True)
+            os.remove(control.texturesFile)
+
             dbcon = database.connect(control.sourcescacheFile)
             dbcur = dbcon.cursor()
             dbcur.execute("DROP TABLE IF EXISTS rel_src")

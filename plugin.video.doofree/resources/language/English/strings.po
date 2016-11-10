@@ -658,8 +658,8 @@ msgid "Auto-play"
 msgstr "Auto-play"
 
 msgctxt "#30510"
-msgid "Are you sure?"
-msgstr "Are you sure?"
+msgid "Are you sure? You will have to restart kodi to recreate the thumbnails!"
+msgstr "Are you sure? You will have to restart kodi to recreate the thumbnails!"
 
 msgctxt "#30511"
 msgid "Process Complete"

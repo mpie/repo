@@ -70,6 +70,10 @@ addonPath = xbmc.translatePath(addonInfo('path'))
 
 dataPath = xbmc.translatePath(addonInfo('profile')).decode('utf-8')
 
+thumbnailsPath = xbmc.translatePath('special://profile/Thumbnails')
+
+texturesFile = xbmc.translatePath('special://profile/Database/Textures13.db')
+
 settingsFile = os.path.join(dataPath, 'settings.xml')
 
 databaseFile = os.path.join(dataPath, 'settings.db')
