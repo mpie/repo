@@ -1,4 +1,12 @@
 ------------------------
+DooFree v3.8.8 (21-Nov-16)
+------------------------
+
+- Fixed older TV Shows sources
+- Added YMovies TV Shows source
+- Dsiabled Torba
+
+------------------------
 DooFree v3.8.7 (10-Nov-16)
 ------------------------
 

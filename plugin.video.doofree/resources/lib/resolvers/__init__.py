@@ -365,6 +365,13 @@ def info():
         'captcha': False,
         'a/c': False
     }, {
+        'class': 'torba',
+        'netloc': ['torba.se'],
+        'host': ['Torba'],
+        'quality': 'High',
+        'captcha': True,
+        'a/c': False
+    }, {
         'class': 'turbovideos',
         'netloc': ['turbovideos.net'],
         'host': ['Turbovideos'],

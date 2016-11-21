@@ -411,7 +411,7 @@ class sources:
     def sourcesFilter(self):
         self.sourcesReset()
 
-        hd_rank = ['afdah', 'directdlmovie', 'cdn', 'nosvideo','gvideo', 'vk', 'yify', 'openload', 'videomega', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
+        hd_rank = ['afdah', 'directdlmovie', 'torba.se', 'nosvideo','gvideo', 'vk', 'yify', 'openload', 'videomega', 'vidto', 'kingfiles', 'streamin', 'uploadrocket', 'xfileload', 'nowvideo', 'cloudtime']
         sd_rank = hd_rank
 
         for i in range(len(self.sources)): self.sources[i]['source'] = self.sources[i]['source'].lower()
