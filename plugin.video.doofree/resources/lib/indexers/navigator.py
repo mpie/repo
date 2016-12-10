@@ -41,6 +41,7 @@ class navigator:
         self.addDirectoryItem('Thai Shows', 'thaiShows', 'root_thai.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows 2', 'thaiShows2', 'root_thai.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Live TV', 'liveTV', 'root_livetv.png', 'DefaultMovies.png')
+        self.addDirectoryItem('Bollywood', 'bollywood', 'bollywood.jpg', 'DefaultMovies.png')
         self.addDirectoryItem('Cartoons', 'cartoons', 'cartoons.png', 'DefaultMovies.png')
         self.addDirectoryItem(30119, 'clearSources', 'experiment.jpg', 'DefaultAddonProgram.png')
         #self.addDirectoryItem('1080P Movies', '1080p', 'hd-logo.png', 'DefaultMovies.png')
@@ -198,6 +199,23 @@ class navigator:
         self.endDirectory()
         views.setView('movies', {'skin.confluence': 50})
 
+    def bollywood(self):
+        url = 'http://www.join4films.com'
+        html = client.request(url)
+
+        r = client.parseDOM(html, 'ul', attrs={'class': 'sub-menu'})
+        r = client.parseDOM(r, 'li')
+        url = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in r]
+        url = [(i[0][0], i[1][0]) for i in url if len(i[0]) > 0 and len(i[1]) > 0]
+
+        del url[-2:]
+        for i in url:
+            link = i[0]
+            title = i[1]
+            self.addDirectoryItem(title, 'listBollywood&url=%s&page=%d' % (link, 1), 'DefaultMovies.jpg', 'DefaultMovies.png')
+
+        self.endDirectory()
+        views.setView('movies', {'skin.confluence': 50})
 
     def DooFree(self):
         if traktMode == True:

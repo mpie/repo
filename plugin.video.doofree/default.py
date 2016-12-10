@@ -233,6 +233,20 @@ elif action == 'phtoons.animeplay':
     phtoons.indexer().animeplay(url)
 # End cartoons
 
+# Start bollywood
+elif action == 'bollywood':
+    from resources.lib.indexers import navigator
+    navigator.navigator().bollywood()
+
+elif action == 'listBollywood':
+    from resources.lib.indexers import bollywood
+    bollywood.bollywood().listBollywood(url, page)
+
+elif action == 'resolveBollywoodUrl':
+    from resources.lib.indexers import bollywood
+    bollywood.bollywood().resolveUrl(name, url, image)
+# End bollywood
+
 # Start movie stuff
 
 
