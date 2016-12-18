@@ -18,8 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-
-import re,unicodedata
+import re, unicodedata
 
 
 def get(title):
@@ -28,6 +27,16 @@ def get(title):
     title = re.sub('(&#[0-9]+)([^;^0-9]+)', '\\1;\\2', title)
     title = title.replace('&quot;', '\"').replace('&amp;', '&')
     title = re.sub('\n|([[].+?[]])|([(].+?[)])|\s(vs|v[.])\s|(:|;|-|"|,|\'|\_|\.|\?)|\s', '', title).lower()
+    return title
+
+
+def geturl(title):
+    if title == None: return
+    title = title.lower()
+    title = title.translate(None, ':*?"\'\.<>|&!,')
+    title = title.replace('/', '-')
+    title = title.replace(' ', '-')
+    title = title.replace('--', '-')
     return title
 
 
@@ -60,9 +69,12 @@ def query(title):
 
 def normalize(title):
     try:
-        try: return title.decode('ascii').encode("utf-8")
-        except: pass
+        try:
+            return title.decode('ascii').encode("utf-8")
+        except:
+            pass
 
-        return str( ''.join(c for c in unicodedata.normalize('NFKD', unicode( title.decode('utf-8') )) if unicodedata.category(c) != 'Mn') )
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
     except:
         return title
+
