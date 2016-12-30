@@ -10,7 +10,8 @@ from resources.lib.libraries import directstream
 
 class source:
     def __init__(self):
-        self.domains = ['putlocker.systems', 'putlocker-movies.tv', 'putlocker.yt', 'cartoonhd.website']
+        self.domains = ['putlocker.systems', 'putlocker-movies.tv', 'putlocker.yt', 'cartoonhd.website',
+                        'cartoonhd.online']
         self.base_link = 'http://cartoonhd.website'
 
 
@@ -58,14 +59,11 @@ class source:
 
                 title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
 
-                imdb = data['imdb']
-
-                match = (title.translate(None, '\/:*?"\'<>|!,')).replace(' ', '-').replace('--', '-').lower()
-
                 if 'tvshowtitle' in data:
-                    url = '%s/show/%s/season/%01d/episode/%01d' % (self.base_link, match, int(data['season']), int(data['episode']))
+                    url = '%s/tv-show/%s/season/%01d/episode/%01d' % (
+                    self.base_link, cleantitle.geturl(title), int(data['season']), int(data['episode']))
                 else:
-                    url = '%s/movie/%s' % (self.base_link, match)
+                    url = '%s/movie/%s' % (self.base_link, cleantitle.geturl(title))
 
                 result = client.request(url, limit='5')
                 result = client.parseDOM(result, 'title')[0]
@@ -74,18 +72,20 @@ class source:
 
                 r = client.request(url, output='extended')
 
-                if not imdb in r[0]: raise Exception()
 
             else:
                 url = urlparse.urljoin(self.base_link, url)
 
                 r = client.request(url, output='extended')
 
+            cookie = r[4]
+            headers = r[3]
+            result = r[0]
 
-            cookie = r[4] ; headers = r[3] ; result = r[0]
-
-            try: auth = re.findall('__utmx=(.+)', cookie)[0].split(';')[0]
-            except: auth = 'false'
+            try:
+                auth = re.findall('__utmx=(.+)', cookie)[0].split(';')[0]
+            except:
+                auth = 'false'
             auth = 'Bearer %s' % urllib.unquote_plus(auth)
 
             headers['Authorization'] = auth
@@ -95,8 +95,8 @@ class source:
             headers['Cookie'] = cookie
             headers['Referer'] = url
 
-
-            u = '/ajax/nembeds.php'
+            u = '/ajax/tnembeds.php'
+            self.base_link = client.request(self.base_link, output='geturl')
             u = urlparse.urljoin(self.base_link, u)
 
             action = 'getEpisodeEmb' if '/episode/' in url else 'getMovieEmb'
@@ -114,19 +114,21 @@ class source:
             r = str(json.loads(r))
             r = client.parseDOM(r, 'iframe', ret='.+?') + client.parseDOM(r, 'IFRAME', ret='.+?')
 
-
             links = []
 
             for i in r:
-                try: links += [{'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'url': i, 'direct': True}]
-                except: pass
+                try:
+                    links += [{'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'url': i,
+                               'direct': True}]
+                except:
+                    pass
 
-            links += [{'source': 'openload.co', 'quality': 'SD', 'url': i, 'direct': False} for i in r if 'openload.co' in i]
+            links += [{'source': 'openload.co', 'quality': 'SD', 'url': i, 'direct': False} for i in r if
+                      'openload.co' in i]
 
-            #links += [{'source': 'videomega.tv', 'quality': 'SD', 'url': i, 'direct': False} for i in r if 'videomega.tv' in i]
-
-
-            for i in links: sources.append({'source': i['source'], 'quality': i['quality'], 'provider': 'Putlocker', 'url': i['url'], 'direct': i['direct'], 'debridonly': False})
+            for i in links: sources.append(
+                {'source': i['source'], 'quality': i['quality'], 'provider': 'Putlocker', 'url': i['url'],
+                 'direct': i['direct'], 'debridonly': False})
 
             return sources
         except:
