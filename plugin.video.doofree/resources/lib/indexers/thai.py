@@ -2,11 +2,11 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2016 Mpie
+    Copyright (C) 2017 Mpie
 '''
 
 
-import os,sys,re,json,urllib,urlparse,base64,datetime
+import os,sys,re,json,urllib,urllib2,urlparse,base64,datetime
 
 try: action = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))['action']
 except: action = None
@@ -86,7 +86,7 @@ class thai:
 
             for page in pages:
                 action = 'listShows'
-                pageNumber = int(page) + 1;
+                pageNumber = int(page) + 1
                 query = '?action=%s&page=%d&name=%s&catid=%s' % (action, int(page), 'Page ' + str(pageNumber), catid)
                 url = '%s%s' % (sysaddon, query)
                 item = control.item('Page ' + str(pageNumber), iconImage='', thumbnailImage='')
@@ -164,9 +164,17 @@ class thai:
         videoUrl = re.compile('file: "(.+?)"').findall(result)[0]
         videoUrl = videoUrl.replace('us88', self.replace_server)
         videoUrl = videoUrl.replace('http://.', 'http://' + self.replace_server + '.seesantv.com')
+
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
-        item.setInfo( type='Video', infoLabels = {'title': name} )
+        item.setInfo(type='Video', infoLabels={'title': name})
         item.setProperty('Video', 'true')
         item.setProperty('IsPlayable', 'true')
         control.playlist.clear()
+
+        try:
+            connection = urllib2.urlopen(videoUrl)
+            connection.close()
+        except urllib2.HTTPError, e:
+            videoUrl = videoUrl.replace('gm99', 'as99')
+
         control.player.play(videoUrl + '|Referer:' + url, item)
