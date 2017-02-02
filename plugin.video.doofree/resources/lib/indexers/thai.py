@@ -175,6 +175,11 @@ class thai:
             connection = urllib2.urlopen(videoUrl)
             connection.close()
         except urllib2.HTTPError, e:
-            videoUrl = videoUrl.replace('gm99', 'as99')
+            videoUrl = videoUrl.replace('gm99', 'uk88')
+            try:
+                connection = urllib2.urlopen(videoUrl)
+                connection.close()
+            except urllib2.HTTPError, e:
+                videoUrl = videoUrl.replace('uk88', 'as88')
 
         control.player.play(videoUrl + '|Referer:' + url, item)
