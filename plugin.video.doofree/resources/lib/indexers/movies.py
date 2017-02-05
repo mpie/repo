@@ -1147,7 +1147,7 @@ class movies:
 
         playbackMenu = control.lang(30204).encode('utf-8') if control.setting('autoplay') == 'true' else control.lang(30203).encode('utf-8')
 
-        traktMode = False if trakt.getTraktCredentials() == False else True
+        traktMode = False if trakt.getTraktCredentialsInfo() == False else True
 
         cacheToDisc = False if not action == 'movieSearch' else True
 

@@ -21,10 +21,8 @@
 
 import re,hashlib,time
 
-try:
-    from sqlite3 import dbapi2 as database
-except:
-    from pysqlite2 import dbapi2 as database
+try: from sqlite3 import dbapi2 as database
+except: from pysqlite2 import dbapi2 as database
 
 from resources.lib.libraries import control
 
@@ -89,13 +87,39 @@ def get(function, timeout, *args, **table):
         pass
 
 
+def timeout(function, *args, **table):
+    try:
+        response = None
+
+        f = repr(function)
+        f = re.sub('.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', f)
+
+        a = hashlib.md5()
+        for i in args: a.update(str(i))
+        a = str(a.hexdigest())
+    except:
+        pass
+
+    try:
+        table = table['table']
+    except:
+        table = 'rel_list'
+
+    try:
+        control.makeFile(control.dataPath)
+        dbcon = database.connect(control.cacheFile)
+        dbcur = dbcon.cursor()
+        dbcur.execute("SELECT * FROM %s WHERE func = '%s' AND args = '%s'" % (table, f, a))
+        match = dbcur.fetchone()
+        return int(match[3])
+    except:
+        return
+
+
 def clear(table=None):
     try:
         if table == None: table = ['rel_list', 'rel_lib']
         elif not type(table) == list: table = [table]
-
-        yes = control.yesnoDialog(control.lang(30401).encode('utf-8'), '', '')
-        if not yes: return
 
         dbcon = database.connect(control.cacheFile)
         dbcur = dbcon.cursor()
@@ -107,8 +131,6 @@ def clear(table=None):
                 dbcon.commit()
             except:
                 pass
-
-        control.infoDialog(control.lang(30402).encode('utf-8'))
     except:
         pass
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import re,urllib,urlparse,json,base64
+import re,urllib,urlparse
 
-from resources.lib.libraries import cleantitle
+from resources.lib.libraries import directstream
 from resources.lib.libraries import client
 from resources.lib.libraries import cache
 
@@ -68,11 +68,9 @@ class source:
 
     def pidtv_tvcache(self, tvshowtitle):
         try:
-
-            headers = {'X-Requested-With': 'XMLHttpRequest'}
             post = urllib.urlencode({'aspp': tvshowtitle, 'action': 'ajaxsearchpro_search', 'options': 'qtranslate_lang=0&set_exactonly=checked&set_intitle=None&customset%5B%5D=post', 'asid': '1', 'asp_inst_id': '1_1'})
             url = urlparse.urljoin(self.base_link, self.tvsearch_link)
-            url = client.request(url, post=post, headers=headers)
+            url = client.request(url, post=post, XHR=True)
             url = zip(client.parseDOM(url, 'a', ret='href', attrs={'class': 'asp_res_url'}), client.parseDOM(url, 'a', attrs={'class': 'asp_res_url'}))
             url = [(i[0], re.findall('(.+?: Season \d+)', i[1].strip())) for i in url]
             url = [i[0] for i in url if len(i[1]) > 0 and tvshowtitle == i[1][0]][0]
@@ -119,7 +117,7 @@ class source:
                     url += [{'url': i[0], 'quality': 'HD'} for i in result if '720' in i[1]]
 
                     for i in url:
-                        sources.append({'source': 'gvideo', 'quality': i['quality'], 'provider': 'Pubfilm', 'url': i['url'], 'direct': True, 'debridonly': False})
+                        sources.append({'source': 'gvideo', 'quality': i['quality'], 'provider': 'PubFilm', 'url': i['url'], 'direct': True, 'debridonly': False})
                 except:
                     pass
 
@@ -128,12 +126,6 @@ class source:
             return sources
 
     def resolve(self, url):
-        try:
-            url = client.request(url, output='geturl')
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
-            return url
-        except:
-            return
+        return directstream.googlepass(url)
 
 

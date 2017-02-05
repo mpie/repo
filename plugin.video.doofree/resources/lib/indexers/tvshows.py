@@ -237,7 +237,7 @@ class tvshows:
     def userlists(self):
         try:
             userlists = []
-            if trakt.getTraktCredentials() == False: raise Exception()
+            if trakt.getTraktCredentialsInfo() == False: raise Exception()
             userlists += cache.get(self.trakt_user_list, 0, self.traktlists_link)
         except:
             pass
@@ -941,7 +941,7 @@ class tvshows:
         isFolder = True if control.setting('autoplay') == 'false' and control.setting('host_select') == '1' else False
         isFolder = False if control.window.getProperty('PseudoTVRunning') == 'True' else isFolder
 
-        traktMode = False if trakt.getTraktCredentials() == False else True
+        traktMode = False if trakt.getTraktCredentialsInfo() == False else True
 
         addonPoster, addonBanner = control.addonPoster(), control.addonBanner()
         addonFanart, settingFanart = control.addonFanart(), control.setting('fanart')

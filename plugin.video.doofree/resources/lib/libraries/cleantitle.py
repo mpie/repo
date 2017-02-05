@@ -20,6 +20,8 @@
 
 import re, unicodedata
 
+from resources.lib.libraries import client
+
 
 def get(title):
     if title == None: return
@@ -33,7 +35,6 @@ def get(title):
 def geturl(title):
     if title == None: return
     title = title.lower()
-    title = title.translate(None, ':*?"\'\.<>|&!,')
     title = title.replace('/', '-')
     title = title.replace(' ', '-')
     title = title.replace('--', '-')
@@ -63,7 +64,7 @@ def getsearch(title):
 
 def query(title):
     if title == None: return
-    title = title.replace('\'', '').rsplit(':', 1)[0]
+    title = title.replace('\'', '').rsplit(':', 1)[0].rsplit(' -', 1)[0].replace('-', ' ')
     return title
 
 
@@ -74,7 +75,8 @@ def normalize(title):
         except:
             pass
 
-        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if unicodedata.category(c) != 'Mn'))
+        return str(''.join(c for c in unicodedata.normalize('NFKD', unicode(title.decode('utf-8'))) if
+                           unicodedata.category(c) != 'Mn'))
     except:
         return title
 

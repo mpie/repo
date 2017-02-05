@@ -442,7 +442,7 @@ class seasons:
         isFolder = True if control.setting('autoplay') == 'false' and control.setting('host_select') == '1' else False
         isFolder = False if control.window.getProperty('PseudoTVRunning') == 'True' else isFolder
 
-        traktMode = False if trakt.getTraktCredentials() == False else True
+        traktMode = False if trakt.getTraktCredentialsInfo() == False else True
 
         addonPoster, addonBanner = control.addonPoster(), control.addonBanner()
         addonFanart, settingFanart = control.addonFanart(), control.setting('fanart')
@@ -596,7 +596,7 @@ class episodes:
 
 
     def widget(self):
-        if not trakt.getTraktCredentials() == False:
+        if not trakt.getTraktCredentialsInfo() == False:
             setting = control.setting('tv_alt_widget')
         else:
             setting = control.setting('tv_widget')
@@ -1092,7 +1092,7 @@ class episodes:
 
         playbackMenu = control.lang(30271).encode('utf-8') if control.setting('autoplay') == 'true' else control.lang(30270).encode('utf-8')
 
-        traktMode = False if trakt.getTraktCredentials() == False else True
+        traktMode = False if trakt.getTraktCredentialsInfo() == False else True
 
         cacheToDisc = False
 

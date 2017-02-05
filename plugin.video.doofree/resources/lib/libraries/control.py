@@ -6,6 +6,8 @@ import os,xbmc,xbmcaddon,xbmcplugin,xbmcgui,xbmcvfs
 
 lang = xbmcaddon.Addon().getLocalizedString
 
+setSetting = xbmcaddon.Addon().setSetting
+
 setting = xbmcaddon.Addon().getSetting
 
 addon = xbmcaddon.Addon
@@ -135,9 +137,12 @@ def artPath():
     else: return os.path.join(addonPath, 'resources', 'media', appearance)
 
 
-def infoDialog(message, heading=addonInfo('name'), icon=addonIcon(), time=3000):
-    try: dialog.notification(heading, message, icon, time, sound=False)
-    except: execute("Notification(%s,%s, %s, %s)" % (heading, message, time, icon))
+def infoDialog(message, heading=addonInfo('name'), icon='', time=3000, sound=False):
+    if icon == '': icon = addonIcon()
+    elif icon == 'INFO': icon = xbmcgui.NOTIFICATION_INFO
+    elif icon == 'WARNING': icon = xbmcgui.NOTIFICATION_WARNING
+    elif icon == 'ERROR': icon = xbmcgui.NOTIFICATION_ERROR
+    dialog.notification(heading, message, icon, time, sound=sound)
 
 
 def yesnoDialog(line1, line2, line3, heading=addonInfo('name'), nolabel='', yeslabel=''):

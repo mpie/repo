@@ -11,13 +11,10 @@ from resources.lib.libraries import directstream
 class source:
     def __init__(self):
         self.domains = ['yesmovies.to']
-        self.base_link = 'http://yesmovies.to'
+        self.base_link = 'https://yesmovies.to'
         self.info_link = '/ajax/movie_info/%s.html'
         self.episode_link = '/ajax/v3_movie_get_episodes/%s/%s/%s/%s.html'
         self.playlist_link = '/ajax/v2_get_sources/%s.html?hash=%s'
-        self.key1 = base64.b64decode('eHdoMzhpZjM5dWN4')
-        self.key2 = base64.b64decode('OHFoZm05b3lxMXV4')
-        self.key = base64.b64decode('Y3RpdzR6bHJuMDl0YXU3a3F2YzE1M3Vv')
 
 
     def get_movie(self, imdb, title, year):
@@ -27,7 +24,10 @@ class source:
             q = '/search/%s.html' % (urllib.quote_plus(cleantitle.query(title)))
             q = urlparse.urljoin(self.base_link, q)
 
-            r = client.request(q)
+            for i in range(3):
+                r = client.request(q)
+                if not r == None: break
+
             r = client.parseDOM(r, 'div', attrs = {'class': 'ml-item'})
             r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in r]
             r = [(i[0][0], i[1][0]) for i in r if i[0] and i[1]]
@@ -63,6 +63,7 @@ class source:
             title = data['tvshowtitle']
             season = '%01d' % int(season) ; episode = '%01d' % int(episode)
             year = re.findall('(\d{4})', date)[0]
+            years = [str(year), str(int(year)+1), str(int(year)-1)]
 
             r = cache.get(self.ymovies_info_season, 720, title, season)
             r = [(i[0], re.findall('(.+?)\s+(?:-|)\s+season\s+(\d+)$', i[1].lower())) for i in r]
@@ -86,7 +87,10 @@ class source:
             q = '/search/%s.html' % (urllib.quote_plus(q))
             q = urlparse.urljoin(self.base_link, q)
 
-            r = client.request(q)
+            for i in range(3):
+                r = client.request(q)
+                if not r == None: break
+
             r = client.parseDOM(r, 'div', attrs = {'class': 'ml-item'})
             r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in r]
             r = [(i[0][0], i[1][0]) for i in r if i[0] and i[1]]
@@ -98,11 +102,14 @@ class source:
     def ymovies_info(self, url):
         try:
             u = urlparse.urljoin(self.base_link, self.info_link)
-            u = client.request(u % url)
 
-            q = client.parseDOM(u, 'div', attrs = {'class': 'jtip-quality'})[0]
+            for i in range(3):
+                r = client.request(u % url)
+                if not r == None: break
 
-            y = client.parseDOM(u, 'div', attrs = {'class': 'jt-info'})
+            q = client.parseDOM(r, 'div', attrs = {'class': 'jtip-quality'})[0]
+
+            y = client.parseDOM(r, 'div', attrs = {'class': 'jt-info'})
             y = [i.strip() for i in y if i.strip().isdigit() and len(i.strip()) == 4][0]
 
             return (y, q)
@@ -122,14 +129,21 @@ class source:
 
             vid_id = re.findall('-(\d+)', url)[-1]
 
-            r = client.request(url)
+
+            for i in range(3):
+                r = client.request(url)
+                if not r == None: break
 
             ref = client.parseDOM(r, 'a', ret='href', attrs = {'class': 'mod-btn mod-btn-watch'})[0]
             ref = urlparse.urljoin(self.base_link, ref)
 
-            r = client.request(ref, referer=url)
+            for i in range(3):
+                r = client.request(ref, referer=url)
+                if not r == None: break
 
-            h = {'X-Requested-With': 'XMLHttpRequest'}
+            c = client.parseDOM(r, 'img', ret='src', attrs = {'class': 'hidden'})
+            if c: cookie = client.request(c[0], referer=ref, output='cookie')
+            else: cookie = ''
 
             server = re.findall('server\s*:\s*"(.+?)"', r)[0]
 
@@ -138,9 +152,12 @@ class source:
             episode_id = re.findall('episode_id\s*:\s*"(.+?)"', r)[0]
 
             r = self.episode_link % (vid_id, server, episode_id, type)
-            r = urlparse.urljoin(self.base_link, r)
+            u = urlparse.urljoin(self.base_link, r)
 
-            r = client.request(r, headers=h, referer=ref)
+            for i in range(13):
+                r = client.request(u, referer=ref)
+                if not r == None: break
+
             r = re.compile('(<li.+?/li>)', re.DOTALL).findall(r)
             r = [(client.parseDOM(i, 'li', ret='onclick'), client.parseDOM(i, 'a', ret='title')) for i in r]
 
@@ -157,20 +174,27 @@ class source:
 
             for u in r:
                 try:
-                    t = self.__get_token()
-                    c = '%s%s%s=%s' % (self.key1, episode_id, self.key2, t)
-                    h = {'X-Requested-With':'XMLHttpRequest'}
+                    key = 'xwh38if39ucx' ; key2 = '8qhfm9oyq1ux' ; key3 = 'ctiw4zlrn09tau7kqvc153uo'
 
-                    p = urllib.quote(self.__uncensored(episode_id + self.key, t))
-                    p = self.playlist_link % (episode_id, p)
-                    p = urlparse.urljoin(self.base_link, p)
+                    k = u + key3
+                    v = ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(6))
 
-                    u = client.request(p, headers=h, referer=ref, cookie=c, timeout='10')
+                    c = key + u + key2 + '=%s' % v
+                    c = '%s; %s' % (cookie, c)
+
+                    url = urllib.quote(uncensored(k, v))
+                    url = '/ajax/v2_get_sources/%s?hash=%s' % (u, url)
+                    url = urlparse.urljoin(self.base_link, url)
+
+                    for i in range(3):
+                        u = client.request(url, referer=ref, cookie=c, timeout='10')
+                        if not u == None: break
+
                     u = json.loads(u)['playlist'][0]['sources']
                     u = [i['file'] for i in u if 'file' in i]
 
                     for i in u:
-                        try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'Ymovies', 'url': i, 'direct': True, 'debridonly': False})
+                        try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'YMovies', 'url': i, 'direct': True, 'debridonly': False})
                         except: pass
                 except:
                     pass
@@ -182,31 +206,12 @@ class source:
     def resolve(self, url):
         return directstream.googlepass(url)
 
-    def __get_token(self):
-        return ''.join(random.sample(string.digits + string.ascii_lowercase, 6))
-
-    def __uncensored(self, a, b):
-        c = ''
-        i = 0
-        for i, d in enumerate(a):
-            e = b[i % len(b) - 1]
-            d = int(self.__jav(d) + self.__jav(e))
-            c += chr(d)
-
-        return base64.b64encode(c)
-
-    def __jav(self, a):
-        b = str(a)
-        code = ord(b[0])
-        if 0xD800 <= code and code <= 0xDBFF:
-            c = code
-            if len(b) == 1:
-                return code
-            d = ord(b[1])
-            return ((c - 0xD800) * 0x400) + (d - 0xDC00) + 0x10000
-
-        if 0xDC00 <= code and code <= 0xDFFF:
-            return code
-        return code
-
-
+def uncensored(a, b):
+    x = ''
+    i = 0
+    for i, y in enumerate(a):
+        z = b[i % len(b) - 1]
+        y = int(ord(str(y)[0])) + int(ord(str(z)[0]))
+        x += chr(y)
+    x = base64.b64encode(x)
+    return x

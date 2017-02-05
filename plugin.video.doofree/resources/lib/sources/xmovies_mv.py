@@ -1,43 +1,28 @@
 # -*- coding: utf-8 -*-
 
-import re,urllib,urlparse,json
+import re,urllib,urlparse,json,time
 
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
 from resources.lib.libraries import directstream
 
-
 class source:
     def __init__(self):
-        self.domains = ['xmovies8.tv']
+        self.domains = ['xmovies8.tv', 'xmovies8.ru']
         self.base_link = 'http://xmovies8.tv'
-        self.search_link = '/movies/search?s=%s'
+        self.moviesearch_link = '/movie/%s-%s/'
 
 
     def get_movie(self, imdb, title, year):
         try:
-            query = urlparse.urljoin(self.base_link, self.search_link)
-            query = query % urllib.quote_plus(title)
-
-            for i in range(5):
-                r = client.request(query)
-                if not r == None: break
-
-            t = cleantitle.get(title)
-
-            r = client.parseDOM(r, 'div', attrs = {'class': 'col-lg.+?'})
-            r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'p', attrs = {'class': 'c-title.+?'})) for i in r]
-            r = [(i[0][0], i[1][0]) for i in r if len(i[0]) > 0 and len(i[1]) > 0]
-            r = [(i[0], i[1], re.findall('(\d{4})', i[1])) for i in r]
-            r = [(i[0], i[1], i[2][-1]) for i in r if len(i[2]) > 0]
-            r = [i[0] for i in r if t == cleantitle.get(i[1]) and year == i[2]][0]
-
-            url = re.findall('(?://.+?|)(/.+)', r)[0]
-            url = client.replaceHTMLCodes(url)
-            url = url.encode('utf-8')
+            url = self.moviesearch_link % (cleantitle.geturl(title.replace('\'', '-')), year)
+            r = urlparse.urljoin(self.base_link, url)
+            r = client.request(r, limit='1')
+            r = client.parseDOM(r, 'title')[0]
+            if not '(%s)' % year in r: raise Exception()
             return url
         except:
-            pass
+            return
 
 
     def get_sources(self, url, hostDict, hostprDict, locDict):
@@ -46,64 +31,40 @@ class source:
 
             if url == None: return sources
 
-            u = urlparse.urljoin(self.base_link, url)
-            r = u.replace('/watching.html', '') + '/watching.html'
+            url = urlparse.urljoin(self.base_link, url)
+            url = path = re.sub('/watching.html$', '', url.strip('/'))
+            url = referer = url + '/watching.html'
 
-            for i in range(5):
-                post = client.request(u)
-                if not post == None: break
-
-            post = re.findall('movie=(\d+)', post)[0]
-            post = urllib.urlencode({'id': post, 'episode_id': '0', 'link_id': '0', 'from': 'v3'})
+            p = client.request(url)
+            p = re.findall("data\s*:\s*{\s*id:\s*(\d+),\s*episode_id:\s*(\d+),\s*link_id:\s*(\d+)", p)[0]
+            p = urllib.urlencode({'id': p[0], 'episode_id': p[1], 'link_id': p[2], '_': int(time.time() * 1000)})
 
             headers = {
             'Accept-Formating': 'application/json, text/javascript',
-            'X-Requested-With': 'XMLHttpRequest',
             'Server': 'cloudflare-nginx',
-            'Referer': r}
+            'Referer': referer}
 
-            url = urlparse.urljoin(self.base_link, '/ajax/movie/load_episodes')
-
-            for i in range(5):
-                r = client.request(url, post=post, headers=headers)
-                if not r == None: break
-
+            r = urlparse.urljoin(self.base_link, '/ajax/movie/load_episodes')
+            r = client.request(r, post=p, headers=headers, XHR=True)
             r = re.findall("load_player\(\s*'([^']+)'\s*,\s*'?(\d+)\s*'?", r)
-            r = list(set(r))
-            r = [i for i in r if i[1] == '0' or int(i[1]) >= 720]
+            r = [i for i in r if int(i[1]) >= 720]
 
-
-            links = []
-
-            for p in r:
+            for u in r:
                 try:
-                    play = urlparse.urljoin(self.base_link, '/ajax/movie/load_player_v2')
+                    p = urllib.urlencode({'id': u[0], 'quality': u[1], '_': int(time.time() * 1000)})
+                    u = urlparse.urljoin(self.base_link, '/ajax/movie/load_player_v2')
 
-                    post = urllib.urlencode({'id': p[0], 'quality': p[1]})
+                    u = client.request(u, post=p, headers=headers, XHR=True)
+                    u = json.loads(u)['playlist']
+                    u = client.request(u, headers=headers, XHR=True)
+                    u = json.loads(u)['playlist'][0]['sources']
+                    u = [i['file'] for i in u if 'file' in i]
 
-                    for i in range(5):
-                        url = client.request(play, post=post, headers=headers)
-                        if not url == None: break
-
-                    url = json.loads(url)['link']
-
-                    url = client.request(url, headers=headers, output='geturl')
-
-
-                    if 'openload.' in url:
-                        links += [{'source': 'openload.co', 'url': url, 'quality': 'HD', 'direct': False}]
-
-                    elif 'videomega.' in url:
-                        links += [{'source': 'videomega.tv', 'url': url, 'quality': 'HD', 'direct': False}]
-
-                    else:
-                        try: links.append({'source': 'gvideo', 'url': url, 'quality': directstream.googletag(url)[0]['quality'], 'direct': True})
+                    for i in u:
+                        try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'XMovies', 'url': i, 'direct': True, 'debridonly': False})
                         except: pass
-
                 except:
                     pass
-
-            for i in links: sources.append({'source': i['source'], 'quality': i['quality'], 'provider': 'Xmovies', 'url': i['url'], 'direct': i['direct'], 'debridonly': False})
 
             return sources
         except:
@@ -111,12 +72,6 @@ class source:
 
 
     def resolve(self, url):
-        try:
-            url = client.request(url, output='geturl')
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
-            return url
-        except:
-            return
+        return directstream.googlepass(url)
 
 

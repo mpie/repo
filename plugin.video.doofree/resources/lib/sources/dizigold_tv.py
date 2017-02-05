@@ -11,9 +11,10 @@ from resources.lib.libraries import directstream
 
 class source:
     def __init__(self):
-        self.domains = ['dizigold.net']
-        self.base_link = 'http://www.dizigold.net'
-        self.player_link = 'http://player.dizigold.net/?id=%s&s=1&dil=or'
+        self.language = ['en']
+        self.domains = ['dizigold.net', 'dizigold.org']
+        self.base_link = 'http://www.dizigold.org'
+        self.player_link = 'http://player.dizigold.org/?id=%s&s=1&dil=or'
 
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
@@ -55,7 +56,7 @@ class source:
         return url
 
 
-    def get_sources(self, url, hostDict, hostprDict, locDict):
+    def get_sources(self, url, hosthdDict, hostprDict, locDict):
         try:
             sources = []
 
@@ -84,7 +85,7 @@ class source:
 
                 else: raise Exception()
 
-                for i in url: sources.append({'source': host, 'quality': i['quality'], 'provider': 'Dizigold', 'url': i['url'], 'direct': direct, 'debridonly': False})
+                for i in url: sources.append({'source': host, 'quality': i['quality'], 'language': 'en', 'url': i['url'], 'direct': direct, 'debridonly': False})
             except:
                 pass
 
@@ -95,7 +96,7 @@ class source:
                 links += [(i[0], 'HD') for i in url if 720 <= int(i[1]) < 1080]
                 links += [(i[0], 'SD') for i in url if 480 <= int(i[1]) < 720]
 
-                for i in links: sources.append({'source': 'gvideo', 'quality': i[1], 'provider': 'Dizigold', 'url': i[0], 'direct': True, 'debridonly': False})
+                for i in links: sources.append({'source': 'gvideo', 'quality': i[1], 'provider': 'DiziGold', 'url': i[0], 'direct': True, 'debridonly': False})
             except:
                 pass
 
@@ -105,11 +106,5 @@ class source:
 
 
     def resolve(self, url):
-        try:
-            url = client.request(url, output='geturl')
-            if 'requiressl=yes' in url: url = url.replace('http://', 'https://')
-            else: url = url.replace('https://', 'http://')
-            return url
-        except:
-            return
+        return url
 

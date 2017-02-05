@@ -1,67 +1,61 @@
 # -*- coding: utf-8 -*-
 
-import re,urllib,urlparse,base64,datetime
+import re,urllib,urlparse,base64
 
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
-from resources.lib import resolvers
+from resources.lib.libraries import proxy
 
 
 class source:
     def __init__(self):
+        self.domains = ['primewire.ag']
         self.base_link = 'http://www.primewire.ag'
         self.key_link = '/index.php?search'
-        self.link_1 = 'http://www.primewire.ag'
-        self.link_2 = 'http://translate.googleusercontent.com/translate_c?anno=2&hl=en&sl=mt&tl=en&u=http://www.primewire.ag'
-        self.link_3 = 'https://primewire.unblocked.pw'
         self.moviesearch_link = '/index.php?search_keywords=%s&key=%s&search_section=1'
         self.tvsearch_link = '/index.php?search_keywords=%s&key=%s&search_section=2'
-        self.headers = {'User-Agent' : 'Mozilla/%s' % datetime.datetime.now().strftime('%Y%m%d%H%M%S')}
 
 
     def get_movie(self, imdb, title, year):
         try:
-            result = ''
-            links = [self.link_1, self.link_2, self.link_3]
-            for base_link in links:
-                result = client.source(urlparse.urljoin(base_link, self.key_link), headers=self.headers)
-                if 'searchform' in str(result): break
+            key = urlparse.urljoin(self.base_link, self.key_link)
+            key = proxy.request(key, 'main_body')
+            key = client.parseDOM(key, 'input', ret='value', attrs = {'name': 'key'})[0]
 
-            key = client.parseDOM(result, 'input', ret='value', attrs = {'name': 'key'})[0]
-            query = self.moviesearch_link % (urllib.quote_plus(re.sub('\'', '', title)), key)
+            query = self.moviesearch_link % (urllib.quote_plus(cleantitle.query(title)), key)
+            query = urlparse.urljoin(self.base_link, query)
 
-            result = client.source(urlparse.urljoin(base_link, query), headers=self.headers)
-            result = result.decode('iso-8859-1').encode('utf-8')
+            result = str(proxy.request(query, 'main_body'))
+            if 'page=2' in result or 'page%3D2' in result: result += str(proxy.request(query + '&page=2', 'main_body'))
+
             result = client.parseDOM(result, 'div', attrs = {'class': 'index_item.+?'})
 
-            title = 'watch' + cleantitle.movie(title)
+            title = 'watch' + cleantitle.get(title)
             years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(client.parseDOM(i, 'a', ret='href')[0], client.parseDOM(i, 'a', ret='title')[0]) for i in result]
+
+            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in result]
+            result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
             result = [i for i in result if any(x in i[1] for x in years)]
 
-            result = [(client.replaceHTMLCodes(i[0]), i[1]) for i in result]
-            try: result = [(urlparse.parse_qs(urlparse.urlparse(i[0]).query)['u'][0], i[1]) for i in result]
-            except: pass
-            result = [(urlparse.urlparse(i[0]).path, i[1]) for i in result]
+            r = [(proxy.parse(i[0]), i[1]) for i in result]
 
-            match = [i[0] for i in result if title == cleantitle.movie(i[1])]
+            match = [i[0] for i in r if title == cleantitle.get(i[1]) and '(%s)' % str(year) in i[1]]
 
-            match2 = [i[0] for i in result]
+            match2 = [i[0] for i in r]
             match2 = [x for y,x in enumerate(match2) if x not in match2[:y]]
             if match2 == []: return
 
             for i in match2[:5]:
                 try:
-                    if len(match) > 0:
-                        url = match[0]
-                        break
-                    result = client.source(base_link + i, headers=self.headers)
-                    if str(imdb) in str(result):
-                        url = i
-                        break
+                    if len(match) > 0: url = match[0] ; break
+                    r = proxy.request(urlparse.urljoin(self.base_link, i), 'main_body')
+                    r = re.findall('(tt\d+)', r)
+                    if imdb in r: url = i ; break
                 except:
                     pass
 
+            url = re.findall('(?://.+?|)(/.+)', url)[0]
+            url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
         except:
@@ -70,47 +64,44 @@ class source:
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
-            result = ''
-            links = [self.link_1, self.link_2, self.link_3]
-            for base_link in links:
-                result = client.source(urlparse.urljoin(base_link, self.key_link), headers=self.headers)
-                if 'searchform' in str(result): break
+            key = urlparse.urljoin(self.base_link, self.key_link)
+            key = proxy.request(key, 'main_body')
+            key = client.parseDOM(key, 'input', ret='value', attrs = {'name': 'key'})[0]
 
-            key = client.parseDOM(result, 'input', ret='value', attrs = {'name': 'key'})[0]
-            query = self.tvsearch_link % (urllib.quote_plus(re.sub('\'', '', tvshowtitle)), key)
+            query = self.tvsearch_link % (urllib.quote_plus(cleantitle.query(tvshowtitle)), key)
+            query = urlparse.urljoin(self.base_link, query)
 
-            result = client.source(urlparse.urljoin(base_link, query), headers=self.headers)
-            result = result.decode('iso-8859-1').encode('utf-8')
+            result = str(proxy.request(query, 'main_body'))
+            if 'page=2' in result or 'page%3D2' in result: result += str(proxy.request(query + '&page=2', 'main_body'))
+
             result = client.parseDOM(result, 'div', attrs = {'class': 'index_item.+?'})
 
-            tvshowtitle = 'watch' + cleantitle.tv(tvshowtitle)
+            tvshowtitle = 'watch' + cleantitle.get(tvshowtitle)
             years = ['(%s)' % str(year), '(%s)' % str(int(year)+1), '(%s)' % str(int(year)-1)]
-            result = [(client.parseDOM(i, 'a', ret='href')[0], client.parseDOM(i, 'a', ret='title')[0]) for i in result]
+
+            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in result]
+            result = [(i[0][0], i[1][0]) for i in result if len(i[0]) > 0 and len(i[1]) > 0]
             result = [i for i in result if any(x in i[1] for x in years)]
 
-            result = [(client.replaceHTMLCodes(i[0]), i[1]) for i in result]
-            try: result = [(urlparse.parse_qs(urlparse.urlparse(i[0]).query)['u'][0], i[1]) for i in result]
-            except: pass
-            result = [(urlparse.urlparse(i[0]).path, i[1]) for i in result]
+            r = [(proxy.parse(i[0]), i[1]) for i in result]
 
-            match = [i[0] for i in result if tvshowtitle == cleantitle.tv(i[1])]
+            match = [i[0] for i in r if tvshowtitle == cleantitle.get(i[1]) and '(%s)' % str(year) in i[1]]
 
-            match2 = [i[0] for i in result]
+            match2 = [i[0] for i in r]
             match2 = [x for y,x in enumerate(match2) if x not in match2[:y]]
             if match2 == []: return
 
             for i in match2[:5]:
                 try:
-                    if len(match) > 0:
-                        url = match[0]
-                        break
-                    result = client.source(base_link + i, headers=self.headers)
-                    if str(imdb) in str(result):
-                        url = i
-                        break
+                    if len(match) > 0: url = match[0] ; break
+                    r = proxy.request(urlparse.urljoin(self.base_link, i), 'main_body')
+                    r = re.findall('(tt\d+)', r)
+                    if imdb in r: url = i ; break
                 except:
                     pass
 
+            url = re.findall('(?://.+?|)(/.+)', url)[0]
+            url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
         except:
@@ -118,13 +109,33 @@ class source:
 
 
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
-        if url == None: return
+        try:
+            if url == None: return
 
-        url = url.replace('/watch-','/tv-')
-        url += '/season-%01d-episode-%01d' % (int(season), int(episode))
-        url = client.replaceHTMLCodes(url)
-        url = url.encode('utf-8')
-        return url
+            url = urlparse.urljoin(self.base_link, url)
+
+            result = proxy.request(url, 'main_body')
+            result = client.parseDOM(result, 'div', attrs = {'class': 'tv_episode_item'})
+
+            title = cleantitle.get(title)
+
+            result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'span', attrs = {'class': 'tv_episode_name'}), re.compile('(\d{4}-\d{2}-\d{2})').findall(i)) for i in result]
+            result = [(i[0], i[1][0], i[2]) for i in result if len(i[1]) > 0] + [(i[0], None, i[2]) for i in result if len(i[1]) == 0]
+            result = [(i[0], i[1], i[2][0]) for i in result if len(i[2]) > 0] + [(i[0], i[1], None) for i in result if len(i[2]) == 0]
+            result = [(i[0][0], i[1], i[2]) for i in result if len(i[0]) > 0]
+
+            url = [i for i in result if title == cleantitle.get(i[1]) and premiered == i[2]][:1]
+            if len(url) == 0: url = [i for i in result if premiered == i[2]]
+            if len(url) == 0 or len(url) > 1: url = [i for i in result if 'season-%01d-episode-%01d' % (int(season), int(episode)) in i[0]]
+
+            url = client.replaceHTMLCodes(url[0][0])
+            url = proxy.parse(url)
+            url = re.findall('(?://.+?|)(/.+)', url)[0]
+            url = client.replaceHTMLCodes(url)
+            url = url.encode('utf-8')
+            return url
+        except:
+            return
 
 
     def get_sources(self, url, hosthdDict, hostDict, locDict):
@@ -133,41 +144,31 @@ class source:
 
             if url == None: return sources
 
-            result = ''
-            links = [self.link_1, self.link_2, self.link_3]
-            for base_link in links:
-                result = client.source(urlparse.urljoin(base_link, url), headers=self.headers)
-                if 'choose_tabs' in str(result): break
+            url = urlparse.urljoin(self.base_link, url)
 
-            result = result.decode('iso-8859-1').encode('utf-8')
+            result = proxy.request(url, 'main_body')
+
             links = client.parseDOM(result, 'tbody')
 
             for i in links:
                 try:
-                    u = client.parseDOM(i, 'a', ret='href')[0]
-                    u = client.replaceHTMLCodes(u)
-                    try: u = urlparse.parse_qs(urlparse.urlparse(u).query)['u'][0]
-                    except: pass
-
-                    host = urlparse.parse_qs(urlparse.urlparse(u).query)['domain'][0]
-                    host = base64.urlsafe_b64decode(host.encode('utf-8'))
-                    host = host.rsplit('.', 1)[0]
-                    host = host.strip().lower()
-                    if not host in hostDict: raise Exception()
-                    host = client.replaceHTMLCodes(host)
-                    host = host.encode('utf-8')
-
-                    url = urlparse.parse_qs(urlparse.urlparse(u).query)['url'][0]
-                    url = base64.urlsafe_b64decode(url.encode('utf-8'))
+                    url = client.parseDOM(i, 'a', ret='href')[0]
+                    url = proxy.parse(url)
+                    url = urlparse.parse_qs(urlparse.urlparse(url).query)['url'][0]
+                    url = base64.b64decode(url)
                     url = client.replaceHTMLCodes(url)
                     url = url.encode('utf-8')
+
+                    host = re.findall('([\w]+[.][\w]+)$', urlparse.urlparse(url.strip().lower()).netloc)[0]
+                    if not host in hostDict: raise Exception()
+                    host = host.encode('utf-8')
 
                     quality = client.parseDOM(i, 'span', ret='class')[0]
                     if quality == 'quality_cam' or quality == 'quality_ts': quality = 'CAM'
                     elif quality == 'quality_dvd': quality = 'SD'
                     else:  raise Exception()
 
-                    sources.append({'source': host, 'quality': quality, 'provider': 'Primewire', 'url': url})
+                    sources.append({'source': host, 'quality': quality, 'provider': 'PrimeWire', 'url': url, 'direct': False, 'debridonly': False})
                 except:
                     pass
 
@@ -177,9 +178,5 @@ class source:
 
 
     def resolve(self, url):
-        try:
-            url = resolvers.request(url)
-            return url
-        except:
-            return
+        return url
 

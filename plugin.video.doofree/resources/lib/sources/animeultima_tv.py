@@ -1,37 +1,49 @@
 # -*- coding: utf-8 -*-
 
-import re,urllib,urlparse,base64
+import re,urllib,urlparse,json
 
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
+from resources.lib.libraries import trakt
+from resources.lib.libraries import tvmaze
 
 
 class source:
     def __init__(self):
+        self.domains = ['animeultima.io']
         self.base_link = 'http://www.animeultima.io'
         self.search_link = '/search.html?searchquery=%s'
-        self.tvdb_link = 'http://thetvdb.com/api/%s/series/%s/default/%01d/%01d'
-        self.tvdb_key = base64.urlsafe_b64decode('MUQ2MkYyRjkwMDMwQzQ0NA==')
 
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
-            query = self.search_link % (urllib.quote_plus(tvshowtitle))
-            query = urlparse.urljoin(self.base_link, query)
+            r = 'search/tvdb/%s?type=show&extended=full' % tvdb
+            r = json.loads(trakt.getTrakt(r))
+            if not r: return '0'
 
-            result = client.source(query)
-            result = result.decode('iso-8859-1').encode('utf-8')
-            result = client.parseDOM(result, 'ol', attrs = {'id': 'searchresult'})[0]
-            result = client.parseDOM(result, 'h2')
+            d = r[0]['show']['genres']
+            if not ('anime' in d or 'animation' in d): return '0'
 
-            tvshowtitle = cleantitle.tv(tvshowtitle)
-            result = [(client.parseDOM(i, 'a', ret='href')[0], client.parseDOM(i, 'a')[0]) for i in result]
-            result = [(i[0], re.sub('<.+?>|</.+?>','', i[1])) for i in result]
-            result = [i for i in result if tvshowtitle == cleantitle.tv(i[1])]
-            result = result[-1][0]
+            tv_maze = tvmaze.tvMaze()
+            tvshowtitle = tv_maze.showLookup('thetvdb', tvdb)
+            tvshowtitle = tvshowtitle['name']
 
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
+            t = cleantitle.get(tvshowtitle)
+
+            q = self.search_link % (urllib.quote_plus(tvshowtitle))
+            q = urlparse.urljoin(self.base_link, q)
+
+            r = client.request(q)
+
+            r = client.parseDOM(r, 'ol', attrs={'id': 'searchresult'})[0]
+            r = client.parseDOM(r, 'h2')
+            r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in r]
+            r = [(i[0][0], i[1][0]) for i in r if len(i[0]) > 0 and len(i[1]) > 0]
+            r = [(i[0], re.sub('<.+?>|</.+?>', '', i[1])) for i in r]
+            r = [i for i in r if t == cleantitle.get(i[1])]
+            r = r[-1][0]
+
+            url = re.findall('(?://.+?|)(/.+)', r)[0]
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -43,20 +55,20 @@ class source:
         try:
             if url == None: return
 
-            tvdb_link = self.tvdb_link % (self.tvdb_key, tvdb, int(season), int(episode))
-            result = client.source(tvdb_link)
+            tv_maze = tvmaze.tvMaze()
+            num = tv_maze.episodeAbsoluteNumber(tvdb, int(season), int(episode))
+            num = str(num)
 
-            num = client.parseDOM(result, 'absolute_number')[0]
             url = urlparse.urljoin(self.base_link, url)
 
-            result = client.source(url)
-            result = result.decode('iso-8859-1').encode('utf-8')
-            result = client.parseDOM(result, 'tr', attrs = {'class': ''})
-            result = [(client.parseDOM(i, 'a', ret='href')[0], client.parseDOM(i, 'td', attrs = {'class': 'epnum'})[0]) for i in result]
-            result = [i[0] for i in result if num == i[1]][0]
+            r = client.request(url)
 
-            try: url = re.compile('//.+?(/.+)').findall(result)[0]
-            except: url = result
+            r = client.parseDOM(r, 'tr', attrs = {'class': ''})
+            r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'td', attrs = {'class': 'epnum'})) for i in r]
+            r = [(i[0][0], i[1][0]) for i in r if len(i[0]) > 0 and len(i[1]) > 0]
+            r = [i[0] for i in r if num == i[1]][0]
+
+            url = re.findall('(?://.+?|)(/.+)', r)[0]
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
             return url
@@ -65,16 +77,56 @@ class source:
 
 
     def get_sources(self, url, hosthdDict, hostDict, locDict):
+        sources = []
+
+        if url == None: return sources
+
+        url = urlparse.urljoin(self.base_link, url)
+
+        hostDict = [(i.rsplit('.', 1)[0], i) for i in hostDict]
+        locDict = [i[0] for i in hostDict]
+
+        result = client.request(url)
+
+        links = []
+
         try:
-            sources = []
-
-            if url == None: return sources
-
-            url = urlparse.urljoin(self.base_link, url)
-            sources.append({'source': 'Animeultima', 'quality': 'SD', 'provider': 'Animeultima', 'url': url})
-            return sources
+            r = client.parseDOM(result, 'div', attrs={'class': 'player-embed'})[0]
+            r = client.parseDOM(r, 'iframe', ret='src')[0]
+            links += [(r, url)]
         except:
-            return sources
+            pass
+
+        try:
+            r = client.parseDOM(result, 'div', attrs={'class': 'generic-video-item'})
+            r = [(i.split('</div>', 1)[-1].split()[0], client.parseDOM(i, 'a', ret='href', attrs={'rel': '.+?'})) for i
+                 in r]
+            links += [(i[0], i[1][0]) for i in r if i[1]]
+        except:
+            pass
+
+        for i in links:
+            try:
+                try:
+                    host = re.findall('([\w]+[.][\w]+)$', urlparse.urlparse(i[0].strip().lower()).netloc)[0]
+                except:
+                    host = i[0].lower()
+                host = host.rsplit('.', 1)[0]
+                if not host in locDict: raise Exception()
+                host = [x[1] for x in hostDict if x[0] == host][0]
+                host = host.encode('utf-8')
+
+                url = i[1]
+                url = urlparse.urljoin(self.base_link, url)
+                url = client.replaceHTMLCodes(url)
+                url = url.encode('utf-8')
+
+                sources.append({'source': host, 'quality': 'SD', 'provider': 'AnimeUltima', 'url': url, 'direct': True,
+                                'debridonly': False})
+            except:
+                pass
+
+        return sources
 
 
     def resolve(self, url):
@@ -85,22 +137,6 @@ class source:
             url = client.parseDOM(result, 'div', attrs = {'class': 'player-embed'})[0]
             url = client.parseDOM(url, 'iframe', ret='src')[0]
 
-            if not 'auengine.com' in url:
-                url = client.parseDOM(result, 'div', attrs = {'class': 'generic-video-item'})
-                url = [i for i in url if 'auengine video' in i.lower()][0]
-                url = client.parseDOM(url, 'a', ret='href')[0]
-                url = urlparse.urljoin(self.base_link, url)
-
-                result = client.request(url)
-                result = result.decode('iso-8859-1').encode('utf-8')
-
-                url = client.parseDOM(result, 'div', attrs = {'class': 'player-embed'})[0]
-                url = client.parseDOM(url, 'iframe', ret='src')[0]
-
-            result = client.request(url)
-
-            url = re.compile("video_link *= *'(.+?)'").findall(result)[0]
-            url = urllib.unquote_plus(url)
             return url
         except:
             return
