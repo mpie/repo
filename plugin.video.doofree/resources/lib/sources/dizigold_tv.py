@@ -11,7 +11,6 @@ from resources.lib.libraries import directstream
 
 class source:
     def __init__(self):
-        self.language = ['en']
         self.domains = ['dizigold.net', 'dizigold.org']
         self.base_link = 'http://www.dizigold.org'
         self.player_link = 'http://player.dizigold.org/?id=%s&s=1&dil=or'

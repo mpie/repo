@@ -9,8 +9,7 @@ from resources.lib.libraries import directstream
 
 class source:
     def __init__(self):
-        self.domains = ['putlocker.systems', 'putlocker-movies.tv', 'putlocker.yt', 'cartoonhd.website',
-                        'cartoonhd.online']
+        self.domains = ['putlocker.systems', 'putlocker-movies.tv', 'putlocker.yt', 'cartoonhd.website', 'cartoonhd.online']
         self.base_link = 'http://cartoonhd.website'
 
 
@@ -62,8 +61,7 @@ class source:
                 year = data['year']
 
                 if 'tvshowtitle' in data:
-                    url = '%s/tv-show/%s/season/%01d/episode/%01d' % (
-                    self.base_link, cleantitle.geturl(title), int(data['season']), int(data['episode']))
+                    url = '%s/tv-show/%s/season/%01d/episode/%01d' % (self.base_link, cleantitle.geturl(title), int(data['season']), int(data['episode']))
                 else:
                     url = '%s/movie/%s' % (self.base_link, cleantitle.geturl(title))
 
@@ -87,9 +85,7 @@ class source:
 
                 r = client.request(url, output='extended')
 
-            cookie = r[4]
-            headers = r[3]
-            result = r[0]
+            cookie = r[4] ; headers = r[3] ; result = r[0]
 
             try:
                 auth = re.findall('__utmx=(.+)', cookie)[0].split(';')[0]
@@ -124,9 +120,7 @@ class source:
 
             for i in r:
                 try:
-                    sources.append(
-                        {'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'PutLocker',
-                         'url': i, 'direct': True, 'debridonly': False})
+                    sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'PutLocker', 'url': i, 'direct': True, 'debridonly': False})
                 except:
                     pass
 

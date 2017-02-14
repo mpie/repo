@@ -455,28 +455,31 @@ class sources:
         if playback_720p == 'false':
             self.sources = [i for i in self.sources if not (i['quality'] == 'HD' and i['source'] in self.hosthdDict and not i['source'] in self.rdDict + self.pzDict)]
 
-        for i in range(len(self.sources)):
-            s = self.sources[i]['source'].lower()
-            p = self.sources[i]['provider']
-            p = re.sub('v\d*$', '', p)
+        try:
+            for i in range(len(self.sources)):
+                s = self.sources[i]['source'].lower()
+                p = self.sources[i]['provider']
+                p = re.sub('v\d*$', '', p)
 
-            q = self.sources[i]['quality']
-            if q == 'SD' and s in self.hostmqDict: q = 'MQ'
-            elif q == 'SD' and s in self.hostlqDict: q = 'LQ'
-            elif q == 'SD': q = 'HQ'
+                q = self.sources[i]['quality']
+                if q == 'SD' and s in self.hostmqDict: q = 'MQ'
+                elif q == 'SD' and s in self.hostlqDict: q = 'LQ'
+                elif q == 'SD': q = 'HQ'
 
-            try: d = self.sources[i]['info']
-            except: d = ''
-            if not d == '': d = ' | [I]%s [/I]' % d
+                try: d = self.sources[i]['info']
+                except: d = ''
+                if not d == '': d = ' | [I]%s [/I]' % d
 
-            if s in self.rdDict: label = '%02d | [B]realdebrid[/B] | ' % int(i+1)
-            elif s in self.pzDict: label = '%02d | [B]premiumize[/B] | ' % int(i+1)
-            else: label = '%02d | [B]%s[/B] | ' % (int(i+1), p)
+                if s in self.rdDict: label = '%02d | [B]realdebrid[/B] | ' % int(i+1)
+                elif s in self.pzDict: label = '%02d | [B]premiumize[/B] | ' % int(i+1)
+                else: label = '%02d | [B]%s[/B] | ' % (int(i+1), p)
 
-            if q in ['1080p', 'HD']: label += '%s%s | [B][I]%s [/I][/B]' % (s, d, q)
-            else: label += '%s%s | [I]%s [/I]' % (s, d, q)
+                if q in ['1080p', 'HD']: label += '%s%s | [B][I]%s [/I][/B]' % (s, d, q)
+                else: label += '%s%s | [I]%s [/I]' % (s, d, q)
 
-            self.sources[i]['label'] = label.upper()
+                self.sources[i]['label'] = label.upper()
+        except:
+            pass
 
         return self.sources
 
