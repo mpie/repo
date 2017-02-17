@@ -150,7 +150,7 @@ class source:
                     pass
 
             for i in links: sources.append({'source': i['source'], 'quality': i['quality'], 'provider': 'Pelispedia', 'url': i['url'], 'direct': i['direct'], 'debridonly': False})
-            print sources
+
             return sources
         except:
             return sources

@@ -22,6 +22,7 @@ class source:
             result = cache.get(self.sezonlukdizi_tvcache, 120)
 
             tvshowtitle = cleantitle.get(tvshowtitle)
+            tvshowtitle = tvshowtitle.replace('marvels', '')
 
             result = [i[0] for i in result if tvshowtitle == i[1]][0]
 
