@@ -98,7 +98,7 @@ class alterepisode:
 
     def tvrageEpisode(self, tvrage, title, date, season, episode):
         monthMap = {'01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'May', '06':'Jun', '07':'Jul', '08':'Aug', '09':'Sep', '10':'Oct', '11':'Nov', '12':'Dec'}
-        title = cleantitle.tv(title)
+        title = cleantitle.get(title)
 
         try:
             url = self.tvrage_link % tvrage
@@ -107,7 +107,7 @@ class alterepisode:
             d = '%02d/%s/%s' % (int(date.split('-')[2]), monthMap[date.split('-')[1]], date.split('-')[0])
             match = [i for i in search if d == i[2]]
             if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
-            match = [i for i in search if title == cleantitle.tv(i[3])]
+            match = [i for i in search if title == cleantitle.get(i[3])]
             if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
         except:
             pass
@@ -119,7 +119,7 @@ class alterepisode:
             d = '%02d/%s/%s' % (int(date.split('-')[2]), monthMap[date.split('-')[1]], date.split('-')[0][-2:])
             match = [i for i in search if d == i[2]]
             if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
-            match = [i for i in search if title == cleantitle.tv(i[3])]
+            match = [i for i in search if title == cleantitle.get(i[3])]
             if len(match) == 1: return (str('%01d' % int(match[0][0])), str('%01d' % int(match[0][1])))
         except:
             pass

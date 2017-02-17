@@ -1070,14 +1070,14 @@ class episodes:
             shows = [client.parseDOM(i, 'a')[0] for i in result]
             shows = [re.compile('(.*)[.](S\d+?E\d+?)[.]').findall(i) for i in shows]
             shows = [(i[0][0].replace('.', ' '), i[0][1]) for i in shows if not len(i) == 0]
-            shows = [cleantitle.tv(i[0]) + ' ' + i[1] for i in shows]
+            shows = [cleantitle.get(i[0]) + ' ' + i[1] for i in shows]
             shows = [i.encode('utf-8') for i in shows]
             shows = [x for y,x in enumerate(shows) if x not in shows[:y]]
 
             url = self.calendar_link % (str(dates[-1]), len(dates))
 
             self.list = self.trakt_list(url)
-            self.list = [i for i in self.list if '%s S%02dE%02d' % (cleantitle.tv(i['tvshowtitle']), int(i['season']), int(i['episode'])) in shows]
+            self.list = [i for i in self.list if '%s S%02dE%02d' % (cleantitle.get(i['tvshowtitle']), int(i['season']), int(i['episode'])) in shows]
 
             return self.list
         except:
