@@ -56,6 +56,7 @@ class source:
                 data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
                 title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
+                title = title.replace('Marvel\'s Agents of S.H.I.E.L.D.', 'Agents of S.H.I.E.L.D.')
 
                 imdb = data['imdb'] ; year = data['year']
 
