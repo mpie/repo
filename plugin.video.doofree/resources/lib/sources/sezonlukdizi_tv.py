@@ -13,7 +13,7 @@ class source:
     def __init__(self):
         self.domains = ['sezonlukdizi.net', 'sezonlukdizi.com']
         self.base_link = 'http://sezonlukdizi.net'
-        self.search_link = '/js/dizi1.js'
+        self.search_link = '/js/dizi3.js'
         self.video_link = '/ajax/dataEmbed.asp'
 
 
@@ -22,7 +22,6 @@ class source:
             result = cache.get(self.sezonlukdizi_tvcache, 120)
 
             tvshowtitle = cleantitle.get(tvshowtitle)
-            tvshowtitle = tvshowtitle.replace('marvels', '')
 
             result = [i[0] for i in result if tvshowtitle == i[1]][0]
 
@@ -61,6 +60,7 @@ class source:
         url = client.replaceHTMLCodes(url)
         url = url.encode('utf-8')
         return url
+
 
     def get_sources(self, url, hostDict, hostprDict, locDict):
         try:
@@ -104,15 +104,24 @@ class source:
                     captions = re.search('kind\s*:\s*(?:\'|\")captions(?:\'|\")', result)
                     if not captions: raise Exception()
 
-                    r = re.findall('"label":(\d+),.+?"?file"?\s*:\s*"([^"]+)"\s*', result)
+                    r = re.findall('"?file"?\s*:\s*"([^"]+)"\s*.*?label"?\s*:\s*"(\d+)p?[^"]*"', result)
+
+                    links = [(i[0], '1080p') for i in r if int(i[1]) >= 1080]
+                    links += [(i[0], 'HD') for i in r if 720 <= int(i[1]) < 1080]
+                    links += [(i[0], 'SD') for i in r if 480 <= int(i[1]) < 720]
+
+                    for i in links: sources.append({'source': 'gvideo', 'quality': i[1], 'language': 'en', 'url': i[0], 'direct': True, 'debridonly': False})
+                    if r: break
+
+                    r = re.findall('"?label"?\s*:\s*(\d*)\s*.*?file"?\s*:\s*"([^"]+)"\s*', result)
 
                     links = [(i[1], '1080p') for i in r if int(i[0]) >= 1080]
                     links += [(i[1], 'HD') for i in r if 720 <= int(i[0]) < 1080]
                     links += [(i[1], 'SD') for i in r if 480 <= int(i[0]) < 720]
 
-                    for i in links: sources.append({'source': 'gvideo', 'quality': i[1], 'provider': 'Sezonlukdizi', 'url': i[0], 'direct': True, 'debridonly': False})
-
+                    for i in links: sources.append({'source': 'gvideo', 'quality': i[1], 'provider': 'SezonlukDizi', 'url': i[0], 'direct': True, 'debridonly': False})
                     if r: break
+
                 except:
                     pass
 
