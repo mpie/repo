@@ -1,4 +1,11 @@
 ------------------------
+DooFree v3.11.0 (22-Apr-17)
+------------------------
+
+- Fixed Miradetodo, Pubfilm, TuneMovie
+- Disabled Pelispedia
+
+------------------------
 DooFree v3.10.1 (31-Mar-17)
 ------------------------
 
