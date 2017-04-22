@@ -9,7 +9,7 @@ from resources.lib.libraries import directstream
 
 class source:
     def __init__(self):
-        self.domains = ['tunemovies.to', 'tunemovie.tv']
+        self.domains = ['tunemovies.to']
         self.base_link = 'https://tunemovies.to'
         self.search_link = '/search/%s.html'
 

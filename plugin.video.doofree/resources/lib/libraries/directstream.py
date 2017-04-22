@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import re,os,urllib,urlparse,json,binascii
+import re, os, urllib, urlparse, json, binascii
 from resources.lib.libraries import client
 
 
@@ -106,7 +106,7 @@ def googletag(url):
         return [{'quality': '1440p', 'url': url}]
     if quality in ['37', '137', '299', '96', '248', '303', '46']:
         return [{'quality': '1080p', 'url': url}]
-    elif quality in ['22', '84', '136', '298', '120', '95', '247', '302', '45', '102']:
+    elif quality in ['15', '22', '84', '136', '298', '120', '95', '247', '302', '45', '102']:
         return [{'quality': 'HD', 'url': url}]
     elif quality in ['35', '44', '59', '135', '244', '94']:
         return [{'quality': 'SD', 'url': url}]
