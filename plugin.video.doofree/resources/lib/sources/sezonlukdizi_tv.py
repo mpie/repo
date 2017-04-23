@@ -103,7 +103,7 @@ class source:
                     url = client.parseDOM(result, 'iframe', ret='src')[0]
 
                     if 'openload.io' in url or 'openload.co' in url or 'oload.tv' in url:
-                        sources.append({'source': 'openload.co', 'quality': 'HD', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+                        sources.append({'source': 'openload.co', 'quality': 'HD', 'provider': 'Sezonlukdizi', 'url': url, 'direct': False, 'debridonly': False})
 
                     if not '.asp' in url: raise Exception()
 

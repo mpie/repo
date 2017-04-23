@@ -2,25 +2,33 @@
 
 import re,urllib,urlparse,json,base64,time
 
-from resources.lib.libraries import client
 from resources.lib.libraries import cleantitle
+from resources.lib.libraries import client
+from resources.lib.libraries import cache
 from resources.lib.libraries import directstream
-
 
 class source:
     def __init__(self):
         self.domains = ['movieshd.tv', 'movieshd.is', 'movieshd.watch', 'flixanity.is', 'flixanity.me']
-        self.base_link = 'http://flixanity.watch'
+        self.base_link = 'https://flixanity.watch'
 
+    def getImdbTitle(self, imdb):
+        try:
+            t = 'http://www.omdbapi.com/?i=%s' % imdb
+            t = client.request(t)
+            t = json.loads(t)
+            t = cleantitle.normalize(t['Title'])
+            return t
+        except:
+            return
 
     def get_movie(self, imdb, title, year):
         try:
-            url = {'imdb': imdb, 'title': title, 'year': year}
+            url = {'imdb': imdb, 'title': title, 'year': year, 'localtitle': localtitle}
             url = urllib.urlencode(url)
             return url
         except:
             return
-
 
     def get_show(self, imdb, tvdb, tvshowtitle, year):
         try:
@@ -29,7 +37,6 @@ class source:
             return url
         except:
             return
-
 
     def get_episode(self, url, imdb, tvdb, title, date, season, episode):
         try:
@@ -56,16 +63,27 @@ class source:
                 data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
                 title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
-                title = title.replace('Marvel\'s Agents of S.H.I.E.L.D.', 'Agents of S.H.I.E.L.D.')
 
                 imdb = data['imdb'] ; year = data['year']
 
                 if 'tvshowtitle' in data:
                     url = '%s/tv-show/%s/season/%01d/episode/%01d' % (self.base_link, cleantitle.geturl(title), int(data['season']), int(data['episode']))
+                    result = client.request(url, limit='5')
+
+                    if result == None:
+                        t = cache.get(self.getImdbTitle, 900, imdb)
+                        if title != t:
+                            url = '%s/tv-show/%s/season/%01d/episode/%01d' % (self.base_link, cleantitle.geturl(t), int(data['season']), int(data['episode']))
+                            result = client.request(url, limit='5')
                 else:
                     url = '%s/movie/%s' % (self.base_link, cleantitle.geturl(title))
+                    result = client.request(url, limit='5')
 
-                result = client.request(url, limit='5')
+                    if result == None:
+                        t = cache.get(self.getImdbTitle, 900, imdb)
+                        if title != t:
+                            url = '%s/movie/%s' % (self.base_link, cleantitle.geturl(t))
+                            result = client.request(url, limit='5')
 
                 if result == None and not 'tvshowtitle' in data:
                     url += '-%s' % year
@@ -121,13 +139,12 @@ class source:
             r = re.findall('\'(http.+?)\'', r) + re.findall('\"(http.+?)\"', r)
 
             for i in r:
-                try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'MoviesHD', 'url': i, 'direct': True, 'debridonly': False})
+                try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'movieshd', 'url': i, 'direct': True, 'debridonly': False})
                 except: pass
 
             return sources
         except:
             return sources
-
 
     def resolve(self, url):
         return directstream.googlepass(url)
