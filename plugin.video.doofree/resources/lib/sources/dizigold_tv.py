@@ -84,7 +84,7 @@ class source:
 
                 else: raise Exception()
 
-                for i in url: sources.append({'source': host, 'quality': i['quality'], 'language': 'en', 'url': i['url'], 'direct': direct, 'debridonly': False})
+                for i in url: sources.append({'source': host, 'quality': i['quality'], 'provider': 'DiziGold', 'url': i['url'], 'direct': direct, 'debridonly': False})
             except:
                 pass
 
