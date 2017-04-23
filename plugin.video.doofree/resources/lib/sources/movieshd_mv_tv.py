@@ -24,7 +24,7 @@ class source:
 
     def get_movie(self, imdb, title, year):
         try:
-            url = {'imdb': imdb, 'title': title, 'year': year, 'localtitle': localtitle}
+            url = {'imdb': imdb, 'title': title, 'year': year}
             url = urllib.urlencode(url)
             return url
         except:

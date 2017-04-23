@@ -7,7 +7,7 @@ DooFree v3.11.4 (23-Apr-17)
   Contact me if you don't know how to update your Kodi
   Support for non HTTPS websites will end when DooFree 4.0 is released in 3 months!
   So please upgrade!
-  
+
 ------------------------
 DooFree v3.11.3 (23-Apr-17)
 ------------------------
