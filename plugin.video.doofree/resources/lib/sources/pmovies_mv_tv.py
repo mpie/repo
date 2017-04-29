@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 
 
-import re,urllib,urlparse,hashlib,random,string,json
+import re,urllib,urlparse,hashlib,random,string,time,json
 
 from resources.lib.libraries import cleantitle
 from resources.lib.libraries import client
+from resources.lib.libraries import cache
 from resources.lib.libraries import directstream
 
 
 class source:
     def __init__(self):
-        self.domains = ['watch5s.to', 'cmovieshd.com', 'pmovies.to']
-        self.base_link = 'http://watch5s.to'
-        self.random_link = ['watch5s.to', 'cmovieshd.com', 'pmovies.to']
-        self.random_link = ['pmovies.to']
+        self.domains = ['watch5s.to', 'cmovieshd.com', 'pmovies.to', 'watch5s.is']
+        self.base_link = 'https://pmovies.to'
         self.info_link = '/ajax/movie_qtip/%s'
+        self.token_link = 'https://redirector-googlevideo.streamdor.co/token.php'
+        self.grabber_link = 'https://redirector-googlevideo.streamdor.co/grabber-api-v2/episode/%s?hash=%s&token=%s&_=%s'
+        self.backup_token_link = 'https://redirector-googlevideo.streamdor.co/embed/go?type=token&eid=%s&mid=%s&_=%s'
+        self.backup_link = 'https://redirector-googlevideo.streamdor.co/embed/go?type=sources&eid=%s&x=%s&y=%s'
 
     def get_movie(self, imdb, title, year):
         try:
@@ -50,44 +53,29 @@ class source:
 
             if url == None: return sources
 
-            choice = random.choice(self.random_link)
-            base_link = 'http://%s' % choice
-            strm_link = 'http://play.%s' % choice + '/grabber-api/episode/%s?token=%s'
+            data = urlparse.parse_qs(url)
+            data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
-            if not str(url).startswith('http'):
+            title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
 
-                data = urlparse.parse_qs(url)
-                data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
+            if 'tvshowtitle' in data:
+                url = '/tv-series/%s-season-%01d/watch/' % (cleantitle.geturl(title), int(data['season']))
+                year = str((int(data['year']) + int(data['season'])) - 1)
+                episode = '%01d' % int(data['episode'])
 
-                title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
-
-                if 'tvshowtitle' in data:
-                    url = '/tv-series/%s-season-%01d/watch/' % (cleantitle.geturl(title), int(data['season']))
-                    year = str((int(data['year']) + int(data['season'])) - 1)
-                    episode = '%01d' % int(data['episode'])
-
-                else:
-                    url = '/movie/%s/watch/' % cleantitle.geturl(title)
-                    year = data['year']
-                    episode = None
-
-                url = urlparse.urljoin(base_link, url)
-                referer = url
-
-                r = client.request(url)
-
-                y = re.findall('Release\s*:\s*.+?\s*(\d{4})', r)[0]
-
-                if not year == y: raise Exception()
             else:
-                try: url, episode = re.findall('(.+?)\?episode=(\d*)$', url)[0]
-                except: episode = None
+                url = '/movie/%s/watch/' % cleantitle.geturl(title)
+                year = data['year']
+                episode = None
 
-                url = urlparse.urljoin(base_link, url)
-                url = re.sub('/watch$', '', url.strip('/')) + '/watch/'
-                referer = url
+            url = urlparse.urljoin(self.base_link, url)
+            referer = url
 
-                r = client.request(url)
+            r = client.request(url)
+
+            y = re.findall('Release\s*:\s*.+?\s*(\d{4})', r)[0]
+
+            if not year == y: raise Exception()
 
             r = client.parseDOM(r, 'div', attrs = {'class': 'les-content'})
             r = zip(client.parseDOM(r, 'a', ret='href'), client.parseDOM(r, 'a'))
@@ -98,7 +86,7 @@ class source:
             else:
                 r = [i[0] for i in r]
 
-            r = [i for i in r if '/server-' in i]
+            r = [i for i in r if 'server=' in i]
 
             for u in r:
                 try:
@@ -107,22 +95,54 @@ class source:
                     t = re.findall('player_type\s*:\s*"(.+?)"', p)[0]
                     if t == 'embed': raise Exception()
 
-                    s = client.parseDOM(p, 'input', ret='value', attrs = {'name': 'episodeID'})[0]
-                    t = ''.join(random.sample(string.digits + string.ascii_uppercase + string.ascii_lowercase, 8))
-                    k = hashlib.md5('!@#$%^&*(' + s + t).hexdigest()
-                    v = hashlib.md5(t + referer + s).hexdigest()
+                    episodeId = re.findall('episode\s*:\s*"(.+?)"', p)[0]
+                    r = client.request(self.token_link,post=urllib.urlencode({'id': episodeId}), referer=referer, timeout='10')
+                    js = json.loads(r)
+                    hash = js['hash']
+                    token = js['token']
+                    _ = js['_']
+                    url = self.grabber_link % (episodeId, hash, token, _)
+                    u = client.request(url, referer=referer, timeout='10')
+                    js = json.loads(u)
 
-                    stream = strm_link % (s, t)
-                    cookie = '%s=%s' % (k, v)
+                    try:
+                        u = js['playlist'][0]['sources']
+                        u = [i['file'] for i in u if 'file' in i]
 
-                    u = client.request(stream, referer=referer, cookie=cookie, timeout='10')
+                        for i in u:
+                            try:
+                                sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'],
+                                                'provider': 'pmovies', 'url': i, 'direct': True, 'debridonly': False})
+                            except:
+                                pass
+                    except:
+                        pass
 
-                    u = json.loads(u)['playlist'][0]['sources']
-                    u = [i['file'] for i in u if 'file' in i]
+                    try:
+                        u = js['backup']
+                        u = urlparse.parse_qs(urlparse.urlsplit(u).query)
+                        u = dict([(i, u[i][0]) if u[i] else (i, '') for i in u])
+                        eid = u['eid']
+                        mid = u['mid']
+                        p = client.request(self.backup_token_link % (eid, mid, _), XHR=True, referer=referer, timeout='10')
+                        x = re.search('''_x=['"]([^"']+)''', p).group(1)
+                        y = re.search('''_y=['"]([^"']+)''', p).group(1)
+                        u = client.request(self.backup_link % (eid, x, y), referer=referer, XHR=True, timeout='10')
+                        js = json.loads(u)
+                        try:
+                            u = js['playlist'][0]['sources']
+                            u = [i['file'] for i in u if 'file' in i]
 
-                    for i in u:
-                        try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'provider': 'PMovies', 'url': i, 'direct': True, 'debridonly': False})
-                        except: pass
+                            for i in u:
+                                try:
+                                    sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'],
+                                                    'provider': 'pmovies', 'url': i, 'direct': True, 'debridonly': False})
+                                except:
+                                    pass
+                        except:
+                            pass
+                    except:
+                        pass
                 except:
                     pass
 
