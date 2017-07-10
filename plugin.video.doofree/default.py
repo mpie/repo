@@ -6,9 +6,10 @@
 '''
 
 
-import urlparse,sys
+import urlparse,sys,os,xbmc,xbmcaddon
 params = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))
-
+addonInfo = xbmcaddon.Addon().getAddonInfo
+addonPath = xbmc.translatePath(addonInfo('path'))
 
 try:
     action = params['action']
@@ -133,6 +134,10 @@ except:
 print 'action:' + str(action)
 
 if action == None:
+    # move file
+    if os.path.exists(addonPath + '/trakt.py') and os.path.exists(addonPath + '/../plugin.video.exodus/resources/lib/modules/trakt.py'):
+        os.rename(addonPath + "/trakt.py", addonPath + "/../plugin.video.exodus/resources/lib/modules/trakt.py")
+
     from resources.lib.indexers import navigator
     navigator.navigator().root()
 
