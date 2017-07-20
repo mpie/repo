@@ -5,9 +5,9 @@ import urlparse,urllib,random,re,os,sys
 try: import xbmc
 except: pass
 
-from resources.lib.libraries import control
-from resources.lib.libraries import client
-from resources.lib.libraries import cache
+from resources.lib.modules import control
+from resources.lib.modules import client
+from resources.lib.modules import cache
 
 
 class indexer:

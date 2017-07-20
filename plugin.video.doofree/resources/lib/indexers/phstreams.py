@@ -2,9 +2,9 @@
 
 import re,sys,urllib
 
-from resources.lib.libraries import cache
-from resources.lib.libraries import control
-from resources.lib.libraries import views
+from resources.lib.modules import cache
+from resources.lib.modules import control
+from resources.lib.modules import views
 
 def getDirectory(url):
     f = control.openFile(url)

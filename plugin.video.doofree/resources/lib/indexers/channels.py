@@ -2,28 +2,25 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2016 Mpie
+    Copyright (C) 2017 DooFree
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 
+from resources.lib.modules import cleangenre
+from resources.lib.modules import control
+from resources.lib.modules import client
+from resources.lib.modules import metacache
+from resources.lib.modules import workers
+from resources.lib.modules import trakt
+
 import sys,re,json,urllib,urlparse,datetime
 
-from resources.lib.libraries import control
-from resources.lib.libraries import client
-from resources.lib.libraries import workers
+params = dict(urlparse.parse_qsl(sys.argv[2].replace('?',''))) if len(sys.argv) > 1 else dict()
+
+action = params.get('action')
+
+control.moderator()
 
 
 class channels:
@@ -32,14 +29,32 @@ class channels:
 
         self.uk_datetime = self.uk_datetime()
         self.systime = (self.uk_datetime).strftime('%Y%m%d%H%M%S%f')
-        self.imdb_by_query = 'http://www.omdbapi.com/?t=%s&y=%s'
+        self.tm_img_link = 'https://image.tmdb.org/t/p/w%s%s'
+        self.lang = control.apiLanguage()['trakt']
 
         self.sky_now_link = 'http://epgservices.sky.com/5.1.1/api/2.0/channel/json/%s/now/nn/0'
         self.sky_programme_link = 'http://tv.sky.com/programme/channel/%s/%s/%s.json'
 
 
     def get(self):
-        channels = [('01', 'Sky Premiere', '1409'), ('02', 'Sky Premiere +1', '1823'), ('03', 'Sky Showcase', '1814'), ('04', 'Sky Greats', '1815'), ('05', 'Sky Disney', '1838'), ('06', 'Sky Family', '1808'), ('07', 'Sky Action', '1001'), ('08', 'Sky Comedy', '1002'), ('09', 'Sky Crime', '1818'), ('10', 'Sky Drama', '1816'), ('11', 'Sky Sci Fi', '1807'), ('12', 'Sky Select', '1811'), ('13', 'Film4', '1627'), ('14', 'TCM', '5605')] 
+        channels = [
+            ('01', 'Sky Premiere', '4021'),
+            ('02', 'Sky Premiere +1', '1823'),
+            ('03', 'Sky Showcase', '4033'),
+            ('04', 'Sky Greats', '1815'),
+            ('05', 'Sky Disney', '4013'),
+            ('06', 'Sky Family', '4018'),
+            ('07', 'Sky Action', '4014'),
+            ('08', 'Sky Comedy', '4019'),
+            ('09', 'Sky Crime', '4062'),
+            ('10', 'Sky Drama', '4016'),
+            ('11', 'Sky Sci Fi', '4017'),
+            ('12', 'Sky Select', '4020'),
+            ('13', 'Film4', '4044'),
+            ('14', 'Film4 +1', '1629'),
+            ('15', 'TCM', '3811'),
+            ('16', 'TCM +1', '5275')
+        ]
 
         threads = []
         for i in channels: threads.append(workers.Thread(self.sky_list, i[0], i[1], i[2]))
@@ -50,6 +65,8 @@ class channels:
         for i in range(0, len(self.items)): threads.append(workers.Thread(self.items_list, self.items[i]))
         [i.start() for i in threads]
         [i.join() for i in threads]
+
+        self.list = metacache.local(self.list, self.tm_img_link, 'poster2', 'fanart')
 
         try: self.list = sorted(self.list, key=lambda k: k['num'])
         except: pass
@@ -94,88 +111,75 @@ class channels:
 
     def items_list(self, i):
         try:
-            url = self.imdb_by_query % (urllib.quote_plus(i[0]), i[1])
-            item = client.request(url, timeout='10')
-            item = json.loads(item)
+            item = trakt.SearchAll(urllib.quote_plus(i[0]), i[1], True)[0]
 
-            title = item['Title']
+            content = item.get('movie')
+            if not content: content = item.get('show')
+            item = content
+
+            title = item.get('title')
             title = client.replaceHTMLCodes(title)
-            title = title.encode('utf-8')
 
-            year = item['Year']
+            originaltitle = title
+
+            year = item.get('year', 0)
             year = re.sub('[^0-9]', '', str(year))
-            year = year.encode('utf-8')
 
-            name = '%s (%s)' % (title, year)
-            try: name = name.encode('utf-8')
-            except: pass
-
-            imdb = item['imdbID']
-            if imdb == None or imdb == '' or imdb == 'N/A': raise Exception()
+            imdb = item.get('ids', {}).get('imdb', '0')
             imdb = 'tt' + re.sub('[^0-9]', '', str(imdb))
-            imdb = imdb.encode('utf-8')
 
-            poster = item['Poster']
-            if poster == None or poster == '' or poster == 'N/A': poster = '0'
-            if not ('_SX' in poster or '_SY' in poster): poster = '0'
-            poster = re.sub('_SX\d*|_SY\d*|_CR\d+?,\d+?,\d+?,\d*','_SX500', poster)
-            poster = poster.encode('utf-8')
+            tmdb = str(item.get('ids', {}).get('tmdb', 0))
 
-            genre = item['Genre']
-            if genre == None or genre == '' or genre == 'N/A': genre = '0'
-            genre = genre.replace(', ', ' / ')
-            genre = genre.encode('utf-8')
+            premiered = item.get('released', '0')
+            try: premiered = re.compile('(\d{4}-\d{2}-\d{2})').findall(premiered)[0]
+            except: premiered = '0'
 
-            duration = item['Runtime']
-            if duration == None or duration == '' or duration == 'N/A': duration = '0'
-            duration = re.sub('[^0-9]', '', str(duration))
-            duration = duration.encode('utf-8')
+            genre = item.get('genres', [])
+            genre = [x.title() for x in genre]
+            genre = ' / '.join(genre).strip()
+            if not genre: genre = '0'
 
-            rating = item['imdbRating']
-            if rating == None or rating == '' or rating == 'N/A' or rating == '0.0': rating = '0'
-            rating = rating.encode('utf-8')
+            duration = str(item.get('Runtime', 0))
 
-            votes = item['imdbVotes']
-            try: votes = str(format(int(votes),',d'))
-            except: pass
-            if votes == None or votes == '' or votes == 'N/A': votes = '0'
-            votes = votes.encode('utf-8')
+            rating = item.get('rating', '0')
+            if not rating or rating == '0.0': rating = '0'
 
-            mpaa = item['Rated']
-            if mpaa == None or mpaa == '' or mpaa == 'N/A': mpaa = '0'
-            mpaa = mpaa.encode('utf-8')
-
-            director = item['Director']
-            if director == None or director == '' or director == 'N/A': director = '0'
-            director = director.replace(', ', ' / ')
-            director = re.sub(r'\(.*?\)', '', director)
-            director = ' '.join(director.split())
-            director = director.encode('utf-8')
-
-            writer = item['Writer']
-            if writer == None or writer == '' or writer == 'N/A': writer = '0'
-            writer = writer.replace(', ', ' / ')
-            writer = re.sub(r'\(.*?\)', '', writer)
-            writer = ' '.join(writer.split())
-            writer = writer.encode('utf-8')
-
-            cast = item['Actors']
-            if cast == None or cast == '' or cast == 'N/A': cast = '0'
-            cast = [x.strip() for x in cast.split(',') if not x == '']
-            try: cast = [(x.encode('utf-8'), '') for x in cast]
-            except: cast = []
-            if cast == []: cast = '0'
-
-            plot = item['Plot']
-            if plot == None or plot == '' or plot == 'N/A': plot = '0'
-            plot = client.replaceHTMLCodes(plot)
-            plot = plot.encode('utf-8')
-
-            tagline = re.compile('[.!?][\s]{1,2}(?=[A-Z])').split(plot)[0]
-            try: tagline = tagline.encode('utf-8')
+            votes = item.get('votes', '0')
+            try: votes = str(format(int(votes), ',d'))
             except: pass
 
-            self.list.append({'title': title, 'originaltitle': title, 'year': year, 'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa, 'director': director, 'writer': writer, 'cast': cast, 'plot': plot, 'tagline': tagline, 'name': name, 'code': imdb, 'imdb': imdb, 'poster': poster, 'channel': i[2], 'num': i[3]})
+            mpaa = item.get('certification', '0')
+            if not mpaa: mpaa = '0'
+
+            tagline = item.get('tagline', '0')
+
+            plot = item.get('overview', '0')
+
+            people = trakt.getPeople(imdb, 'movies')
+
+            director = writer = ''
+            if 'crew' in people and 'directing' in people['crew']:
+                director = ', '.join([director['person']['name'] for director in people['crew']['directing'] if director['job'].lower() == 'director'])
+            if 'crew' in people and 'writing' in people['crew']:
+                writer = ', '.join([writer['person']['name'] for writer in people['crew']['writing'] if writer['job'].lower() in ['writer', 'screenplay', 'author']])
+
+            cast = []
+            for person in people.get('cast', []):
+                cast.append({'name': person['person']['name'], 'role': person['character']})
+            cast = [(person['name'], person['role']) for person in cast]
+
+            try:
+                if self.lang == 'en' or self.lang not in item.get('available_translations', [self.lang]): raise Exception()
+
+                trans_item = trakt.getMovieTranslation(imdb, self.lang, full=True)
+
+                title = trans_item.get('title') or title
+                tagline = trans_item.get('tagline') or tagline
+                plot = trans_item.get('overview') or plot
+            except:
+                pass
+
+            self.list.append({'title': title, 'originaltitle': originaltitle, 'year': year, 'premiered': premiered, 'genre': genre, 'duration': duration, 'rating': rating, 'votes': votes, 'mpaa': mpaa, 'director': director, 'writer': writer, 'cast': cast, 'plot': plot, 'tagline': tagline, 'imdb': imdb, 'tmdb': tmdb, 'poster': '0', 'channel': i[2], 'num': i[3]})
         except:
             pass
 
@@ -193,61 +197,95 @@ class channels:
 
 
     def channelDirectory(self, items):
-        if items == None or len(items) == 0: return
+        if items == None or len(items) == 0: control.idle() ; sys.exit()
 
-        playbackMenu = control.lang(30292).encode('utf-8') if control.setting('autoplay') == 'true' else control.lang(30291).encode('utf-8')
+        sysaddon = sys.argv[0]
+
+        syshandle = int(sys.argv[1])
 
         addonPoster, addonBanner = control.addonPoster(), control.addonBanner()
-        addonFanart = control.addonFanart()
-        sysaddon = sys.argv[0]
+
+        addonFanart, settingFanart = control.addonFanart(), control.setting('fanart')
+
+        try: isOld = False ; control.item().getArt('type')
+        except: isOld = True
+
+        isPlayable = 'true' if not 'plugin' in control.infoLabel('Container.PluginName') else 'false'
+
+        playbackMenu = control.lang(32063).encode('utf-8') if control.setting('hosts.mode') == '2' else control.lang(32064).encode('utf-8')
+
+        queueMenu = control.lang(32065).encode('utf-8')
+
+        refreshMenu = control.lang(32072).encode('utf-8')
 
 
         for i in items:
             try:
-                label = "[B]%s[/B] : %s" % (i['channel'].upper(), i['name'])
-                sysname = urllib.quote_plus(i['name'])
+                label = '[B]%s[/B] : %s (%s)' % (i['channel'].upper(), i['title'], i['year'])
+                sysname = urllib.quote_plus('%s (%s)' % (i['title'], i['year']))
                 systitle = urllib.quote_plus(i['title'])
-                imdb, tmdb, year = i['imdb'], '0', i['year']
-
-                poster, banner = i['poster'], i['poster']
-                if poster == '0': poster = addonPoster
-                if banner == '0' and poster == '0': banner = addonBanner
-                elif banner == '0': banner = poster
+                imdb, tmdb, year = i['imdb'], i['tmdb'], i['year']
 
                 meta = dict((k,v) for k, v in i.iteritems() if not v == '0')
+                meta.update({'code': imdb, 'imdbnumber': imdb, 'imdb_id': imdb})
+                meta.update({'tmdb_id': tmdb})
+                meta.update({'mediatype': 'movie'})
                 meta.update({'trailer': '%s?action=trailer&name=%s' % (sysaddon, sysname)})
-                if i['duration'] == '0': meta.update({'duration': '120'})
-                try: meta.update({'duration': str(int(meta['duration']) * 60)})
+                #meta.update({'trailer': 'plugin://script.extendedinfo/?info=playtrailer&&id=%s' % imdb})
+                meta.update({'playcount': 0, 'overlay': 6})
+                try: meta.update({'genre': cleangenre.lang(meta['genre'], self.lang)})
                 except: pass
+
                 sysmeta = urllib.quote_plus(json.dumps(meta))
 
-                url = '%s?action=play&name=%s&title=%s&year=%s&imdb=%s&tmdb=%s&t=%s' % (sysaddon, sysname, systitle, year, imdb, tmdb, self.systime)
+
+                url = '%s?action=play&title=%s&year=%s&imdb=%s&meta=%s&t=%s' % (sysaddon, systitle, year, imdb, sysmeta, self.systime)
                 sysurl = urllib.quote_plus(url)
 
+
                 cm = []
+
+                cm.append((queueMenu, 'RunPlugin(%s?action=queueItem)' % sysaddon))
+
+                cm.append((refreshMenu, 'RunPlugin(%s?action=refresh)' % sysaddon))
+
                 cm.append((playbackMenu, 'RunPlugin(%s?action=alterSources&url=%s&meta=%s)' % (sysaddon, sysurl, sysmeta)))
-                cm.append((control.lang(30293).encode('utf-8'), 'Action(Info)'))
-                cm.append((control.lang(30294).encode('utf-8'), 'RunPlugin(%s?action=refresh)' % (sysaddon)))
-                cm.append((control.lang(30295).encode('utf-8'), 'RunPlugin(%s?action=openSettings)' % (sysaddon)))
-                cm.append((control.lang(30296).encode('utf-8'), 'RunPlugin(%s?action=openPlaylist)' % (sysaddon)))
 
-                item = control.item(label=label, iconImage=poster, thumbnailImage=poster)
+                if isOld == True:
+                    cm.append((control.lang2(19033).encode('utf-8'), 'Action(Info)'))
 
-                try: item.setArt({'poster': poster, 'banner': banner})
-                except: pass
 
-                if not addonFanart == None:
+                item = control.item(label=label)
+
+                art = {}
+
+                if 'poster2' in i and not i['poster2'] == '0':
+                    art.update({'icon': i['poster2'], 'thumb': i['poster2'], 'poster': i['poster2']})
+                elif 'poster' in i and not i['poster'] == '0':
+                    art.update({'icon': i['poster'], 'thumb': i['poster'], 'poster': i['poster']})
+                else:
+                    art.update({'icon': addonPoster, 'thumb': addonPoster, 'poster': addonPoster})
+
+                art.update({'banner': addonBanner})
+
+                if settingFanart == 'true' and 'fanart' in i and not i['fanart'] == '0':
+                    item.setProperty('Fanart_Image', i['fanart'])
+                elif not addonFanart == None:
                     item.setProperty('Fanart_Image', addonFanart)
 
+                item.setArt(art)
+                item.addContextMenuItems(cm)
+                item.setProperty('IsPlayable', isPlayable)
                 item.setInfo(type='Video', infoLabels = meta)
-                item.setProperty('Video', 'true')
-                item.setProperty('IsPlayable', 'true')
-                item.addContextMenuItems(cm, replaceItems=True)
-                control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=False)
+
+                video_streaminfo = {'codec': 'h264'}
+                item.addStreamInfo('video', video_streaminfo)
+
+                control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
             except:
                 pass
 
-        control.content(int(sys.argv[1]), 'movies')
-        control.directory(int(sys.argv[1]), cacheToDisc=True)
+        control.content(syshandle, 'files')
+        control.directory(syshandle, cacheToDisc=True)
 
 

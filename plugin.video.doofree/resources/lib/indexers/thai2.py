@@ -11,8 +11,9 @@ import os,sys,re,json,urllib,urlparse,cookielib,urllib2
 try: action = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))['action']
 except: action = None
 
-from resources.lib.libraries import control
-from resources.lib.libraries import client
+from resources.lib.modules import control
+from resources.lib.modules import client
+from resources.lib.modules import views
 
 addonFanart = control.addonFanart()
 sysaddon = sys.argv[0]
@@ -34,6 +35,7 @@ class thai:
     List all the shows from a specific category
     '''
     def listShows(self, catid, page, limit, channel):
+        syshandle = int(sys.argv[1])
         url = self.shows_link % (page, limit, channel, catid)
         try: result = client.request(url)
         except: pass
@@ -69,17 +71,18 @@ class thai:
                 item = control.item('Page ' + str(page), iconImage='', thumbnailImage='')
                 if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
                 item.setInfo(type="Video", infoLabels={"Title": 'Page ' + str(page), "OriginalTitle": 'Page ' + str(page)})
-                control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
+                control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 
-        control.content(int(sys.argv[1]), 'movies')
-        if control.skin == 'skin.confluence': control.execute('Container.SetViewMode(500)')
-        control.directory(int(sys.argv[1]), cacheToDisc=True)
+        control.content(syshandle, 'tvshows')
+        control.directory(syshandle, cacheToDisc=True)
+        views.setView('tvshows', {'skin.estuary': 500, 'skin.confluence': 500})
 
     '''
     List all shows episodes
     Page starts at 0
     '''
     def listEpisodes(self, showid, page, image):
+        syshandle = int(sys.argv[1])
         url = self.episodes_link % (showid)
         try: result = client.request(url)
         except: pass
@@ -107,11 +110,11 @@ class thai:
             item = control.item(name, iconImage=image, thumbnailImage=image)
             if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
             item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
-            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=False)
+            control.addItem(handle=syshandle, url=url, listitem=item, isFolder=False)
 
-        control.content(int(sys.argv[1]), 'movies')
-        if control.skin == 'skin.confluence': control.execute('Container.SetViewMode(50)')
-        control.directory(int(sys.argv[1]), cacheToDisc=True)
+        control.content(syshandle, 'episodes')
+        control.directory(syshandle, cacheToDisc=True)
+        views.setView('episodes', {'skin.estuary': 55, 'skin.confluence': 50})
 
     '''
     Get the video url by member_id cookie

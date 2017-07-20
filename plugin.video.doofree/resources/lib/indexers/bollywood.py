@@ -5,9 +5,10 @@ import urlparse,urllib,random,re,os,sys
 try: import xbmc
 except: pass
 
-from resources.lib.libraries import control
-from resources.lib.libraries import client
-from resources.lib.libraries import cache
+from resources.lib.modules import control
+from resources.lib.modules import client
+from resources.lib.modules import cache
+from resources.lib.modules import views
 
 sysaddon = sys.argv[0]
 
@@ -18,6 +19,8 @@ class bollywood:
     def listBollywood(self, url, page):
         try: html = client.request(url + 'page/' + str(page))
         except: pass
+
+        syshandle = int(sys.argv[1])
 
         result = client.parseDOM(html, 'article', attrs={'id': 'posts'})
         result = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'img', ret='src'), client.parseDOM(i, 'a')) for i in result]
@@ -38,11 +41,11 @@ class bollywood:
         print query
         item = control.item('Next page', iconImage='', thumbnailImage='')
         item.setInfo(type="Video", infoLabels={"Title": 'Page ' + str(page), "OriginalTitle": 'Page ' + str(page)})
-        control.addItem(handle=int(sys.argv[1]), url=query, listitem=item, isFolder=True)
+        control.addItem(handle=syshandle, url=query, listitem=item, isFolder=True)
 
-        control.content(int(sys.argv[1]), 'movies')
-        if control.skin == 'skin.confluence': control.execute('Container.SetViewMode(500)')
-        control.directory(int(sys.argv[1]), cacheToDisc=True)
+        control.content(syshandle, 'movies')
+        control.directory(syshandle, cacheToDisc=True)
+        views.setView('movies', {'skin.estuary': 500, 'skin.confluence': 500})
 
     def resolveUrl(self, name, url, image):
         try: html = client.request(url)
