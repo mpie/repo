@@ -79,7 +79,7 @@ class movies:
         self.imdbwatchlist2_link = 'http://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user
 
 
-    def get(self, url, idx=True, create_directory=True):
+    def get(self, url, idx=True, create_directory=True, skin=500):
         try:
             try: url = getattr(self, url + '_link')
             except: pass
@@ -120,7 +120,7 @@ class movies:
                 if idx == True: self.worker()
 
 
-            if idx == True and create_directory == True: self.movieDirectory(self.list)
+            if idx == True and create_directory == True: self.movieDirectory(self.list, skin)
             return self.list
         except:
             pass
@@ -150,7 +150,7 @@ class movies:
             if (q == None or q == ''): return
 
             url = self.search_link + urllib.quote_plus(q)
-            url = '%s?action=moviePage&url=%s' % (sys.argv[0], urllib.quote_plus(url))
+            url = '%s?action=moviePage&url=%s&skin=55' % (sys.argv[0], urllib.quote_plus(url))
             control.execute('Container.Update(%s)' % url)
         except:
             return
@@ -806,7 +806,7 @@ class movies:
             pass
 
 
-    def movieDirectory(self, items):
+    def movieDirectory(self, items, skin=500):
         if items == None or len(items) == 0: control.idle() ; sys.exit()
 
         sysaddon = sys.argv[0]
@@ -951,7 +951,7 @@ class movies:
 
         control.content(syshandle, 'movies')
         control.directory(syshandle, cacheToDisc=True)
-        views.setView('movies', {'skin.estuary': 500, 'skin.confluence': 500})
+        views.setView('movies', {'skin.estuary': skin, 'skin.confluence': 500})
 
 
     def addDirectory(self, items, queue=False):

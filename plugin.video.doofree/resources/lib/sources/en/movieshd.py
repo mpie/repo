@@ -9,7 +9,6 @@ import re,urllib,urlparse,json,base64,time
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
-from resources.lib.modules import cache
 from resources.lib.modules import directstream
 
 
@@ -18,7 +17,7 @@ class source:
         self.priority = 1
         self.language = ['en']
         self.domains = ['movieshd.tv', 'movieshd.is', 'movieshd.watch', 'flixanity.is', 'flixanity.me','istream.is']
-        self.base_link = 'https://istream.is'
+        self.base_link = 'https://flixanity.online'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:

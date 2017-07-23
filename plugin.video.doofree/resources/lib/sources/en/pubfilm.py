@@ -5,100 +5,99 @@
     Copyright (C) 2017 DooFree
 '''
 
+import re, urllib, urlparse, json, base64
 
-import re,urllib,urlparse,json,base64
-
+from resources.lib.modules import cleantitle
 from resources.lib.modules import client
-from resources.lib.modules import cache
+from resources.lib.modules import dom_parser
 from resources.lib.modules import directstream
+from resources.lib.modules import source_utils
 
 
 class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['pubfilmno1.com', 'pubfilm.com', 'pidtv.com', 'pubfilm.ac']
-        self.base_link = 'http://pubfilm.ac'
-        self.moviesearch_link = '/%s-%s-full-hd-pubfilm-free.html'
-        self.moviesearch_link_2 = '/%s-%s-pubfilm-free.html'
-        self.tvsearch_link = '/wp-admin/admin-ajax.php'
-        self.tvsearch_link_2 = '/?s=%s'
+        self.domains = ['pubfilm.to']
+        self.base_link = 'http://pubfilm.to'
 
+        self.tvsearch_link = '?c=movie&m=quickSearch&keyword=%s'
+        self.tvsearch_link_2 = '?c=movie&m=filter&keyword=%s'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
-            title = (title.translate(None, '\/:*?"\'<>|!,')).replace(' ', '-').replace('--', '-').lower()
-
-            query = self.moviesearch_link % (title, year)
-            query = urlparse.urljoin(self.base_link, query)
-
-            for i in range(3):
-                result = client.request(query, timeout='10')
-                if not result == None: break
-
-            if result == None:
-                query = self.moviesearch_link_2 % (title, year)
-                query = urlparse.urljoin(self.base_link, query)
-
-                for i in range(3):
-                    result = client.request(query, limit='5', timeout='10')
-                    if not result == None: break
-
-            if result == None:
-                raise Exception()
-
-            url = re.findall('(?://.+?|)(/.+)', query)[0]
-            url = url.encode('utf-8')
-            return url
+            return self.__search([title] + source_utils.aliases_to_array(aliases), year)
         except:
             return
 
-
     def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
         try:
-            url = {'imdb': imdb, 'tvdb': tvdb, 'tvshowtitle': tvshowtitle, 'year': year}
+            url = {'tvshowtitle': tvshowtitle, 'aliases': aliases, 'year': year}
             url = urllib.urlencode(url)
             return url
         except:
             return
 
-
     def episode(self, url, imdb, tvdb, title, premiered, season, episode):
         try:
+
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
+            tvshowtitle = data['tvshowtitle']
+            aliases = source_utils.aliases_to_array(eval(data['aliases']))
+            # maybe ignore the year because they use wrong dates on seasons
+            url = self.__search([tvshowtitle] + aliases, data['year'], season)
 
-            year = re.findall('(\d{4})', premiered)[0]
-            season = '%01d' % int(season) ; episode = '%01d' % int(episode)
-            tvshowtitle = '%s %s: Season %s' % (data['tvshowtitle'], year, season)
+            # if url == None: raise Exception()
+            if not url: return
 
-            url = cache.get(self.pidtv_tvcache, 120, tvshowtitle)
-
-            if url == None: raise Exception()
-
-            url += '?episode=%01d' % int(episode)
+            url += '%01d' % int(episode)
+            url = urlparse.urljoin(self.base_link, url)
             url = url.encode('utf-8')
             return url
         except:
+            pass
             return
 
-
-    def pidtv_tvcache(self, tvshowtitle):
+    def __search(self, titles, year, season='0'):
         try:
-            post = urllib.urlencode({'aspp': tvshowtitle, 'action': 'ajaxsearchpro_search', 'options': 'qtranslate_lang=0&set_exactonly=checked&set_intitle=None&customset%5B%5D=post', 'asid': '5', 'asp_inst_id': '5_1'})
-            url = urlparse.urljoin(self.base_link, self.tvsearch_link)
-            for i in range(3):
-                url = client.request(url, post=post, XHR=True, timeout='10')
-                if not url == None: break
-            url = zip(client.parseDOM(url, 'a', ret='href', attrs={'class': 'asp_res_url'}), client.parseDOM(url, 'a', attrs={'class': 'asp_res_url'}))
-            url = [(i[0], re.findall('(.+?: Season \d+)', i[1].strip())) for i in url]
-            url = [i[0] for i in url if len(i[1]) > 0 and tvshowtitle == i[1][0]][0]
-            url = urlparse.urljoin(self.base_link, url)
-            url = re.findall('(?://.+?|)(/.+)', url)[0]
+            url = urlparse.urljoin(self.base_link, self.tvsearch_link) % (urllib.quote_plus(titles[0]))
+            url2 = urlparse.urljoin(self.base_link, self.tvsearch_link_2) % (urllib.quote_plus(titles[0]))
+            result = client.request(url)
+            if season <> '0':
+                try:
+                    id = [j['id'] for j in json.loads(result) if
+                          str.upper(str(j['title'])) == str.upper(titles[0] + ' - Season ' + season)]
+                    page = '%s-season-%s-stream-%s.html' % (str.replace(titles[0], ' ', '-'), season, id[0])
+                except:
+                    result = client.request(url2)
+                    result = client.parseDOM(result, 'div', attrs={'class': 'recent-item'})
+                    page = \
+                    [re.findall(r'class=\'title_new\'>.*?Season\s+%s.*?<.*?href="([^"]+)">' % season, r, re.DOTALL) for
+                     r in result if bool(re.search(r'class=\'title_new\'>.*?Season\s+%s.*?<' % season, r, re.DOTALL))][
+                        0][0]
+
+            else:
+                try:
+                    id = [j['id'] for j in json.loads(result) if
+                          str.upper(str(j['title'])) == str.upper(titles[0]) and j['year'] == year]
+                    page = '%s-stream-%s.html' % (str.replace(titles[0], ' ', '-'), id[0])
+                except:
+                    result = client.request(url2)
+                    result = client.parseDOM(result, 'div', attrs={'class': 'recent-item'})
+                    page = \
+                    [re.findall(r'class=\'title_new\'>.*?\(%s\).*?href="([^"]+)"' % year, r, re.DOTALL) for r in result
+                     if bool(re.search(r'class=\'title_new\'>.*?\(%s\)' % year, r, re.DOTALL))][0][0]
+
+            url = page if 'http' in page else urlparse.urljoin(self.base_link, page)
+            result = client.request(url)
+            url = re.findall(u'<center><iframe\s+id="myiframe".*?src="([^"]+)', result)[0]
+            result = client.request(url)
+            rex = 'href=\'([^\']+episode=)' if season <> '0' else 'class="server(?:Active)?"><a\s+href="([^"]+)"'
+            url = re.findall(rex, result)[0]
             return url
         except:
             return
-
 
     def sources(self, url, hostDict, hostprDict):
         try:
@@ -106,50 +105,48 @@ class source:
 
             if url == None: return sources
 
-            url = urlparse.urljoin(self.base_link, url)
-
-            content = re.compile('(.+?)\?episode=\d*$').findall(url)
+            content = re.compile('(.+?)&server=.+&episode=\d*$').findall(url)
             content = 'movie' if len(content) == 0 else 'episode'
 
-            try: url, episode = re.compile('(.+?)\?episode=(\d*)$').findall(url)[0]
-            except: pass
+            if content <> 'movie':
+                try:
+                    uri, server, episode = re.compile('(.+?)&server=(.+)&episode=(\d*)$').findall(url)[0]
+                    url1 = '%s&server=1&episode=%s' % (uri, episode)
+                except:
+                    url1 = url
+            else:
+                url1 = url
 
             for i in range(3):
-                result = client.request(url, timeout='10')
+                result = client.request(url1, timeout='10')
                 if not result == None: break
-            result = result.replace('"target="EZWebPlayer"', '" target="EZWebPlayer"')
-            url = zip(client.parseDOM(result, 'a', ret='href', attrs={'target': 'EZWebPlayer'}), client.parseDOM(result, 'a', attrs={'target': 'EZWebPlayer'}))
-            url = [(i[0], re.compile('(\d+)').findall(i[1])) for i in url]
-            url = [(i[0], i[1][-1]) for i in url if len(i[1]) > 0]
+            try:
+                data = re.findall('>({"data".*]})<', result)[0]
+                data = json.loads(data)
 
-            if content == 'episode':
-                url = [i for i in url if i[1] == '%01d' % int(episode)]
-
-            links = [client.replaceHTMLCodes(i[0]) for i in url]
-
+                links_ = data['data']
+                links = []
+                for l in links_: links.append(l['files'])
+            except:
+                links = re.findall(r"<source\s+src='([^>]+)>", result)
 
             for u in links:
                 try:
-                    for i in range(3):
-                        result = client.request(u, timeout='10')
-                        if not result == None: break
-                    result = re.findall('sources\s*:\s*\[(.+?)\]', result)[0]
-                    result = re.findall('"file"\s*:\s*"(.+?)"', result)
+                    u = str.replace(str(u), "'", "")
+                    l = re.findall('^http[^\s]+', u)[0]
+                    valid, hoster = source_utils.is_host_valid(l, hostDict)
+                    if not valid: continue
+                    l = directstream.googletag(l)[0]
+                    sources.append(
+                        {'source': 'gvideo', 'quality': l['quality'], 'language': 'en', 'url': l['url'], 'direct': True,
+                         'debridonly': False})
 
-                    for url in result:
-                        try:
-                            url = url.replace('\\', '')
-                            url = directstream.googletag(url)[0]
-                            sources.append({'source': 'gvideo', 'quality': url['quality'], 'language': 'en', 'url': url['url'], 'direct': True, 'debridonly': False})
-                        except:
-                            pass
                 except:
                     pass
 
             return sources
         except:
             return sources
-
 
     def resolve(self, url):
         return directstream.googlepass(url)

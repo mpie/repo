@@ -22,6 +22,14 @@ class player(xbmc.Player):
     def __init__ (self):
         xbmc.Player.__init__(self)
 
+    def playLiveStream(self, name, url, image):
+        item = control.item(path=url, iconImage=image, thumbnailImage=image)
+        item.setInfo(type='Video', infoLabels={'title': name})
+        item.setProperty('Video', 'true')
+        item.setProperty('IsPlayable', 'true')
+        control.playlist.clear()
+
+        control.player.play(url)
 
     def run(self, title, year, season, episode, imdb, tvdb, url, meta):
         try:

@@ -57,6 +57,11 @@ query = params.get('query')
 
 source = params.get('source')
 
+try:
+    skin = params.get('skin')
+except:
+    skin = 500
+
 # More thai params
 content = params.get('content')
 
@@ -206,7 +211,10 @@ elif action == 'movies':
 elif action == 'moviePage':
     from resources.lib.indexers import movies
 
-    movies.movies().get(url)
+    if skin is None:
+        skin = 500
+
+    movies.movies().get(url, skin=skin)
 
 elif action == 'movieWidget':
     from resources.lib.indexers import movies
@@ -266,7 +274,10 @@ elif action == 'tvshows':
 elif action == 'tvshowPage':
     from resources.lib.indexers import tvshows
 
-    tvshows.tvshows().get(url)
+    if skin is None:
+        skin = 54
+
+    tvshows.tvshows().get(url, skin=skin)
 
 elif action == 'tvSearch':
     from resources.lib.indexers import tvshows

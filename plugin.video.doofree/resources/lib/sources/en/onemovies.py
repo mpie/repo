@@ -12,7 +12,6 @@ from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import directstream
 from resources.lib.modules import jsunfuck
-from resources.lib.modules import cache
 
 CODE = '''def retA():
     class Infix:
@@ -40,8 +39,8 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['123movies.to', '123movies.ru', '123movies.is', '123movies.gs', '123-movie.ru', '123movies-proxy.ru', '123movies.moscow', '123movies.msk.ru', '123movies.msk.ru', '123movies.unblckd.me', 'gomovies.to']
-        self.base_link = 'https://gomovies.to'
+        self.domains = ['123movies.to', '123movies.ru', '123movies.is', '123movies.gs', '123-movie.ru', '123movies-proxy.ru', '123movies.moscow', '123movies.msk.ru', '123movies.msk.ru', '123movies.unblckd.me', 'gostream.is']
+        self.base_link = 'https://gostream.is'
         self.search_link = '/ajax/suggest_search'
         self.search_link_2 = '/movie/search/%s'
         self.info_link = '/ajax/movie_load_info/%s'

@@ -6,18 +6,22 @@
 '''
 
 
-import re,json,urlparse,time
+import json
+import re
+import time
+import urllib
+import urlparse
 
 from resources.lib.modules import cache
-from resources.lib.modules import control
 from resources.lib.modules import cleandate
 from resources.lib.modules import client
-from resources.lib.modules import utils
+from resources.lib.modules import control
 from resources.lib.modules import log_utils
+from resources.lib.modules import utils
 
 BASE_URL = 'http://api.trakt.tv'
-V2_API_KEY = 'c029c80fd3d3a5284ee820ba1cf7f0221da8976b8ee5e6c4af714c22fc4f46fa'
-CLIENT_SECRET = '90a1840447a1e39d350023263902fe7010338d19789e6260f18df56a8b07a68a'
+V2_API_KEY = '69c02554717a67733a58000917e2be6d71c9f58dcf347d21e616e0be5c9d0d1b'
+CLIENT_SECRET = '49b9132329e16d81cae68df9bd16651a2e0f49787cbe49147e1988a11d55bb24'
 REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 
 def __getTrakt(url, post=None):
@@ -424,7 +428,7 @@ def SearchAll(title, year, full=True):
 
 def SearchMovie(title, year, full=True):
     try:
-        url = '/search/movie?query=%s' % title
+        url = '/search/movie?query=%s' % urllib.quote_plus(title)
 
         if year: url += '&year=%s' % year
         if full: url += '&extended=full'
@@ -434,7 +438,7 @@ def SearchMovie(title, year, full=True):
 
 def SearchTVShow(title, year, full=True):
     try:
-        url = '/search/show?query=%s' % title
+        url = '/search/show?query=%s' % urllib.quote_plus(title)
 
         if year: url += '&year=%s' % year
         if full: url += '&extended=full'

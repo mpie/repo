@@ -10,14 +10,15 @@ import re,urllib,urlparse
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import directstream
+from resources.lib.modules import source_utils
 
 
 class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['watchhd.co', 'watchonline.one', 'watchonline.vip']
-        self.base_link = 'http://watchhd.co'
+        self.domains = ['watchonline.tube']
+        self.base_link = 'http://watchonline.tube'
 
 
     def movie(self, imdb, title, localtitle, aliases, year):
@@ -63,53 +64,52 @@ class source:
                 data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
                 if 'tvshowtitle' in data:
-                    url = '%s/episodes/%s-%01dx%01d/' % (self.base_link, cleantitle.geturl(data['tvshowtitle']), int(data['season']), int(data['episode']))
+                    url = '%s/episode/%s-s%02de%02d/' % (self.base_link, cleantitle.geturl(data['tvshowtitle']), int(data['season']), int(data['episode']))
                     year = re.findall('(\d{4})', data['premiered'])[0]
+
+                    url = client.request(url, output='geturl')
+                    if url == None: raise Exception()
+
+                    r = client.request(url)
+
+                    y = client.parseDOM(r, 'span', attrs = {'class': 'date'})
+                    y += [i for i in client.parseDOM(r, 'div', attrs = {'class': 'metadatac'}) if 'date' in i]
+                    y = re.findall('(\d{4})', y[0])[0]
+                    if not y == year: raise Exception()
+
                 else:
-                    url = '%s/movies/%s/' % (self.base_link, cleantitle.geturl(data['title']))
-                    year = data['year']
+                    url = '%s/movie/%s-%s/' % (self.base_link, cleantitle.geturl(data['title']), data['year'])
 
-                url = client.request(url, timeout='10', output='geturl')
-                if url == None: raise Exception()
+                    url = client.request(url, output='geturl')
+                    if url == None: raise Exception()
 
-                r = client.request(url, timeout='10')
+                    r = client.request(url)
 
-                y = client.parseDOM(r, 'a', attrs={'rel': 'tag', 'href': '[^\'"]*year[^\'"]*'})[0]
-                y = re.findall('(\d{4})', y)[0]
-                if not y == year: raise Exception()
             else:
                 url = urlparse.urljoin(self.base_link, url)
 
-                r = client.request(url, timeout='10')
-
+                r = client.request(url)
 
             links = client.parseDOM(r, 'iframe', ret='src')
 
             for link in links:
-                try:
-                    url = link.replace('\/', '/')
-                    url = client.replaceHTMLCodes(url)
-                    url = 'http:' + url if url.startswith('//') else url
-                    url = url.encode('utf-8')
-
-                    if not '.php' in url: raise Exception()
-
-                    r = client.request(url, timeout='10')
-
-                    r = re.findall('file\s*:\s*(?:\"|\')(.+?)(?:\"|\')', r)
-
-                    for i in r:
-                        try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'language': 'en', 'url': i, 'direct': True, 'debridonly': False})
-                        except: pass
+                try:                    
+                    valid, hoster = source_utils.is_host_valid(link, hostDict)
+                    if not valid: continue
+                    urls, host, direct = source_utils.check_directstreams(link, hoster)
+                    for x in urls:
+                         if x['quality'] == 'SD':
+                             try:                                 
+                                 if 'HDTV' in x['url'] or '720' in  x['url']: x['quality'] = 'HD'
+                                 if '1080' in  x['url']: x['quality'] = '1080p'
+                             except:
+                                 pass
+                    sources.append({'source': host, 'quality': x['quality'], 'language': 'en', 'url': x['url'], 'direct': direct, 'debridonly': False})
                 except:
                     pass
-
             return sources
         except:
             return sources
 
-
     def resolve(self, url):
-        return directstream.googlepass(url)
-
-
+        return url

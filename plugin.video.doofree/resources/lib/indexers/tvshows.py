@@ -79,7 +79,7 @@ class tvshows:
         self.imdbwatchlist_link = 'http://www.imdb.com/user/ur%s/watchlist?sort=alpha,asc' % self.imdb_user
         self.imdbwatchlist2_link = 'http://www.imdb.com/user/ur%s/watchlist?sort=date_added,desc' % self.imdb_user
 
-    def get(self, url, idx=True, create_directory=True):
+    def get(self, url, idx=True, create_directory=True, skin=54):
         try:
             try:
                 url = getattr(self, url + '_link')
@@ -126,7 +126,7 @@ class tvshows:
                 self.list = cache.get(self.tvmaze_list, 168, url)
                 if idx == True: self.worker()
 
-            if idx == True and create_directory == True: self.tvshowDirectory(self.list)
+            if idx == True and create_directory == True: self.tvshowDirectory(self.list, skin)
             return self.list
         except:
             pass
@@ -143,7 +143,7 @@ class tvshows:
             if (q == None or q == ''): return
 
             url = self.search_link + urllib.quote_plus(q)
-            url = '%s?action=tvshowPage&url=%s' % (sys.argv[0], urllib.quote_plus(url))
+            url = '%s?action=tvshowPage&url=%s&skin=55' % (sys.argv[0], urllib.quote_plus(url))
             control.execute('Container.Update(%s)' % url)
         except:
             return
@@ -1119,7 +1119,7 @@ class tvshows:
         except:
             pass
 
-    def tvshowDirectory(self, items):
+    def tvshowDirectory(self, items, skin=54):
         if items == None or len(items) == 0: control.idle(); sys.exit()
 
         sysaddon = sys.argv[0]
@@ -1287,7 +1287,7 @@ class tvshows:
 
         control.content(syshandle, 'tvshows')
         control.directory(syshandle, cacheToDisc=True)
-        views.setView('tvshows', {'skin.estuary': 54, 'skin.confluence': 500})
+        views.setView('tvshows', {'skin.estuary': skin, 'skin.confluence': 500})
 
     def addDirectory(self, items, queue=False):
         if items == None or len(items) == 0: control.idle(); sys.exit()

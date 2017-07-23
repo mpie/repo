@@ -5,11 +5,10 @@
     Copyright (C) 2017 DooFree
 '''
 
-import re, urllib, urlparse, base64, json
+import re, urllib, urlparse
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import directstream
-from resources.lib.modules import cache
 
 
 class source:
