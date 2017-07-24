@@ -20,7 +20,7 @@
                     <screenshot>resources/screenshots/screenshot-02.jpg</screenshot>
                     <screenshot>resources/screenshots/screenshot-03.jpg</screenshot>
                 </assets>
-                <news>- DooFree 4.0 has launched!</news>
+                <news>- Fixed hash</news>
             </extension>
         </addon>
         <addon id="plugin.video.kijk" name="Kijk Upload" version="0.0.2" provider-name="Mpie">
