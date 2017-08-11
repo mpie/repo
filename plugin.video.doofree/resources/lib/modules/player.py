@@ -25,9 +25,6 @@ class player(xbmc.Player):
     def playLiveStream(self, name, url, image):
         if '.ts' in url:
             stype = 'TSDOWNLOADER'
-        elif '.m3u' in url:
-            stype = 'HLS'
-        if stype:
             from F4mProxy import f4mProxyHelper
             f4mp=f4mProxyHelper()
             xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
