@@ -10,18 +10,6 @@ import urlparse, sys, urllib, shutil, os, xbmc, xbmcaddon
 
 # update repo
 addonInfo = xbmcaddon.Addon().getAddonInfo
-changelog = os.path.join(xbmc.translatePath(addonInfo('path')), 'changelog.txt')
-with open(changelog, 'r') as f:
-    first_line = f.readline()
-    if (int(first_line) <= 4):
-        updatedFile = os.path.join(xbmc.translatePath(addonInfo('path')), '..', 'repository.mpie', 'updated.txt')
-        if (not os.path.isfile(updatedFile)):
-            srcXML = os.path.join(xbmc.translatePath(addonInfo('path')), 'repo', 'addon.xml')
-            dstXML = os.path.join(xbmc.translatePath(addonInfo('path')), '..', 'repository.mpie')
-            srcTXT = os.path.join(xbmc.translatePath(addonInfo('path')), 'repo', 'updated.txt')
-            dstTXT = os.path.join(xbmc.translatePath(addonInfo('path')), '..', 'repository.mpie')
-            shutil.copy(srcXML, dstXML)
-            shutil.copy(srcTXT, dstTXT)
 
 params = dict(urlparse.parse_qsl(sys.argv[2].replace('?', '')))
 
@@ -83,6 +71,11 @@ if action == None:
 
     navigator.navigator().root()
 
+elif action == 'liveTV':
+    from resources.lib.indexers import navigator
+
+    navigator.navigator().liveTV()
+
 elif action == 'thaiLiveTV':
     from resources.lib.indexers import navigator
 
@@ -97,6 +90,11 @@ elif action == 'thaiShows2':
     from resources.lib.indexers import navigator
 
     navigator.navigator().thaiShows2()
+
+elif action == 'playLiveTV':
+    from resources.lib.modules import player
+
+    player.player().playLiveStream(name, url, image)
 
 elif action == 'playThaiLiveTV':
     from resources.lib.modules import player

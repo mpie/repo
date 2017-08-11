@@ -6,7 +6,7 @@
 '''
 
 
-import re,sys,json,time,xbmc
+import re,sys,json,time,xbmc,xbmcplugin
 import hashlib,urllib,os,zlib,base64,codecs,xmlrpclib
 
 try: from sqlite3 import dbapi2 as database
@@ -23,6 +23,17 @@ class player(xbmc.Player):
         xbmc.Player.__init__(self)
 
     def playLiveStream(self, name, url, image):
+        if '.ts' in url:
+            stype = 'TSDOWNLOADER'
+        elif '.m3u' in url:
+            stype = 'HLS'
+        if stype:
+            from F4mProxy import f4mProxyHelper
+            f4mp=f4mProxyHelper()
+            xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
+            f4mp.playF4mLink(url,name,proxy=None,use_proxy_for_chunks=False, maxbitrate=0, simpleDownloader=False, auth=None, streamtype=stype,setResolved=False,swf=None , callbackpath="",callbackparam="", iconImage=image)
+            return
+
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo(type='Video', infoLabels={'title': name})
         item.setProperty('Video', 'true')
