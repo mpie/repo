@@ -47,24 +47,6 @@ class navigator:
         views.setView('movies', {'skin.estuary': 500, 'skin.confluence': 500})
 
 
-    def liveTV(self):
-        # live4 is asia, uk99 is uk
-        self.addDirectoryItem('FOX Sports 1 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22597.ts&name=FOXSports1HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('FOX Sports 2 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22596.ts&name=FOXSports2HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('FOX Sports 3', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22598.ts&name=FOXSports3', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('Film1 premiere HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22601.ts&name=Film1PremiereHD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('RTL4 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22581.ts&name=RTL4HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('RTL5 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22580.ts&name=RTL5HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('SBS6 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22577.ts&name=SBS6HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('RTL7 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22579.ts&name=RTL7HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('RTL8 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22578.ts&name=RTL8HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('SBS9 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22576.ts&name=SBS9HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('Net5 HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22591.ts&name=NET5HD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('Veronica HD', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22574.ts&name=VeronicaHD', '', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('Ziggo sport voetbal', 'playLiveTV&url=http://185.59.221.175:25461/live/15pUsZKUIw/4boblpukUd/22568.ts&name=Ziggo%20sport%20voetbal', '', 'DefaultMovies.png', isFolder=False)
-        self.endDirectory()
-
-
     def thaiLiveTV(self):
         # live4 is asia, uk99 is uk
         self.addDirectoryItem('3HD', 'playThaiLiveTV&url=http://edge4-04.thaimediaserver.com/chlive3/live3stream_720p_20150924/playlist.m3u8&name=3HD&image=ch3hd.png', 'ch3hd.png', 'DefaultMovies.png', isFolder=False)

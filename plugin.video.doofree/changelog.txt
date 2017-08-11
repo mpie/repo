@@ -1,2 +1,5 @@
+[B]4.2.2[/B]
+- Implemented full live tv list
+
 [B]4.2.1[/B]
 - Fixed Thai live tv stream

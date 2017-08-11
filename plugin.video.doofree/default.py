@@ -72,9 +72,38 @@ if action == None:
     navigator.navigator().root()
 
 elif action == 'liveTV':
-    from resources.lib.indexers import navigator
 
-    navigator.navigator().liveTV()
+    from resources.lib.indexers import livetv
+
+    livetv.livetv().index()
+
+
+elif action == 'listStreams':
+
+    from resources.lib.indexers import livetv
+
+    livetv.livetv().listStreams(url)
+
+
+elif action == 'getLiveTVurl':
+
+    from resources.lib.indexers import livetv
+
+    livetv.livetv().getLiveTVurl()
+
+
+elif action == 'searchLiveTVLinks':
+
+    from resources.lib.indexers import livetv
+
+    livetv.livetv().searchLinks(url)
+
+
+elif action == 'openSettings':
+
+    from resources.lib.indexers import livetv
+
+    livetv.livetv().openSettings()
 
 elif action == 'thaiLiveTV':
     from resources.lib.indexers import navigator

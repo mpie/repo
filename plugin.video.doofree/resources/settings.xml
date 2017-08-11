@@ -234,4 +234,15 @@
 		<setting type="lsep" label="32358" />
 		<setting type="lsep" label="32359" />
 	</category>
+	<category label="LiveTV">
+        <setting id="playmode" type="enum" label="Set default Playback" lvalues="F4mProxy|Direct" default="0" />
+        <setting type="sep" />
+        <setting type="lsep" label="Listing Filters (empty = off)" />
+        <setting id="filterset" type="enum" label="Choose your filter" lvalues="Set 1|Set 2|Set 3|Set 4|Set 5" default="0" />
+        <setting label="Filter set 1" type="text" id="txtfilter1" default="NL:" />
+        <setting label="Filter set 2" type="text" id="txtfilter2" />
+        <setting label="Filter set 3" type="text" id="txtfilter3" />
+        <setting label="Filter set 4" type="text" id="txtfilter4" />
+        <setting label="Filter set 5" type="text" id="txtfilter5" />
+    </category>
 </settings>
