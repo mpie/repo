@@ -26,7 +26,7 @@ class thai:
         self.shows_ajax_link = self.main_link % 'program_ajax3.php?id=%s&page=%s'
         self.episodes_ajax_link = self.main_link % 'change_page_ajax.php?page=%s&program_id=%s'
         self.episodes_link = self.main_link % 'program_detail.php?page=%s&id=%s'
-        self.member_id = 196985  # expires 25 aug 2017
+        self.member_id = 205812  # expires 15 jun 2019
         self.view_server_name = 'gm1'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
         self.replace_server = 'gm99'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
 

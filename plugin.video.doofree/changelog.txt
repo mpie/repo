@@ -1,3 +1,7 @@
+[B]4.2.3[/B]
+- Changed thai shows id
+- Added urlresolver
+
 [B]4.2.2[/B]
 - Implemented full live tv list
 
