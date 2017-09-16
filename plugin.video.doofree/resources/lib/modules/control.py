@@ -6,10 +6,16 @@
 '''
 
 
-import urlparse,os,sys
+import os
+import sys
+import urllib
+import urlparse
 
-import xbmc,xbmcaddon,xbmcplugin,xbmcgui,xbmcvfs
-
+import xbmc
+import xbmcaddon
+import xbmcgui
+import xbmcplugin
+import xbmcvfs
 
 integer = 1000
 
@@ -139,6 +145,27 @@ def addonNext():
     return 'DefaultVideo.png'
 
 
+def addonId():
+    return addonInfo('id')
+
+
+def addonName():
+    return addonInfo('name')
+
+
+def get_plugin_url(queries):
+    try:
+        query = urllib.urlencode(queries)
+    except UnicodeEncodeError:
+        for k in queries:
+            if isinstance(queries[k], unicode):
+                queries[k] = queries[k].encode('utf-8')
+        query = urllib.urlencode(queries)
+    addon_id = sys.argv[0]
+    if not addon_id: addon_id = addonId()
+    return addon_id + '?' + query
+
+
 def artPath():
     theme = appearance()
     if theme in ['-', '']: return
@@ -171,7 +198,7 @@ def selectDialog(list, heading=addonInfo('name')):
 
 
 def moderator():
-    netloc = [urlparse.urlparse(sys.argv[0]).netloc, '', 'plugin.video.live.streamspro', 'plugin.video.phstreams', 'plugin.video.cpstreams', 'plugin.video.streamarmy', 'plugin.video.tinklepad', 'plugin.video.metallic']
+    netloc = [urlparse.urlparse(sys.argv[0]).netloc, '', 'plugin.video.live.streamspro', 'plugin.video.phstreams', 'plugin.video.cpstreams', 'plugin.video.tinklepad', 'script.tvguide.fullscreen', 'script.tvguide.assassins']
 
     if not infoLabel('Container.PluginName') in netloc: sys.exit()
 

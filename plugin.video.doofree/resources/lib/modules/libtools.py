@@ -1,22 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""
+'''
     DooFree Add-on
-    Copyright (C) 2015 Exodus
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
+    Copyright (C) 2017 DooFree
+'''
 
 
 try:
@@ -465,7 +452,9 @@ class libepisodes:
                 ep = [x['title'].encode('utf-8') for x in lib if str(x['imdbnumber']) in id or (x['title'].encode('utf-8') == item['tvshowtitle'] and str(x['year']) == item['year'])][0]
                 ep = control.jsonrpc('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"filter":{"and": [{"field": "tvshow", "operator": "is", "value": "%s"}]}, "properties": ["season", "episode"]}, "id": 1}' % ep)
                 ep = unicode(ep, 'utf-8', errors='ignore')
-                ep = json.loads(ep)['result']['episodes'][-1]
+                ep = json.loads(ep).get('result', {}).get('episodes', {})
+                ep = [{'season': int(i['season']), 'episode': int(i['episode'])} for i in ep]
+                ep = sorted(ep, key=lambda x: (x['season'], x['episode']))[-1]
 
                 num = [x for x,y in enumerate(it) if str(y['season']) == str(ep['season']) and str(y['episode']) == str(ep['episode'])][-1]
                 it = [y for x,y in enumerate(it) if x > num]

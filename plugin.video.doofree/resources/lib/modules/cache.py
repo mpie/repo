@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
+'''
     DooFree Add-on
     Copyright (C) 2017 DooFree
-"""
+'''
 import ast
 import hashlib
 import re

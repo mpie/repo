@@ -1,9 +1,2 @@
-[B]4.2.3[/B]
-- Changed thai shows id
-- Added urlresolver
-
-[B]4.2.2[/B]
-- Implemented full live tv list
-
-[B]4.2.1[/B]
-- Fixed Thai live tv stream
+[B]4.2.6[/B]
+- Fixed sources

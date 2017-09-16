@@ -5,7 +5,6 @@
     Copyright (C) 2017 DooFree
 '''
 
-
 import random
 import re
 import urllib
@@ -113,3 +112,5 @@ def get():
     'http://www.navigate-online.xyz/browse.php?b=20&u='
 
     ]
+
+

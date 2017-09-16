@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""
+'''
     DooFree Add-on
     Copyright (C) 2017 DooFree
-"""
+'''
 
 from resources.lib.modules import log_utils
 
