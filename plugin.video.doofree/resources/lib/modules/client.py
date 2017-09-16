@@ -5,24 +5,27 @@
     Copyright (C) 2017 DooFree
 '''
 
-
-import re,sys,cookielib,urllib,urllib2,urlparse,gzip,StringIO,HTMLParser,time,random,base64
+import re, sys, cookielib, urllib, urllib2, urlparse, gzip, StringIO, HTMLParser, time, random, base64
 
 from resources.lib.modules import cache
 from resources.lib.modules import workers
 from resources.lib.modules import dom_parser
 from resources.lib.modules import log_utils
+from resources.lib.modules import utils
 
 
-def request(url, close=True, redirect=True, error=False, proxy=None, post=None, headers=None, mobile=False, XHR=False, limit=None, referer=None, cookie=None, compression=True, output='', timeout='30'):
+def request(url, close=True, redirect=True, error=False, proxy=None, post=None, headers=None, mobile=False, XHR=False,
+            limit=None, referer=None, cookie=None, compression=True, output='', timeout='30'):
     try:
+        if not url:
+            return
+
         handlers = []
 
         if not proxy == None:
-            handlers += [urllib2.ProxyHandler({'http':'%s' % (proxy)}), urllib2.HTTPHandler]
+            handlers += [urllib2.ProxyHandler({'http': '%s' % (proxy)}), urllib2.HTTPHandler]
             opener = urllib2.build_opener(*handlers)
             opener = urllib2.install_opener(opener)
-
 
         if output == 'cookie' or output == 'extended' or not close == True:
             cookies = cookielib.LWPCookieJar()
@@ -32,7 +35,8 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 
         if (2, 7, 8) < sys.version_info < (2, 7, 12):
             try:
-                import ssl; ssl_context = ssl.create_default_context()
+                import ssl;
+                ssl_context = ssl.create_default_context()
                 ssl_context.check_hostname = False
                 ssl_context.verify_mode = ssl.CERT_NONE
                 handlers += [urllib2.HTTPSHandler(context=ssl_context)]
@@ -43,34 +47,36 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 
         if url.startswith('//'): url = 'http:' + url
 
-        try: headers.update(headers)
-        except: headers = {}
-        if 'User-Agent' in headers:
+        _headers = {}
+        try:
+            _headers.update(headers)
+        except:
+            pass
+        if 'User-Agent' in _headers:
             pass
         elif not mobile == True:
-            #headers['User-Agent'] = agent()
-            headers['User-Agent'] = cache.get(randomagent, 1)
+            # headers['User-Agent'] = agent()
+            _headers['User-Agent'] = cache.get(randomagent, 1)
         else:
-            headers['User-Agent'] = 'Apple-iPhone/701.341'
-        if 'Referer' in headers:
+            _headers['User-Agent'] = 'Apple-iPhone/701.341'
+        if 'Referer' in _headers:
             pass
         elif referer is not None:
-            headers['Referer'] = referer
-        if not 'Accept-Language' in headers:
-            headers['Accept-Language'] = 'en-US'
-        if 'X-Requested-With' in headers:
+            _headers['Referer'] = referer
+        if not 'Accept-Language' in _headers:
+            _headers['Accept-Language'] = 'en-US'
+        if 'X-Requested-With' in _headers:
             pass
         elif XHR == True:
-            headers['X-Requested-With'] = 'XMLHttpRequest'
-        if 'Cookie' in headers:
+            _headers['X-Requested-With'] = 'XMLHttpRequest'
+        if 'Cookie' in _headers:
             pass
         elif not cookie == None:
-            headers['Cookie'] = cookie
-        if 'Accept-Encoding' in headers:
+            _headers['Cookie'] = cookie
+        if 'Accept-Encoding' in _headers:
             pass
         elif compression and limit is None:
-            headers['Accept-Encoding'] = 'gzip'
-
+            _headers['Accept-Encoding'] = 'gzip'
 
         if redirect == False:
 
@@ -80,15 +86,19 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
             opener = urllib2.build_opener(NoRedirection)
             opener = urllib2.install_opener(opener)
 
-            try: del headers['Referer']
-            except: pass
+            try:
+                del _headers['Referer']
+            except:
+                pass
 
         if isinstance(post, dict):
+            post = utils.byteify(post)
             post = urllib.urlencode(post)
 
-        request = urllib2.Request(url, data=post)
-        _add_request_header(request, headers)
+        url = utils.byteify(url)
 
+        request = urllib2.Request(url, data=post)
+        _add_request_header(request, _headers)
 
         try:
             response = urllib2.urlopen(request, timeout=int(timeout))
@@ -96,8 +106,10 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 
             if response.code == 503:
                 cf_result = response.read(5242880)
-                try: encoding = response.info().getheader('Content-Encoding')
-                except: encoding = None
+                try:
+                    encoding = response.info().getheader('Content-Encoding')
+                except:
+                    encoding = None
                 if encoding == 'gzip':
                     cf_result = gzip.GzipFile(fileobj=StringIO.StringIO(cf_result)).read()
 
@@ -105,14 +117,16 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 
                     netloc = '%s://%s' % (urlparse.urlparse(url).scheme, urlparse.urlparse(url).netloc)
 
-                    ua = headers['User-Agent']
+                    if not netloc.endswith('/'): netloc += '/'
+
+                    ua = _headers['User-Agent']
 
                     cf = cache.get(cfcookie().get, 168, netloc, ua, timeout)
 
-                    headers['Cookie'] = cf
+                    _headers['Cookie'] = cf
 
                     request = urllib2.Request(url, data=post)
-                    _add_request_header(request, headers)
+                    _add_request_header(request, _headers)
 
                     response = urllib2.urlopen(request, timeout=int(timeout))
                 else:
@@ -122,12 +136,15 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
                 log_utils.log('Request-Error (%s): %s' % (str(response.code), url), log_utils.LOGDEBUG)
                 if error == False: return
 
-
         if output == 'cookie':
-            try: result = '; '.join(['%s=%s' % (i.name, i.value) for i in cookies])
-            except: pass
-            try: result = cf
-            except: pass
+            try:
+                result = '; '.join(['%s=%s' % (i.name, i.value) for i in cookies])
+            except:
+                pass
+            try:
+                result = cf
+            except:
+                pass
             if close == True: response.close()
             return result
 
@@ -142,13 +159,14 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
             return result
 
         elif output == 'chunk':
-            try: content = int(response.headers['Content-Length'])
-            except: content = (2049 * 1024)
+            try:
+                content = int(response.headers['Content-Length'])
+            except:
+                content = (2049 * 1024)
             if content < (2048 * 1024): return
             result = response.read(16 * 1024)
             if close == True: response.close()
             return result
-
 
         if limit == '0':
             result = response.read(224 * 1024)
@@ -157,19 +175,20 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
         else:
             result = response.read(5242880)
 
-        try: encoding = response.info().getheader('Content-Encoding')
-        except: encoding = None
+        try:
+            encoding = response.info().getheader('Content-Encoding')
+        except:
+            encoding = None
         if encoding == 'gzip':
             result = gzip.GzipFile(fileobj=StringIO.StringIO(result)).read()
-
 
         if 'sucuri_cloudproxy_js' in result:
             su = sucuri().get(result)
 
-            headers['Cookie'] = su
+            _headers['Cookie'] = su
 
             request = urllib2.Request(url, data=post)
-            _add_request_header(request, headers)
+            _add_request_header(request, _headers)
 
             response = urllib2.urlopen(request, timeout=int(timeout))
 
@@ -180,28 +199,36 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
             else:
                 result = response.read(5242880)
 
-            try: encoding = response.info().getheader('Content-Encoding')
-            except: encoding = None
+            try:
+                encoding = response.info().getheader('Content-Encoding')
+            except:
+                encoding = None
             if encoding == 'gzip':
                 result = gzip.GzipFile(fileobj=StringIO.StringIO(result)).read()
 
         if 'Blazingfast.io' in result and 'xhr.open' in result:
             netloc = '%s://%s' % (urlparse.urlparse(url).scheme, urlparse.urlparse(url).netloc)
-            ua = headers['User-Agent']
-            headers['Cookie'] = cache.get(bfcookie().get, 168, netloc, ua, timeout)
+            ua = _headers['User-Agent']
+            _headers['Cookie'] = cache.get(bfcookie().get, 168, netloc, ua, timeout)
 
-            result = _basic_request(url, headers=headers, post=post, timeout=timeout, limit=limit)
+            result = _basic_request(url, headers=_headers, post=post, timeout=timeout, limit=limit)
 
         if output == 'extended':
-            try: response_headers = dict([(item[0].title(), item[1]) for item in response.info().items()])
-            except: response_headers = response.headers
+            try:
+                response_headers = dict([(item[0].title(), item[1]) for item in response.info().items()])
+            except:
+                response_headers = response.headers
             response_code = str(response.code)
-            try: cookie = '; '.join(['%s=%s' % (i.name, i.value) for i in cookies])
-            except: pass
-            try: cookie = cf
-            except: pass
+            try:
+                cookie = '; '.join(['%s=%s' % (i.name, i.value) for i in cookies])
+            except:
+                pass
+            try:
+                cookie = cf
+            except:
+                pass
             if close == True: response.close()
-            return (result, response_code, response_headers, headers, cookie)
+            return (result, response_code, response_headers, _headers, cookie)
         else:
             if close == True: response.close()
             return result
@@ -212,8 +239,10 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
 
 def _basic_request(url, headers=None, post=None, timeout='30', limit=None):
     try:
-        try: headers.update(headers)
-        except: headers = {}
+        try:
+            headers.update(headers)
+        except:
+            headers = {}
 
         request = urllib2.Request(url, data=post)
         _add_request_header(request, headers)
@@ -228,8 +257,10 @@ def _add_request_header(_request, headers):
         if not headers:
             headers = {}
 
-        try: scheme = _request.get_type()
-        except: scheme = 'http'
+        try:
+            scheme = _request.get_type()
+        except:
+            scheme = 'http'
 
         referer = headers.get('Referer') if 'Referer' in headers else '%s://%s' % (scheme, _request.get_host())
 
@@ -257,6 +288,7 @@ def _get_result(response, limit=None):
 
     return result
 
+
 def parseDOM(html, name='', attrs=None, ret=False):
     if attrs: attrs = dict((key, re.compile(value + ('$' if value else ''))) for key, value in attrs.iteritems())
     results = dom_parser.parse_dom(html, name, attrs, ret)
@@ -279,22 +311,27 @@ def replaceHTMLCodes(txt):
 def randomagent():
     BR_VERS = [
         ['%s.0' % i for i in xrange(18, 50)],
-        ['37.0.2062.103', '37.0.2062.120', '37.0.2062.124', '38.0.2125.101', '38.0.2125.104', '38.0.2125.111', '39.0.2171.71', '39.0.2171.95', '39.0.2171.99',
+        ['37.0.2062.103', '37.0.2062.120', '37.0.2062.124', '38.0.2125.101', '38.0.2125.104', '38.0.2125.111',
+         '39.0.2171.71', '39.0.2171.95', '39.0.2171.99',
          '40.0.2214.93', '40.0.2214.111',
-         '40.0.2214.115', '42.0.2311.90', '42.0.2311.135', '42.0.2311.152', '43.0.2357.81', '43.0.2357.124', '44.0.2403.155', '44.0.2403.157', '45.0.2454.101',
+         '40.0.2214.115', '42.0.2311.90', '42.0.2311.135', '42.0.2311.152', '43.0.2357.81', '43.0.2357.124',
+         '44.0.2403.155', '44.0.2403.157', '45.0.2454.101',
          '45.0.2454.85', '46.0.2490.71',
-         '46.0.2490.80', '46.0.2490.86', '47.0.2526.73', '47.0.2526.80', '48.0.2564.116', '49.0.2623.112', '50.0.2661.86', '51.0.2704.103', '52.0.2743.116',
+         '46.0.2490.80', '46.0.2490.86', '47.0.2526.73', '47.0.2526.80', '48.0.2564.116', '49.0.2623.112',
+         '50.0.2661.86', '51.0.2704.103', '52.0.2743.116',
          '53.0.2785.143', '54.0.2840.71'],
         ['11.0'],
         ['8.0', '9.0', '10.0', '10.6']]
-    WIN_VERS = ['Windows NT 10.0', 'Windows NT 7.0', 'Windows NT 6.3', 'Windows NT 6.2', 'Windows NT 6.1', 'Windows NT 6.0', 'Windows NT 5.1', 'Windows NT 5.0']
+    WIN_VERS = ['Windows NT 10.0', 'Windows NT 7.0', 'Windows NT 6.3', 'Windows NT 6.2', 'Windows NT 6.1',
+                'Windows NT 6.0', 'Windows NT 5.1', 'Windows NT 5.0']
     FEATURES = ['; WOW64', '; Win64; IA64', '; Win64; x64', '']
     RAND_UAS = ['Mozilla/5.0 ({win_ver}{feature}; rv:{br_ver}) Gecko/20100101 Firefox/{br_ver}',
                 'Mozilla/5.0 ({win_ver}{feature}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{br_ver} Safari/537.36',
                 'Mozilla/5.0 ({win_ver}{feature}; Trident/7.0; rv:{br_ver}) like Gecko',
                 'Mozilla/5.0 (compatible; MSIE {br_ver}; {win_ver}{feature}; Trident/6.0)']
     index = random.randrange(len(RAND_UAS))
-    return RAND_UAS[index].format(win_ver=random.choice(WIN_VERS), feature=random.choice(FEATURES), br_ver=random.choice(BR_VERS[index]))
+    return RAND_UAS[index].format(win_ver=random.choice(WIN_VERS), feature=random.choice(FEATURES),
+                                  br_ver=random.choice(BR_VERS[index]))
 
 
 def agent():
@@ -305,7 +342,6 @@ class cfcookie:
     def __init__(self):
         self.cookie = None
 
-
     def get(self, netloc, ua, timeout):
         threads = []
 
@@ -315,7 +351,6 @@ class cfcookie:
         for i in range(0, 30):
             if not self.cookie == None: return self.cookie
             time.sleep(1)
-
 
     def get_cookie(self, netloc, ua, timeout):
         try:
@@ -328,8 +363,10 @@ class cfcookie:
                 response = urllib2.urlopen(request, timeout=int(timeout))
             except urllib2.HTTPError as response:
                 result = response.read(5242880)
-                try: encoding = response.info().getheader('Content-Encoding')
-                except: encoding = None
+                try:
+                    encoding = response.info().getheader('Content-Encoding')
+                except:
+                    encoding = None
                 if encoding == 'gzip':
                     result = gzip.GzipFile(fileobj=StringIO.StringIO(result)).read()
 
@@ -346,10 +383,9 @@ class cfcookie:
             for line in lines:
 
                 if len(line) > 0 and '=' in line:
-
-                    sections=line.split('=')
+                    sections = line.split('=')
                     line_val = self.parseJSString(sections[1])
-                    decryptVal = int(eval(str(decryptVal)+sections[0][-1]+str(line_val)))
+                    decryptVal = int(eval(str(decryptVal) + sections[0][-1] + str(line_val)))
 
             answer = decryptVal + len(urlparse.urlparse(netloc).netloc)
 
@@ -357,7 +393,8 @@ class cfcookie:
 
             if 'type="hidden" name="pass"' in result:
                 passval = re.findall('name="pass" value="(.*?)"', result)[0]
-                query = '%s/cdn-cgi/l/chk_jschl?pass=%s&jschl_vc=%s&jschl_answer=%s' % (netloc, urllib.quote_plus(passval), jschl, answer)
+                query = '%s/cdn-cgi/l/chk_jschl?pass=%s&jschl_vc=%s&jschl_answer=%s' % (
+                netloc, urllib.quote_plus(passval), jschl, answer)
                 time.sleep(6)
 
             cookies = cookielib.LWPCookieJar()
@@ -378,18 +415,17 @@ class cfcookie:
         except:
             pass
 
-
     def parseJSString(self, s):
         try:
-            offset=1 if s[0]=='+' else 0
-            val = int(eval(s.replace('!+[]','1').replace('!![]','1').replace('[]','0').replace('(','str(')[offset:]))
+            offset = 1 if s[0] == '+' else 0
+            val = int(
+                eval(s.replace('!+[]', '1').replace('!![]', '1').replace('[]', '0').replace('(', 'str(')[offset:]))
             return val
         except:
             pass
 
 
 class bfcookie:
-
     def __init__(self):
         self.COOKIE_NAME = 'BLAZINGFAST-WEB-PROTECT'
 
@@ -441,7 +477,6 @@ class sucuri:
     def __init__(self):
         self.cookie = None
 
-
     def get(self, result):
         try:
             s = re.compile("S\s*=\s*'([^']+)").findall(result)[0]
@@ -455,7 +490,8 @@ class sucuri:
             s = re.sub(r'\n', '', s)
             s = re.sub(r'document\.cookie', 'cookie', s)
 
-            cookie = '' ; exec(s)
+            cookie = ''
+            exec (s)
             self.cookie = re.compile('([^=]+)=(.*)').findall(cookie)[0]
             self.cookie = '%s=%s' % (self.cookie[0], self.cookie[1])
 

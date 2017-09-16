@@ -5,19 +5,19 @@
     Copyright (C) 2017 DooFree
 '''
 
-
-import re,urllib,urlparse
+import re, urllib, urlparse
 
 from resources.lib.modules import client
 from resources.lib.modules import directstream
+from resources.lib.modules import source_utils
 
 
 class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['dayt.se', 'cyro.se']
-        self.base_link = 'http://cyro.se'
+        self.domains = ['dayt.se', 'cyro.se', 'xpau.se']
+        self.base_link = 'http://xpau.se'
         self.watch_link = '/watch/%s'
         self.watch_series_link = '/watch/%s/s%s/e%s'
 
@@ -65,14 +65,15 @@ class source:
             if is_movie:
                 url = urlparse.urljoin(self.base_link, self.watch_link % title)
             else:
-                url = urlparse.urljoin(self.base_link, self.watch_series_link % (title, data['season'], data['episode']))
+                url = urlparse.urljoin(self.base_link,
+                                       self.watch_series_link % (title, data['season'], data['episode']))
 
             r = client.request(url, output='geturl')
 
             if r is None: raise Exception()
 
             r = client.request(url)
-            r = re.sub(r'[^\x00-\x7F]+',' ', r)
+            r = re.sub(r'[^\x00-\x7F]+', ' ', r)
             result = r
 
             y = re.findall('Date\s*:\s*.+?>.+?(\d{4})', r)
@@ -85,8 +86,8 @@ class source:
             q = q[0] if len(q) > 0 else None
 
             quality = '1080p' if ' 1080' in q else 'HD'
-            r = client.parseDOM(r, 'div', attrs = {'id': '5throw'})[0]
-            r = client.parseDOM(r, 'a', ret='href', attrs = {'rel': 'nofollow'})
+            r = client.parseDOM(r, 'div', attrs={'id': '5throw'})[0]
+            r = client.parseDOM(r, 'a', ret='href', attrs={'rel': 'nofollow'})
 
             links = []
 
@@ -116,29 +117,34 @@ class source:
                         if not r.startswith('http'):
                             r = urlparse.urljoin(self.base_link, r)
                         r = client.request(r)
-                        r = re.sub(r'[^\x00-\x7F]+',' ', r)
+                        r = re.sub(r'[^\x00-\x7F]+', ' ', r)
                         r = client.parseDOM(r, 'iframe', ret='src')[0]
                         if 'google' in r: break
                     except:
                         break
 
                 if not 'google' in r: raise Exception()
-                r = directstream.google(r)
 
-                for i in r:
-                    try:
-                        links += [{'source': 'gvideo', 'url': i['url'], 'quality': i['quality'], 'direct': True}]
-                    except:
-                        pass
+                valid, hoster = source_utils.is_host_valid(r, hostDict)
+                links, host, direct = source_utils.check_directstreams(r, hoster)
+
             except:
                 pass
 
             for i in links:
-                sources.append({'source': i['source'], 'quality': i['quality'], 'language': 'en', 'url': i['url'], 'direct': i['direct'], 'debridonly': False})
+                if 'google' in i['url']:
+                    i['source'] = 'gvideo'
+                    i['direct'] = False
+
+                sources.append({'source': i['source'], 'quality': i['quality'], 'language': 'en', 'url': i['url'],
+                                'direct': i['direct'], 'debridonly': False})
 
             return sources
         except:
             return sources
 
     def resolve(self, url):
-        return url
+        if 'google' in url:
+            return directstream.googlepass(url)
+        else:
+            return url
