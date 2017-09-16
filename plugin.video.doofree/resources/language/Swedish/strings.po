@@ -1,6 +1,3 @@
-# Addon Name: DooFree
-# Addon id: plugin.video.doofree
-# Addon Provider: DooFree
 # Translators:
 # Translators:
 # Translators:
@@ -24,8 +21,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DooFree\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2017-05-30 09:11+0000\n"
-"Last-Translator: Viper2k4\n"
+"PO-Revision-Date: 2017-06-06 06:03+0000\n"
+"Last-Translator: Jonatan Nyberg\n"
+"Language-Team: Swedish (http://www.transifex.com/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -322,8 +320,8 @@ msgid "Refresh"
 msgstr "Hämta igen"
 
 msgctxt "#32073"
-msgid "[B]HELP[/B] : www.tvaddons.ag"
-msgstr "[B]HJÄLP[/B] : www.tvaddons.ag"
+msgid "[B]TRAKT[/B] : Authorize"
+msgstr "[B]TRAKT[/B]: Auktorisation"
 
 msgctxt "#32074"
 msgid "[B]HELP[/B]"
@@ -798,4 +796,8 @@ msgstr "[B]TRAKT[/B] : Importera TV-samling..."
 msgctxt "#32564"
 msgid "[B]TRAKT[/B] : Import TV Watchlist..."
 msgstr "[B]TRAKT[/B] : Importera titta senare lista för TV..."
+
+msgctxt "#32565"
+msgid "Include episodes with unknown air dates"
+msgstr "Inkludera episoder med okända sändningsdatum"
 

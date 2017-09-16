@@ -1,2 +1,5 @@
+[B]4.3.0[/B]
+- Fixed live stream
+
 [B]4.2.6[/B]
 - Fixed sources

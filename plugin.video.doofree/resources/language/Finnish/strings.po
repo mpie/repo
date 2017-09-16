@@ -1,6 +1,3 @@
-# Addon Name: DooFree
-# Addon id: plugin.video.doofree
-# Addon Provider: DooFree
 # Translators:
 # Translators:
 # Translators:
@@ -26,6 +23,7 @@ msgstr ""
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2017-05-30 15:46+0000\n"
 "Last-Translator: teemue\n"
+"Language-Team: Finnish (http://www.transifex.com/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -295,11 +293,11 @@ msgstr "Lisää toistojonoon"
 
 msgctxt "#32066"
 msgid "Watched in DooFree"
-msgstr "Merkkaa katsotuksi Exoduksessa"
+msgstr "Merkkaa katsotuksi DooFree"
 
 msgctxt "#32067"
 msgid "Unwatched in DooFree"
-msgstr "Merkkaa katsomattomaksi Exoduksessa"
+msgstr "Merkkaa katsomattomaksi DooFree"
 
 msgctxt "#32068"
 msgid "Watched in Trakt"
@@ -322,8 +320,8 @@ msgid "Refresh"
 msgstr "Päivitä"
 
 msgctxt "#32073"
-msgid "[B]HELP[/B] : www.tvaddons.ag"
-msgstr "[B]OHJE[/B]: www.tvaddons.ag"
+msgid "[B]TRAKT[/B] : Authorize"
+msgstr "[B]TRAKT[/B]: Valtuutus"
 
 msgctxt "#32074"
 msgid "[B]HELP[/B]"
@@ -575,7 +573,7 @@ msgstr "Syötettä ei saatavilla"
 
 msgctxt "#32402"
 msgid "Playback outside DooFree is not allowed"
-msgstr "Toisto Exoduksen ulkopuolella ei ole sallittus"
+msgstr "Toisto DooFree ulkopuolella ei ole sallittus"
 
 msgctxt "#32403"
 msgid "Download"
@@ -707,7 +705,7 @@ msgstr "Kirjasto"
 
 msgctxt "#32542"
 msgid ""
-"DooFree folders will be imported to library if they are added to media "
+"Exodus folders will be imported to library if they are added to media "
 "sources."
 msgstr "Lisää ylläolevat Exoduksen kansiot medialähteisiin"
 
@@ -764,24 +762,24 @@ msgid "Are you sure?"
 msgstr "Oletko varma?"
 
 msgctxt "#32556"
-msgid "[B]DOOFREE[/B] : Library"
-msgstr "[B]DOOFREE[/B]: Kirjasto"
+msgid "[B]EXODUS[/B] : Library"
+msgstr "[B]EXODUS[/B]: Kirjasto"
 
 msgctxt "#32557"
 msgid "[B]LIBRARY[/B] : Settings"
 msgstr "[B]KIRJASTO[/B]: Asetukset"
 
 msgctxt "#32558"
-msgid "[B]DOOFREE[/B] : Update library..."
-msgstr "[B]DOOFREE[/B]: Päivitä kirjasto..."
+msgid "[B]EXODUS[/B] : Update library..."
+msgstr "[B]EXODUS[/B]: Päivitä kirjasto..."
 
 msgctxt "#32559"
-msgid "[B]DOOFREE[/B] : Movie folder..."
-msgstr "[B]DOOFREE[/B]: Elokuvakansio..."
+msgid "[B]EXODUS[/B] : Movie folder..."
+msgstr "[B]EXODUS[/B]: Elokuvakansio..."
 
 msgctxt "#32560"
-msgid "[B]DOOFREE[/B] : TV folder..."
-msgstr "[B]DOOFREE[/B]: TV-sarjojen kansio..."
+msgid "[B]EXODUS[/B] : TV folder..."
+msgstr "[B]EXODUS[/B]: TV-sarjojen kansio..."
 
 msgctxt "#32561"
 msgid "[B]TRAKT[/B] : Import Collection..."
