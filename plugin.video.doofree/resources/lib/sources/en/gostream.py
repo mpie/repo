@@ -126,9 +126,16 @@ class source:
                         r = json.loads(r)
                         r = r['playlist'][0]['sources']
                         for i in r:
-                            try: label = source_utils.label_to_quality(i['label']) 
+                            if i == 'type':
+                                file = r['file']
+                                label = '720p'
+                            else:
+                                file = i['file']
+                                label = i['label']
+
+                            try: label = source_utils.label_to_quality(label)
                             except: label = 'SD'
-                            sources.append({'source': 'cdn', 'quality': label, 'language': 'en', 'url': i['file'], 'direct': True, 'debridonly': False})
+                            sources.append({'source': 'cdn', 'quality': label, 'language': 'en', 'url': file, 'direct': True, 'debridonly': False})
                     except:
                         pass
 
