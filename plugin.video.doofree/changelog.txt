@@ -1,3 +1,6 @@
+[B]4.3.2[/B]
+- Fixed thai shows
+
 [B]4.3.0[/B]
 - Fixed live stream
 

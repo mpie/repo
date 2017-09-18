@@ -55,6 +55,8 @@ class thai:
             title = show[0][2].decode('iso-8859-11')
             showid = show[0][0]
             image = show[0][1]
+            image = image.replace('//', 'https://')
+
             self.list.append({'name': title, 'showid': showid, 'image': image})
 
         for show in self.list:
@@ -111,6 +113,7 @@ class thai:
 
         programMeta = re.compile('<div class="program-meta">(.+?)</div>').findall(link)
         image = re.compile('<img src="(.+?)" alt').findall(programMeta[0])[0]
+        image = image.replace('//', 'https://')
 
         # episodes per page
         for episode in episodes:
@@ -161,6 +164,7 @@ class thai:
         videoUrl = re.compile('file: "(.+?)"').findall(result)[0]
         videoUrl = videoUrl.replace('us88', self.replace_server)
         videoUrl = videoUrl.replace('http://.', 'http://' + self.replace_server + '.seesantv.com')
+        videoUrl = videoUrl.replace('//', 'http://')
 
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo(type='Video', infoLabels={'title': name})
