@@ -163,8 +163,6 @@ class thai:
 
         videoUrl = re.compile('file: "(.+?)"').findall(result)[0]
         videoUrl = videoUrl.replace('us88', self.replace_server)
-        videoUrl = videoUrl.replace('http://.', 'http://' + self.replace_server + '.seesantv.com')
-        videoUrl = videoUrl.replace('//', 'http://')
 
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo(type='Video', infoLabels={'title': name})
