@@ -1,3 +1,6 @@
+[B]4.3.4[/B]
+- Temp redirect thai shows
+
 [B]4.3.3[/B]
 - Fixed thai shows
 
