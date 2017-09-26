@@ -1,3 +1,6 @@
+[B]4.3.5[/B]
+- Fixed Thai live tv
+
 [B]4.3.4[/B]
 - Temp redirect thai shows
 
