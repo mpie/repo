@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     DooFree Add-on
-    Copyright (C) 2017 DooFree
-'''
+    Copyright (C) 2017 Mpie
+"""
 
 
 import os
@@ -61,9 +61,16 @@ button = xbmcgui.ControlButton
 
 image = xbmcgui.ControlImage
 
+getCurrentDialogId = xbmcgui.getCurrentWindowDialogId()
+
 keyboard = xbmc.Keyboard
 
-sleep = xbmc.sleep
+# Modified `sleep` command that honors a user exit request
+def sleep (time):
+    while time > 0 and not xbmc.abortRequested:
+        xbmc.sleep(min(100, time))
+        time = time - 100
+
 
 execute = xbmc.executebuiltin
 
@@ -103,10 +110,15 @@ providercacheFile = os.path.join(dataPath, 'providers.13.db')
 
 metacacheFile = os.path.join(dataPath, 'meta.5.db')
 
+searchFile = os.path.join(dataPath, 'search.1.db')
+
 libcacheFile = os.path.join(dataPath, 'library.db')
 
 cacheFile = os.path.join(dataPath, 'cache.db')
 
+key = "RgUkXp2s5v8x/A?D(G+KbPeShVmYq3t6"
+
+iv = "p2s5v8y/B?E(H+Mb"
 
 def addonIcon():
     theme = appearance() ; art = artPath()
@@ -169,16 +181,16 @@ def get_plugin_url(queries):
 def artPath():
     theme = appearance()
     if theme in ['-', '']: return
-    else: return os.path.join(addonPath, 'resources', 'media', theme)
+    else: return os.path.join(xbmcaddon.Addon('plugin.video.doofree').getAddonInfo('path'), 'resources', 'media', theme)
 
 
 def appearance():
-    appearance = setting('appearance.1').lower()
+    appearance = setting('appearance.1').lower() if condVisibility('System.HasAddon(plugin.video.doofree)') else setting('appearance.alt').lower()
     return appearance
 
 
 def artwork():
-    execute('RunPlugin(plugin://script.doofree.artwork)')
+    execute('RunPlugin(plugin://plugin.video.doofree)')
 
 
 def infoDialog(message, heading=addonInfo('name'), icon='', time=3000, sound=False):
@@ -215,7 +227,10 @@ def apiLanguage(ret_name=None):
     tvdb = ['en','sv','no','da','fi','nl','de','it','es','fr','pl','hu','el','tr','ru','he','ja','pt','zh','cs','sl','hr','ko']
     youtube = ['gv', 'gu', 'gd', 'ga', 'gn', 'gl', 'ty', 'tw', 'tt', 'tr', 'ts', 'tn', 'to', 'tl', 'tk', 'th', 'ti', 'tg', 'te', 'ta', 'de', 'da', 'dz', 'dv', 'qu', 'zh', 'za', 'zu', 'wa', 'wo', 'jv', 'ja', 'ch', 'co', 'ca', 'ce', 'cy', 'cs', 'cr', 'cv', 'cu', 'ps', 'pt', 'pa', 'pi', 'pl', 'mg', 'ml', 'mn', 'mi', 'mh', 'mk', 'mt', 'ms', 'mr', 'my', 've', 'vi', 'is', 'iu', 'it', 'vo', 'ii', 'ik', 'io', 'ia', 'ie', 'id', 'ig', 'fr', 'fy', 'fa', 'ff', 'fi', 'fj', 'fo', 'ss', 'sr', 'sq', 'sw', 'sv', 'su', 'st', 'sk', 'si', 'so', 'sn', 'sm', 'sl', 'sc', 'sa', 'sg', 'se', 'sd', 'lg', 'lb', 'la', 'ln', 'lo', 'li', 'lv', 'lt', 'lu', 'yi', 'yo', 'el', 'eo', 'en', 'ee', 'eu', 'et', 'es', 'ru', 'rw', 'rm', 'rn', 'ro', 'be', 'bg', 'ba', 'bm', 'bn', 'bo', 'bh', 'bi', 'br', 'bs', 'om', 'oj', 'oc', 'os', 'or', 'xh', 'hz', 'hy', 'hr', 'ht', 'hu', 'hi', 'ho', 'ha', 'he', 'uz', 'ur', 'uk', 'ug', 'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'as', 'ar', 'av', 'ay', 'az', 'nl', 'nn', 'no', 'na', 'nb', 'nd', 'ne', 'ng', 'ny', 'nr', 'nv', 'ka', 'kg', 'kk', 'kj', 'ki', 'ko', 'kn', 'km', 'kl', 'ks', 'kr', 'kw', 'kv', 'ku', 'ky']
 
+    name = None
     name = setting('api.language')
+    if not name: name = 'AUTO'
+    
     if name[-1].isupper():
         try: name = xbmc.getLanguage(xbmc.ENGLISH_NAME).split(' ')[0]
         except: pass

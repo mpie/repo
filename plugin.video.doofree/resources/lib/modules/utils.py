@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     DooFree Add-on
-    Copyright (C) 2017 DooFree
-'''
+    Copyright (C) 2017 Mpie
+"""
 
 import json, re
 

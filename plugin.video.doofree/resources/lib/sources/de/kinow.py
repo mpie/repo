@@ -2,20 +2,7 @@
 
 """
     DooFree Add-on
-    Copyright (C) 2016 Viper2k4
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2017 Mpie
 """
 
 import re
@@ -25,6 +12,7 @@ import urlparse
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import control
+from resources.lib.modules import directstream
 from resources.lib.modules import source_utils
 from resources.lib.modules import dom_parser
 
@@ -105,6 +93,7 @@ class source:
 
             for link in links:
                 if '/englisch/' in link: continue
+                control.sleep(3000)
                 if link != url: r = client.request(urlparse.urljoin(self.base_link, link))
 
                 quality = 'SD'
@@ -128,7 +117,12 @@ class source:
                     valid, hoster = source_utils.is_host_valid(hoster, hostDict)
                     if not valid: continue
 
-                    sources.append({'source': hoster, 'quality': quality, 'language': 'de', 'url': stream_link, 'info': info, 'direct': False, 'debridonly': False, 'checkquality': True})
+                    direct = False
+
+                    if hoster.lower() == 'gvideo':
+                        direct = True
+
+                    sources.append({'source': hoster, 'quality': quality, 'language': 'de', 'url': stream_link, 'info': info, 'direct': direct, 'debridonly': False, 'checkquality': True})
 
             return sources
         except:
@@ -139,8 +133,14 @@ class source:
             control.sleep(5000)
 
             url = urlparse.urljoin(self.base_link, url)
-            url = client.request(url, output='geturl')
+            url = client.request(url, redirect=False, output='extended')
+
+            if url and url[2]['Location'].strip():
+                url = url[2]['Location']
+
             if self.base_link not in url:
+                if 'google' in url:
+                    return self.__google(url)
                 return url
         except:
             return
@@ -159,11 +159,36 @@ class source:
             r = dom_parser.parse_dom(r, 'tr')
             r = [dom_parser.parse_dom(i, 'td') for i in r]
             r = [dom_parser.parse_dom(i, 'a', req='href') for i in r]
+
             r = [(i[0].attrs['href'], i[0].content, i[1].content) for i in r if i]
-            r = [(i[0], i[1], re.findall('(.+?)\s<i>\((.+?)\)<', i[1]), i[2]) for i in r]
-            r = [(i[0], i[2][0][0] if len(i[2]) > 0 else i[1], i[2][0][1] if len(i[2]) > 0 else '', i[3]) for i in r]
-            r = [i[0] for i in r if (cleantitle.get(i[1]) in t or cleantitle.get(i[2]) in t) and i[3] == year][0]
+            x = []
+            for i in r:
+                if re.search('(?<=<i>\().*$', i[1]):
+                    x.append((i[0], re.search('(.*?)(?=\s<)', i[1]).group(), re.search('(?<=<i>\().*$', i[1]).group(), i[2]))
+                else:
+                    x.append((i[0], i[1], i[1], i[2]))
+            r = [i[0] for i in x if (cleantitle.get(i[1]) in t or cleantitle.get(i[2]) in t) and i[3] == year][0]
 
             return source_utils.strip_domain(r)
         except:
             return
+
+    def __google(self, url):
+        try:
+            url = re.sub('[^\/]+$', 'view', url) # fix kinow problem for gvideo urls (/view)
+            
+            video_id = re.search('(?<=\/d\/)(.*?)(?=\/)', url).group()
+            
+            url = 'https://drive.google.com/uc?id=%s&export=download' % video_id
+            
+            cookie = client.request(url, output='cookie')
+            
+            confirm = '(?<=%s=)(.*?)(?=;)' % video_id
+            confirm = re.search(confirm, cookie).group()
+
+            url = 'https://drive.google.com/uc?export=download&confirm=%s&id=%s' % (confirm, video_id)
+            url = url + '|Cookie=' + cookie
+
+            return url
+        except:
+            return url

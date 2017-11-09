@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -10,17 +10,16 @@ import re,urllib,urlparse
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
+from resources.lib.modules import source_utils
 from resources.lib.modules import debrid
-
 
 class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['300mbmoviesdl.com', 'hevcbluray.com']
-        self.base_link = 'http://www.300mbmoviesdl.com'
+        self.domains = ['300mbmoviesdl.com', 'hevcbluray.info']
+        self.base_link = 'http://hevcbluray.info'
         self.search_link = '/search/%s/feed/rss2/'
-
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
@@ -38,7 +37,7 @@ class source:
             if url == None: return sources
 
             if debrid.status() == False: raise Exception()
-
+            
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
@@ -90,33 +89,16 @@ class source:
 
                     if not y == hdlr: raise Exception()
 
-                    fmt = re.sub('(.+)(\.|\(|\[|\s)(\d{4}|S\d*E\d*|S\d*)(\.|\)|\]|\s)', '', name.upper())
-                    fmt = re.split('\.|\(|\)|\[|\]|\s|\-', fmt)
-                    fmt = [i.lower() for i in fmt]
-
-                    if any(i.endswith(('subs', 'sub', 'dubbed', 'dub')) for i in fmt): raise Exception()
-                    if any(i in ['extras'] for i in fmt): raise Exception()
-
-                    if '1080p' in fmt: quality = '1080p'
-                    elif '720p' in fmt: quality = 'HD'
-                    else: quality = 'SD'
-                    if any(i in ['dvdscr', 'r5', 'r6'] for i in fmt): quality = 'SCR'
-                    elif any(i in ['camrip', 'tsrip', 'hdcam', 'hdts', 'dvdcam', 'dvdts', 'cam', 'telesync', 'ts'] for i in fmt): quality = 'CAM'
-
-                    info = []
-
-                    if '3d' in fmt: info.append('3D')
+                    quality, info = source_utils.get_release_quality(name, item[1])
 
                     try:
                         size = re.findall('((?:\d+\.\d+|\d+\,\d+|\d+) (?:GB|GiB|MB|MiB))', item[2])[-1]
                         div = 1 if size.endswith(('GB', 'GiB')) else 1024
-                        size = float(re.sub('[^0-9|/.|/,]', '', size))/div
+                        size = float(re.sub('[^0-9|/.|/,]', '', size)) / div
                         size = '%.2f GB' % size
                         info.append(size)
                     except:
                         pass
-
-                    if any(i in ['hevc', 'h265', 'x265'] for i in fmt): info.append('HEVC')
 
                     info = ' | '.join(info)
 
@@ -125,8 +107,8 @@ class source:
                     url = client.replaceHTMLCodes(url)
                     url = url.encode('utf-8')
 
-                    host = re.findall('([\w]+[.][\w]+)$', urlparse.urlparse(url.strip().lower()).netloc)[0]
-                    if not host in hostDict: raise Exception()
+                    valid, host = source_utils.is_host_valid(url, hostDict)
+                    if not valid: continue
                     host = client.replaceHTMLCodes(host)
                     host = host.encode('utf-8')
 
@@ -140,7 +122,6 @@ class source:
             return sources
         except:
             return sources
-
 
     def resolve(self, url):
         return url

@@ -1,3 +1,6 @@
+[B]4.4.0[/B]
+- Changed crawler
+
 [B]4.3.5[/B]
 - Fixed Thai live tv
 

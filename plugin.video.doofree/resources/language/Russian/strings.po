@@ -19,7 +19,7 @@
 # Viktor Sch, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Covenant\n"
+"Project-Id-Version: DooFree\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2017-05-30 09:11+0000\n"
 "Last-Translator: Viper2k4\n"
@@ -292,12 +292,12 @@ msgid "Queue item"
 msgstr "В очередь"
 
 msgctxt "#32066"
-msgid "Watched in Covenant"
-msgstr "Просмотрено в Covenant"
+msgid "Watched in DooFree"
+msgstr "Просмотрено в DooFree"
 
 msgctxt "#32067"
-msgid "Unwatched in Covenant"
-msgstr "Не просмотрено в Covenant"
+msgid "Unwatched in DooFree"
+msgstr "Не просмотрено в DooFree"
 
 msgctxt "#32068"
 msgid "Watched in Trakt"
@@ -572,8 +572,8 @@ msgid "No stream available"
 msgstr "Поток недоступен"
 
 msgctxt "#32402"
-msgid "Playback outside Covenant is not allowed"
-msgstr "Воспроизведение вне Covenant не допускается"
+msgid "Playback outside DooFree is not allowed"
+msgstr "Воспроизведение вне DooFree не допускается"
 
 msgctxt "#32403"
 msgid "Download"

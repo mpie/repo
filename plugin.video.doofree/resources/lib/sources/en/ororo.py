@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -29,7 +29,7 @@ class source:
         self.password = control.setting('ororo.pass')
         self.headers = {
         'Authorization': 'Basic %s' % base64.b64encode('%s:%s' % (self.user, self.password)),
-        'User-Agent': 'Exodus for Kodi'
+        'User-Agent': 'DooFree for Kodi'
         }
 
 

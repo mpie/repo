@@ -2,20 +2,7 @@
 
 """
     DooFree Add-on
-    Copyright (C) 2016 Viper2k4
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2017 Mpie
 """
 
 import json
@@ -25,6 +12,7 @@ import urlparse
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
+from resources.lib.modules import control
 from resources.lib.modules import source_utils
 from resources.lib.modules import dom_parser
 
@@ -36,6 +24,10 @@ class source:
         self.domains = ['serienstream.to']
         self.base_link = 'https://serienstream.to'
         self.search_link = '/ajax/search'
+        self.login = control.setting('serienstream.user')
+        self.password = control.setting('serienstream.pass')
+        self.cookie = ''
+        self.user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
@@ -75,17 +67,17 @@ class source:
 
             r = dom_parser.parse_dom(r, 'div', attrs={'class': 'hosterSiteVideo'})
             r = dom_parser.parse_dom(r, 'li', attrs={'data-lang-key': re.compile('[1|3]')})
-            r = [(dom_parser.parse_dom(i, 'a', req='href'), dom_parser.parse_dom(i, 'h4')) for i in r]
-            r = [(i[0][0].attrs['href'], i[1][0].content.lower()) for i in r if len(i[0]) > 0 and len(i[1]) > 0]
-            r = [(i[0], i[1], re.findall('(.+?)\s*<br\s*/?>(.+?)$', i[1], re.DOTALL)) for i in r]
-            r = [(i[0], i[2][0][0] if len(i[2]) > 0 else i[1], i[2][0][1] if len(i[2]) > 0 else '') for i in r]
-            r = [(i[0], i[1], 'HD' if 'hosterhdvideo' in i[2] else 'SD') for i in r]
+            r = [(dom_parser.parse_dom(i, 'a', req='href'), dom_parser.parse_dom(i, 'h4'), 'subbed' if i.attrs['data-lang-key'] == '3' else '') for i in r]
+            r = [(i[0][0].attrs['href'], i[1][0].content.lower(), i[2]) for i in r if len(i[0]) > 0 and len(i[1]) > 0]
+            r = [(i[0], i[1], re.findall('(.+?)\s*<br\s*/?>(.+?)$', i[1], re.DOTALL), i[2]) for i in r]
+            r = [(i[0], i[2][0][0] if len(i[2]) > 0 else i[1], i[2][0][1] if len(i[2]) > 0 else '', i[3]) for i in r]
+            r = [(i[0], i[1], 'HD' if 'hosterhdvideo' in i[2] else 'SD', i[3]) for i in r]
 
-            for link, host, quality in r:
+            for link, host, quality, info in r:
                 valid, host = source_utils.is_host_valid(host, hostDict)
                 if not valid: continue
 
-                sources.append({'source': host, 'quality': quality, 'language': 'de', 'url': link, 'direct': False, 'debridonly': False})
+                sources.append({'source': host, 'quality': quality, 'language': 'de', 'url': link, 'info': info, 'direct': False, 'debridonly': False})
 
             return sources
         except:
@@ -97,10 +89,21 @@ class source:
             if self.base_link not in url:
                 return url
 
-            r = client.request(url)
+            header = {'User-Agent': self.user_agent, 'Accept': 'text/html'}
+            
+            self.__login()
+            cookie = self.cookie
 
-            r = dom_parser.parse_dom(r, 'div', attrs={'class': 'container'})
-            return dom_parser.parse_dom(r, 'iframe', req='src')[0].attrs['src']
+            try:
+                res = client.request(url, headers=header, cookie=cookie, redirect=False, output='geturl')
+                if self.base_link not in res:
+                    url = res
+                else:
+                    control.infoDialog(control.lang(32572).encode('utf-8'), sound=True, icon='WARNING')
+            except:
+                return
+
+            return url
         except:
             return
 
@@ -108,6 +111,9 @@ class source:
         try:
             r = urllib.urlencode({'keyword': titles[0]})
             r = client.request(urlparse.urljoin(self.base_link, self.search_link), XHR=True, post=r)
+            if r is None:
+                r = urllib.urlencode({'keyword': cleantitle.query(titles[0])})
+                r = client.request(urlparse.urljoin(self.base_link, self.search_link), XHR=True, post=r)
 
             t = [cleantitle.get(i) for i in set(titles) if i]
             y = ['%s' % str(year), '%s' % str(int(year) + 1), '%s' % str(int(year) - 1), '0']
@@ -122,5 +128,24 @@ class source:
             r = [i[0] for i in r if cleantitle.get(i[1]) in t and i[2] in y][0]
 
             return source_utils.strip_domain(r)
+        except:
+            return
+
+    def __login(self):
+        try:
+            if (self.login == '' or self.password == ''):
+                return
+
+            url = urlparse.urljoin(self.base_link, '/login')
+            post = urllib.urlencode({'email': self.login, 'password': self.password, 'autoLogin': 'on'})
+            header = {'User-Agent': self.user_agent, 'Accept': 'text/html'}
+            cookie = client.request(url, headers=header, referer=url, post=post, output='cookie')
+            data = client.request(url, cookie=cookie, output='extended')
+
+            if '/home/logout' in data[0]:
+                self.cookie = cookie
+                return
+
+            return
         except:
             return

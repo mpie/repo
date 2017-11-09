@@ -2,20 +2,7 @@
 
 """
     DooFree Add-on
-    Copyright (C) 2016 Viper2k4
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2017 Mpie
 """
 
 import base64
@@ -59,8 +46,18 @@ class source:
             if not url:
                 return
 
-            url = re.sub('\.\w+$', '', url)
-            return url + '/staffel-%s-episode-%s.html' % (season, episode)
+            s = 'staffel-%s-episode-%s' % (season, episode)
+            s = '(?<=<a class=\"episode-name\" href=\")(.*?)(?='+s+')(.*?)(?=\")'
+
+            url = '/serien' + re.sub('\.\w+$', '', url)
+            url = urlparse.urljoin(self.base_link, url)
+
+            r = client.request(url, mobile=True)
+
+            p = dom_parser.parse_dom(r, 'div', attrs={'id': 'seasonss'})
+            url = re.search(s, p[0][1]).group()
+
+            return url
         except:
             return
 
@@ -110,6 +107,13 @@ class source:
                             url = url[0].attrs['src']
                             if '/old/seframer.php' in url: url = self.__get_old_url(url)
 
+                            if 'keepup' in url:
+                                print url
+                                # needs to be fixed (keepup.gq)
+                            elif self.domains[0] in url:
+                                url = re.search('(?<=id=).*$', url).group()
+                                url = 'https://drive.google.com/file/d/' + url
+
                         valid, host = source_utils.is_host_valid(url, hostDict)
                         if not valid: continue
 
@@ -118,10 +122,7 @@ class source:
                         elif i in ['2160p']: quali = '4K'
                         else: quali = 'SD'
 
-                        if 'google' in url: host = 'gvideo'; direct = True; urls = directstream.google(url)
-                        elif 'ok.ru' in url: host = 'vk'; direct = True; urls = directstream.odnoklassniki(url)
-                        elif 'vk.com' in url: host = 'vk'; direct = True; urls = directstream.vk(url)
-                        else: direct = False; urls = [{'quality': quali, 'url': url}]
+                        urls, host, direct = source_utils.check_directstreams(url, host, quali)
 
                         for i in urls: sources.append({'source': host, 'quality': i['quality'], 'language': 'de', 'url': i['url'], 'direct': direct, 'debridonly': False})
                     except:
@@ -137,7 +138,7 @@ class source:
 
     def __search(self, titles, year):
         try:
-            query = self.search_link % (urllib.quote_plus(titles[0]))
+            query = self.search_link % urllib.quote_plus(cleantitle.query(titles[0]))
             query = urlparse.urljoin(self.base_link, query)
 
             t = [cleantitle.get(i) for i in set(titles) if i]

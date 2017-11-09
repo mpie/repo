@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -17,10 +17,9 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['sceper.ws']
-        self.base_link = 'http://sceper.ws'
+        self.domains = ['sceper.ws','sceper.unblocked.pro']
+        self.base_link = 'https://sceper.unblocked.pro'
         self.search_link = '/search/%s/feed/rss2/'
-
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:

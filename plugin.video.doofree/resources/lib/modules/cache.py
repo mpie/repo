@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-'''
+"""
     DooFree Add-on
-    Copyright (C) 2017 DooFree
-'''
+    Copyright (C) 2017 Mpie
+"""
 import ast
 import hashlib
 import re
@@ -19,7 +19,6 @@ This module is used to get/set cache for every action done in the system
 """
 
 cache_table = 'cache'
-
 
 def get(function, duration, *args):
     # type: (function, int, object) -> object or None
@@ -58,6 +57,64 @@ def timeout(function, *args):
     except Exception:
         return None
 
+def bennu_download_get(function, timeout, *args, **table):
+    try:
+        response = None
+
+        f = repr(function)
+        f = re.sub('.+\smethod\s|.+function\s|\sat\s.+|\sof\s.+', '', f)
+
+        a = hashlib.md5()
+        for i in args: a.update(str(i))
+        a = str(a.hexdigest())
+    except:
+        pass
+
+    try:
+        table = table['table']
+    except:
+        table = 'rel_list'
+
+    try:
+        control.makeFile(control.dataPath)
+        dbcon = db.connect(control.cacheFile)
+        dbcur = dbcon.cursor()
+        dbcur.execute("SELECT * FROM %s WHERE func = '%s' AND args = '%s'" % (table, f, a))
+        match = dbcur.fetchone()
+
+        response = eval(match[2].encode('utf-8'))
+
+        t1 = int(match[3])
+        t2 = int(time.time())
+        update = (abs(t2 - t1) / 3600) >= int(timeout)
+        if update == False:
+            return response
+    except:
+        pass
+
+    try:
+        r = function(*args)
+        if (r == None or r == []) and not response == None:
+            return response
+        elif (r == None or r == []):
+            return r
+    except:
+        return
+
+    try:
+        r = repr(r)
+        t = int(time.time())
+        dbcur.execute("CREATE TABLE IF NOT EXISTS %s (""func TEXT, ""args TEXT, ""response TEXT, ""added TEXT, ""UNIQUE(func, args)"");" % table)
+        dbcur.execute("DELETE FROM %s WHERE func = '%s' AND args = '%s'" % (table, f, a))
+        dbcur.execute("INSERT INTO %s Values (?, ?, ?, ?)" % table, (f, a, r, t))
+        dbcon.commit()
+    except:
+        pass
+
+    try:
+        return eval(r.encode('utf-8'))
+    except:
+        pass
 
 def cache_get(key):
     # type: (str, str) -> dict or None
@@ -67,7 +124,6 @@ def cache_get(key):
         return cursor.fetchone()
     except OperationalError:
         return None
-
 
 def cache_insert(key, value):
     # type: (str, str) -> None
@@ -104,11 +160,56 @@ def cache_clear():
     except:
         pass
 
+def cache_clear_meta():
+    try:
+        cursor = _get_connection_cursor_meta()
 
+        for t in ['meta']:
+            try:
+                cursor.execute("DROP TABLE IF EXISTS %s" % t)
+                cursor.execute("VACUUM")
+                cursor.commit()
+            except:
+                pass
+    except:
+        pass
+
+def cache_clear_providers():
+    try:
+        cursor = _get_connection_cursor_providers()
+
+        for t in ['rel_src', 'rel_url']:
+            try:
+                cursor.execute("DROP TABLE IF EXISTS %s" % t)
+                cursor.execute("VACUUM")
+                cursor.commit()
+            except:
+                pass
+    except:
+        pass
+
+def cache_clear_search():
+    try:
+        cursor = _get_connection_cursor_search()
+
+        for t in ['tvshow', 'movies']:
+            try:
+                cursor.execute("DROP TABLE IF EXISTS %s" % t)
+                cursor.execute("VACUUM")
+                cursor.commit()
+            except:
+                pass
+    except:
+        pass
+
+def cache_clear_all():
+    cache_clear()
+    cache_clear_meta()
+    cache_clear_providers()
+        
 def _get_connection_cursor():
     conn = _get_connection()
     return conn.cursor()
-
 
 def _get_connection():
     control.makeFile(control.dataPath)
@@ -116,6 +217,35 @@ def _get_connection():
     conn.row_factory = _dict_factory
     return conn
 
+def _get_connection_cursor_meta():
+    conn = _get_connection_meta()
+    return conn.cursor()
+
+def _get_connection_meta():
+    control.makeFile(control.dataPath)
+    conn = db.connect(control.metacacheFile)
+    conn.row_factory = _dict_factory
+    return conn
+
+def _get_connection_cursor_providers():
+    conn = _get_connection_providers()
+    return conn.cursor()
+
+def _get_connection_providers():
+    control.makeFile(control.dataPath)
+    conn = db.connect(control.providercacheFile)
+    conn.row_factory = _dict_factory
+    return conn
+    
+def _get_connection_cursor_search():
+    conn = _get_connection_search()
+    return conn.cursor()
+
+def _get_connection_search():
+    control.makeFile(control.dataPath)
+    conn = db.connect(control.searchFile)
+    conn.row_factory = _dict_factory
+    return conn
 
 def _dict_factory(cursor, row):
     d = {}
@@ -142,3 +272,24 @@ def _is_cache_valid(cached_time, cache_timeout):
     now = int(time.time())
     diff = now - cached_time
     return (cache_timeout * 3600) > diff
+
+def cache_version_check():
+
+    if _find_cache_version():
+        cache_clear(); cache_clear_meta(); cache_clear_providers()
+        control.infoDialog(control.lang(32057).encode('utf-8'), sound=True, icon='INFO')
+        
+def _find_cache_version():
+
+    import os
+    versionFile = os.path.join(control.dataPath, 'cache.v')
+    try: 
+        with open(versionFile, 'rb') as fh: oldVersion = fh.read()
+    except: oldVersion = '0'
+    try:
+        curVersion = control.addon('plugin.video.doofree').getAddonInfo('version')
+        if oldVersion != curVersion: 
+            with open(versionFile, 'wb') as fh: fh.write(curVersion)
+            return True
+        else: return False
+    except: return False

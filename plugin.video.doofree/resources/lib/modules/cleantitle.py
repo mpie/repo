@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     DooFree Add-on
-    Copyright (C) 2017 DooFree
-'''
+    Copyright (C) 2017 Mpie
+"""
 
 import re
 import unicodedata
@@ -60,6 +60,7 @@ def query(title):
 
 
 def normalize(title):
+
     try:
         try: return title.decode('ascii').encode("utf-8")
         except: pass

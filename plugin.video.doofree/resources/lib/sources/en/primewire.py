@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -11,7 +11,7 @@ import re,urllib,urlparse,base64
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import proxy
-
+from resources.lib.modules import source_utils
 
 class source:
     def __init__(self):
@@ -19,6 +19,7 @@ class source:
         self.language = ['en']
         self.domains = ['primewire.ag']
         self.base_link = 'http://www.primewire.ag'
+        self.base_link = 'https://primewire.unblocked.bid'
         self.key_link = '/index.php?search'
         self.moviesearch_link = '/index.php?search_keywords=%s&key=%s&search_section=1'
         self.tvsearch_link = '/index.php?search_keywords=%s&key=%s&search_section=2'
@@ -172,9 +173,7 @@ class source:
                     host = host.encode('utf-8')
 
                     quality = client.parseDOM(i, 'span', ret='class')[0]
-                    if quality == 'quality_cam' or quality == 'quality_ts': quality = 'CAM'
-                    elif quality == 'quality_dvd': quality = 'SD'
-                    else:  raise Exception()
+                    quality,info = source_utils.get_release_quality(quality, url)
 
                     sources.append({'source': host, 'quality': quality, 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
                 except:

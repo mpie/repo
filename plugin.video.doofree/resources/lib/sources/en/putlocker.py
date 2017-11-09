@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -12,14 +12,16 @@ from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import cache
 from resources.lib.modules import directstream
+from resources.lib.modules import source_utils
+
 
 
 class source:
     def __init__(self):
-        self.priority = 1
+        self.priority = 0
         self.language = ['en']
-        self.domains = ['putlocker.systems', 'putlocker-movies.tv', 'putlocker.yt', 'cartoonhd.website', 'cartoonhd.online', 'cartoonhd.cc']
-        self.base_link = 'https://cartoonhd.be/'
+        self.domains = ['putlocker.systems', 'putlocker-movies.tv', 'cartoonhd.website', 'cartoonhd.online', 'cartoonhd.cc']
+        self.base_link = 'https://cartoonhd.in'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
@@ -54,7 +56,7 @@ class source:
     def searchShow(self, title, season, episode, aliases, headers):
         try:
             for alias in aliases:
-                url = '%s/tv-show/%s/season/%01d/episode/%01d' % (self.base_link, cleantitle.geturl(alias['title']), int(season), int(episode))
+                url = '%s/show/%s/season/%01d/episode/%01d' % (self.base_link, cleantitle.geturl(alias['title']), int(season), int(episode))
                 url = client.request(url, headers=headers,output='geturl', timeout='10')
                 if not url == None and url != self.base_link: break
             return url
@@ -118,16 +120,15 @@ class source:
             try: auth = re.findall('__utmx=(.+)', cookie)[0].split(';')[0]
             except: auth = 'false'
             auth = 'Bearer %s' % urllib.unquote_plus(auth)
-
+            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
             headers['Authorization'] = auth
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
             headers['Accept'] = 'application/json, text/javascript, */*; q=0.01'
-            headers['Cookie'] = cookie
+            headers['Accept-Encoding'] = 'gzip,deflate,br'
             headers['Referer'] = url
 
-
             u = '/ajax/tnembedr.php'
-            self.base_link = client.request(self.base_link, output='geturl')
+            self.base_link = client.request(self.base_link, headers=headers, output='geturl')
             u = urlparse.urljoin(self.base_link, u)
 
             action = 'getEpisodeEmb' if '/episode/' in url else 'getMovieEmb'
@@ -140,13 +141,58 @@ class source:
 
             post = {'action': action, 'idEl': idEl, 'token': token, 'elid': elid}
             post = urllib.urlencode(post)
+            cookie += ';%s=%s'%(idEl,elid)
+            headers['Cookie'] = cookie
 
-            r = client.request(u, post=post, XHR=True)
+            r = client.request(u, post=post, headers=headers, cookie=cookie, XHR=True)
             r = str(json.loads(r))
             r = re.findall('\'(http.+?)\'', r) + re.findall('\"(http.+?)\"', r)
 
             for i in r:
-                try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'language': 'en', 'url': i, 'direct': True, 'debridonly': False})
+                #try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'language': 'en', 'url': i, 'direct': True, 'debridonly': False})
+                #except: pass
+                if 'googleusercontent' in i:
+                    try:
+                        newheaders = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
+                               'Accept': '*/*',
+                               'Host': 'lh3.googleusercontent.com',
+                               'Accept-Language': 'en-US,en;q=0.8,de;q=0.6,es;q=0.4',
+                               'Accept-Encoding': 'identity;q=1, *;q=0',
+                               'Referer': url,
+                               'Connection': 'Keep-Alive',
+                               'X-Client-Data': 'CJK2yQEIo7bJAQjEtskBCPqcygEIqZ3KAQjSncoBCKijygE=',
+                               'Range': 'bytes=0-'
+                          }
+                        resp = client.request(i, headers=newheaders, redirect=False, output='extended', timeout='10')
+                        loc = resp[2]['Location']
+                        c = resp[2]['Set-Cookie'].split(';')[0]
+                        i = '%s|Cookie=%s' % (loc, c)
+                        urls, host, direct = [{'quality': 'SD', 'url': i}], 'gvideo', True    
+                                            
+                    except: 
+                        pass
+
+                try:
+                    #direct = False
+                    quali = 'SD'
+                    quali = source_utils.check_sd_url(i)
+                    if 'googleapis' in i:
+                        sources.append({'source': 'gvideo', 'quality': quali, 'language': 'en', 'url': i, 'direct': True, 'debridonly': False})
+                        continue
+                    valid, hoster = source_utils.is_host_valid(i, hostDict)
+                    if not urls or urls == []:
+                        urls, host, direct = source_utils.check_directstreams(i, hoster)
+                    if valid:
+                         for x in urls:
+                             if host == 'gvideo':
+                                 try:
+                                     x['quality'] = directstream.googletag(x['url'])[0]['quality']
+                                 except: 
+                                     pass
+
+                             sources.append({'source': host, 'quality': x['quality'], 'language': 'en', 'url': x['url'], 'direct': direct, 'debridonly': False})                             
+                    else:
+                        sources.append({'source': 'CDN', 'quality': quali, 'language': 'en', 'url': i, 'direct': True, 'debridonly': False})
                 except: pass
 
             return sources
@@ -155,6 +201,8 @@ class source:
 
 
     def resolve(self, url):
-        return directstream.googlepass(url)
-
+        if 'google' in url and not 'googleapis' in url:
+            return directstream.googlepass(url)
+        else:
+            return url
 

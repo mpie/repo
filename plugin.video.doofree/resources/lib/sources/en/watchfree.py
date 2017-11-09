@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -15,13 +15,12 @@ from resources.lib.modules import proxy
 
 class source:
     def __init__(self):
-        self.priority = 0
+        self.priority = 1
         self.language = ['en']
-        self.domains = ['watchfree.to']
-        self.base_link = 'http://www.watchfree.to'
+        self.domains = ['watchfree.to','watchfree.unblockall.org']
+        self.base_link = 'http://watchfree.unblockall.org'
         self.moviesearch_link = '/?keyword=%s&search_section=1'
         self.tvsearch_link = '/?keyword=%s&search_section=2'
-
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
@@ -181,5 +180,3 @@ class source:
 
     def resolve(self, url):
         return url
-
-

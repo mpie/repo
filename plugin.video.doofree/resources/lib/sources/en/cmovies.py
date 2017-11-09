@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -19,9 +19,9 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['cmovieshd.is']
-        self.base_link = 'http://www.cmovieshd.is/'
-        self.search_link = '?c=movie&m=filter&keyword=%s&per_page=%s'
+        self.domains = ['cmovieshd.net']
+        self.base_link = 'http://cmovieshd.net/'
+        self.search_link = 'search/?q=%s'
 
     def matchAlias(self, title, aliases):
         try:
@@ -68,43 +68,82 @@ class source:
             if url == None: return sources
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
-            title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']            
-            for p in {'','10','20','30','40','50'}:
-                query = self.search_link % (urllib.quote_plus(title), p)
-                query = urlparse.urljoin(self.base_link, query)          
-                result = client.request(query)
-                r = zip(client.parseDOM(result, 'a', ret='href', attrs={'class':'clip-link'}), client.parseDOM(result, 'a', ret='title', attrs={'class':'clip-link'}))
-                try:
-                    if 'episode' in data:            
-                        r = [i for i in r if cleantitle.get(title+'season%s'%data['season']) == cleantitle.get(i[1])][0][0]
-                    else:
-                        r = [i for i in r if cleantitle.get(title) == cleantitle.get(i[1]) and data['year'] in i[1]][0][0]
+            title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
+            aliases = eval(data['aliases'])
+            #cookie = '; approve_search=yes'
+            query = self.search_link % (urllib.quote_plus(title))
+            query = urlparse.urljoin(self.base_link, query)
+            result = client.request(query) #, cookie=cookie)
+            try:
+              
+                if 'episode' in data:            
+                    r = client.parseDOM(result, 'div', attrs={'class': 'ml-item'})
+                    r = zip(client.parseDOM(r, 'a', ret='href'), client.parseDOM(r, 'a', ret='title'))
+                    r = [(i[0], i[1], re.findall('(.*?)\s+-\s+Season\s+(\d)', i[1])) for i in r]
+                    r = [(i[0], i[1], i[2][0]) for i in r if len(i[2]) > 0]
+                    url = [i[0] for i in r if self.matchAlias(i[2][0], aliases) and i[2][1] == data['season']][0]
+                    url = '%swatch' % url
+                else:
+                    r = client.parseDOM(result, 'div', attrs={'class': 'ml-item'})
+                    r = zip(client.parseDOM(r, 'a', ret='href'), client.parseDOM(r, 'a', ret='title'))
+                    results = [(i[0], i[1], re.findall('\((\d{4})', i[1])) for i in r]
+                    try:
+                        r = [(i[0], i[1], i[2][0]) for i in results if len(i[2]) > 0]
+                        url = [i[0] for i in r if self.matchAlias(i[1], aliases) and (year == i[2])][0]
+                    except:
+                        url = None
+                        pass
 
-                    break
-                except:
-                    if p == '50': raise Exception
-                    else: pass
+                    if (url == None):
+                        url = [i[0] for i in results if self.matchAlias(i[1], aliases)][0]
+                    url = '%s/watch' % url
+
+                url = client.request(url, output='geturl')
+                if url == None: raise Exception()
+
+            except:                           
+              return sources
                 
             
-            url = r if 'http' in r else urlparseF.urljoin(self.base_link, r)
+            url = url if 'http' in url else urlparseF.urljoin(self.base_link, url)
             result = client.request(url)    
-            url = re.findall(u'<iframe.*?src="([^"]+)', result)[0]
-            id = re.compile('id=(\d+)').findall(url)[0]
-                      
-            if 'episode' in data:
-                post = {'id': id, 'e': data['episode'], 'lang': '3', 'cat': 'episode'}          
-                                  
-            else:
-                post = {'id': id, 'e': '', 'lang': '3', 'cat': 'movie'}                
+            src = re.findall('src\s*=\s*"(.*streamdor.co/video/\d+)"', result)[0]
+            if src.startswith('//'):
+                src = 'http:'+src
+            episodeId = re.findall('.*streamdor.co/video/(\d+)', src)[0]
+            p = client.request(src, referer=url)
+            try:
+                p = re.findall(r'JuicyCodes.Run\(([^\)]+)', p, re.IGNORECASE)[0]
+                p = re.sub(r'\"\s*\+\s*\"','', p)
+                p = re.sub(r'[^A-Za-z0-9+\\/=]','', p)    
+                p = base64.b64decode(p)                
+                p = jsunpack.unpack(p)
+                p = unicode(p, 'utf-8')
 
-            url = "%s://%s/embed/movieStreams?"%(urlparse.urlsplit(url)[0],urlparse.urlsplit(url)[1]) + urllib.urlencode(post) 
-            result = client.request(url, post={})
-            links = re.findall(r'show_player\(.*?,.*?"([^"\\]+)',result)
+                post = {'id': episodeId}
+                p2 = client.request('https://embed.streamdor.co/token.php?v=5', post=post, referer=src, XHR=True)
+                js = json.loads(p2)
+                tok = js['token']
+                quali = 'SD'
+                try:
+                    quali = re.findall(r'label:"(.*?)"',p)[0]
+                except:
+                    pass
+                p = re.findall(r'var\s+episode=({[^}]+});',p)[0]
+                js = json.loads(p)
+                ss = []
 
-            sources = []
-            i = 0
-            for url in links:
-                if i == 10: break
+                #if 'eName' in js and js['eName'] != '':
+                #    quali = source_utils.label_to_quality(js['eName'])
+                if 'fileEmbed' in js and js['fileEmbed'] != '':
+                    ss.append([js['fileEmbed'], quali])
+                if 'fileHLS' in js and js['fileHLS'] != '':
+                    ss.append(['https://hls.streamdor.co/%s%s'%(tok, js['fileHLS']), quali])  
+            except:
+                return sources
+
+            for link in ss:               
+
                 try:
                     if 'google' in url:
                         valid, hoster = source_utils.is_host_valid(url, hostDict)
@@ -112,9 +151,14 @@ class source:
                         for x in urls: sources.append({'source': host, 'quality': x['quality'], 'language': 'en', 'url': x['url'], 'direct': direct, 'debridonly': False})
              
                     else:
-                        valid, hoster = source_utils.is_host_valid(url, hostDict)
-                        sources.append({'source': hoster, 'quality': 'SD', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
-                    i+=1
+                        try: 
+                            valid, hoster = source_utils.is_host_valid(link[0], hostDict)
+                            direct = False
+                            if not valid:
+                                hoster = 'CDN'                        
+                                direct = True                                       
+                            sources.append({'source': hoster, 'quality': link[1], 'language': 'en', 'url': link[0], 'direct': direct, 'debridonly': False})
+                        except: pass
 
                 except:
                     pass

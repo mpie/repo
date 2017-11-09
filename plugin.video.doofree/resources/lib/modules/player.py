@@ -2,11 +2,11 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
-import re,sys,json,time,xbmc,xbmcplugin
+import re,sys,json,time,xbmc
 import hashlib,urllib,os,base64,codecs,xmlrpclib
 import gzip, StringIO
 
@@ -24,21 +24,21 @@ class player(xbmc.Player):
         xbmc.Player.__init__(self)
 
     def playLiveStream(self, name, url, image):
-        if '.ts' in url:
-            stype = 'TSDOWNLOADER'
-            from F4mProxy import f4mProxyHelper
-            f4mp=f4mProxyHelper()
-            xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
-            f4mp.playF4mLink(url,name,proxy=None,use_proxy_for_chunks=False, maxbitrate=0, simpleDownloader=False, auth=None, streamtype=stype,setResolved=False,swf=None , callbackpath="",callbackparam="", iconImage=image)
-            return
+            if '.ts' in url:
+                stype = 'TSDOWNLOADER'
+                from F4mProxy import f4mProxyHelper
+                f4mp=f4mProxyHelper()
+                xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
+                f4mp.playF4mLink(url,name,proxy=None,use_proxy_for_chunks=False, maxbitrate=0, simpleDownloader=False, auth=None, streamtype=stype,setResolved=False,swf=None , callbackpath="",callbackparam="", iconImage=image)
+                return
 
-        item = control.item(path=url, iconImage=image, thumbnailImage=image)
-        item.setInfo(type='Video', infoLabels={'title': name})
-        item.setProperty('Video', 'true')
-        item.setProperty('IsPlayable', 'true')
-        control.playlist.clear()
+            item = control.item(path=url, iconImage=image, thumbnailImage=image)
+            item.setInfo(type='Video', infoLabels={'title': name})
+            item.setProperty('Video', 'true')
+            item.setProperty('IsPlayable', 'true')
+            control.playlist.clear()
 
-        control.player.play(url)
+            control.player.play(url)
 
     def run(self, title, year, season, episode, imdb, tvdb, url, meta):
         try:
@@ -269,6 +269,10 @@ class player(xbmc.Player):
         if control.setting('crefresh') == 'true':
             xbmc.executebuiltin('Container.Refresh')
 
+        try:
+            if (self.currentTime / self.totalTime) >= .90:
+                self.libForPlayback()
+        except: pass
 
     def onPlayBackEnded(self):
         self.libForPlayback()

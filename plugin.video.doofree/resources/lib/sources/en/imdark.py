@@ -1,8 +1,21 @@
 # -*- coding: utf-8 -*-
 
 '''
-    DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Specto Add-on
+    Copyright (C) 2015 lambda
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 
@@ -15,7 +28,7 @@ from resources.lib.modules import directstream
 
 class source:
     def __init__(self):
-        self.priority = 0
+        self.priority = 1
         self.language = ['en']
         self.domains = ['imdark.com']
         self.base_link = 'http://imdark.com'
@@ -43,6 +56,8 @@ class source:
             title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
             query = self.search_link % (urllib.quote_plus(title))
             query = urlparse.urljoin(self.base_link, query)
+            #query = urlparse.urljoin(self.base_link, self.ajax_link)            
+            #post = urllib.urlencode({'action':'sufi_search', 'search_string': title})
             
             result = client.request(query)
             r = client.parseDOM(result, 'div', attrs={'id':'showList'})

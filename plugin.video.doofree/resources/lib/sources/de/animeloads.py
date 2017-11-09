@@ -2,20 +2,7 @@
 
 """
     DooFree Add-on
-    Copyright (C) 2016 Viper2k4
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2017 Mpie
 """
 
 import json
@@ -113,14 +100,13 @@ class source:
                         hosters = dom_parser.parse_dom(html, 'a', attrs={'href': re.compile('#streams_episodes_%s_%s' % (id, s))})
                         hosters = [dom_parser.parse_dom(i, 'i', req='class') for i in hosters]
                         hosters = [re.findall('hoster-(\w+)', ' '.join([x.attrs['class'] for x in i])) for i in hosters if i][0]
-                        hosters = [re.sub('(co|to|net|pw|sx|tv|moe|ws|icon)$', '', i) for i in hosters]
-                        hosters = [(source_utils.is_host_valid(i, hostDict), i) for i in hosters if i]
+                        hosters = [(source_utils.is_host_valid(re.sub('(co|to|net|pw|sx|tv|moe|ws|icon)$', '', i), hostDict), i) for i in hosters]
                         hosters = [(i[0][1], i[1]) for i in hosters if i[0] and i[0][0]]
 
                         info = ' | '.join(info)
 
                         for source, hoster in hosters:
-                            sources.append({'source': source, 'quality': quality, 'language': 'de', 'url': [enc, hoster], 'info': info, 'direct': False, 'debridonly': False})
+                            sources.append({'source': source, 'quality': quality, 'language': 'de', 'url': [enc, hoster], 'info': info, 'direct': False, 'debridonly': False, 'checkquality': True})
                     except:
                         pass
 

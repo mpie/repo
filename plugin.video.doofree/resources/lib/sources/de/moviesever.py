@@ -2,20 +2,7 @@
 
 """
     DooFree Add-on
-    Copyright (C) 2016 Viper2k4
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2017 Mpie
 """
 
 import base64
@@ -63,7 +50,7 @@ class source:
             rels = dom_parser.parse_dom(rels, 'ul', attrs={'class': 'idTabs'})
             rels = dom_parser.parse_dom(rels, 'li')
             rels = [(dom_parser.parse_dom(i, 'a', attrs={'class': 'options'}, req='href'), dom_parser.parse_dom(i, 'img', req='src')) for i in rels]
-            rels = [(i[0][0].attrs['href'][1:], re.findall('\/flags\/(\w+)\.png$', i[1][0].attrs['src'])) for i in rels if i[0] and i[1]]
+            rels = [(i[0][0].attrs['href'][1:], re.findall('/flags/(\w+)\.png$', i[1][0].attrs['src'])) for i in rels if i[0] and i[1]]
             rels = [i[0] for i in rels if len(i[1]) > 0 and i[1][0].lower() == 'de']
 
             r = [dom_parser.parse_dom(r, 'div', attrs={'id': i}) for i in rels]
@@ -75,14 +62,16 @@ class source:
                     i = re.sub('\[.+?\]|\[/.+?\]', '', i)
                     i = client.replaceHTMLCodes(i)
                     if not i.startswith('http'): i = self.__decode_hash(i)
+                    if 'play.seriesever' in i:
+                        i = client.request(i)
+                        i = dom_parser.parse_dom(i, 'iframe', req='src')
+                        if len(i) < 1: continue
+                        i = i[0].attrs['src']
 
                     valid, host = source_utils.is_host_valid(i, hostDict)
                     if not valid: continue
 
-                    if 'google' in i: host = 'gvideo'; direct = True; urls = directstream.google(i)
-                    elif 'ok.ru' in i: host = 'vk'; direct = True; urls = directstream.odnoklassniki(i)
-                    elif 'vk.com' in i: host = 'vk'; direct = True; urls = directstream.vk(i)
-                    else: direct = False; urls = [{'quality': 'SD', 'url': i}]
+                    urls, host, direct = source_utils.check_directstreams(i, host)
 
                     for x in urls: sources.append({'source': host, 'quality': x['quality'], 'language': 'de', 'url': x['url'], 'direct': direct, 'debridonly': False})
                 except:
@@ -116,7 +105,7 @@ class source:
             r = dom_parser.parse_dom(r, 'div', attrs={'class': 'details'})
             r = [(dom_parser.parse_dom(i, 'div', attrs={'class': 'title'}), dom_parser.parse_dom(i, 'span', attrs={'class': 'year'})) for i in r]
             r = [(dom_parser.parse_dom(i[0][0], 'a', req='href'), i[1][0].content) for i in r if i[0] and i[1]]
-            r = [(i[0][0].attrs['href'], i[0][0].content, i[1]) for i in r if i[0]]
+            r = [(i[0][0].attrs['href'], client.replaceHTMLCodes(i[0][0].content), i[1]) for i in r if i[0]]
             r = sorted(r, key=lambda i: int(i[2]), reverse=True)  # with year > no year
             r = [i[0] for i in r if cleantitle.get(i[1]) in t and i[2] in y][0]
 

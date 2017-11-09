@@ -1,48 +1,53 @@
+# NEEDS FIXING
+
 # -*- coding: utf-8 -*-
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
-import re,json,urllib,urlparse
+import re, json, urllib, urlparse, base64
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import directstream
-
+from resources.lib.modules import source_utils
 
 class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['fmovie.co', 'afdah.org', 'xmovies8.org', 'putlockerhd.co']
-        self.base_link = 'https://afdah.org'
-        self.search_link = '/results?q=%s'
-
+        self.domains = ['afdah.to']
+        self.base_link = 'http://afdah.to'
+        self.search_link = '/wp-content/themes/afdah/ajax-search.php'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
-            query = self.search_link % (urllib.quote_plus(title))
-            query = urlparse.urljoin(self.base_link, query)
 
-            c, h = self.__get_cookies(query)
+            query = urlparse.urljoin(self.base_link, self.search_link)
+            if ':' in title:
+                title2 = title.split(':')[0] + ':'
+                post = 'search=%s&what=title' % title2
+
+            else: post = 'search=%s&what=title' % cleantitle.getsearch(title)
+
 
             t = cleantitle.get(title)
 
-            r = client.request(query, headers=h, cookie=c)
-
-            r = client.parseDOM(r, 'div', attrs={'class': 'cell_container'})
-            r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a', ret='title')) for i in r]
+            r = client.request(query, post=post)
+            r = client.parseDOM(r, 'li')
+            r = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a',)) for i in r]
             r = [(i[0][0], i[1][0]) for i in r if len(i[0]) > 0 and len(i[1]) > 0]
             r = [(i[0], re.findall('(.+?) \((\d{4})', i[1])) for i in r]
             r = [(i[0], i[1][0][0], i[1][0][1]) for i in r if len(i[1]) > 0]
             r = [i[0] for i in r if t == cleantitle.get(i[1]) and year == i[2]][0]
 
-            url = re.findall('(?://.+?|)(/.+)', r)[0]
+            url = urlparse.urljoin(self.base_link, re.findall('(?://.+?|)(/.+)', r)[0])
             url = client.replaceHTMLCodes(url)
             url = url.encode('utf-8')
+
             return url
         except:
             return
@@ -54,40 +59,79 @@ class source:
         try:
             if not url:
                 return sources
+            surl = []
+            r = client.request(url, redirect=True)
+            data = client.parseDOM(r, 'div', attrs={'class': 'jw-player'}, ret='data-id')
+            data2 = client.parseDOM(r, 'tr')
+            data2 = [client.parseDOM(i, 'a', ret='href') for i in data2]
+            surl += [i[0] for i in data2 if i]
+            surl += [urlparse.urljoin(self.base_link,i) for i in data if not 'trailer' in i]
 
-            referer = urlparse.urljoin(self.base_link, url)
+            for url in surl:
+                try:
+                    if self.base_link in url:
+                        txt = client.request(url)
 
-            c, h = self.__get_cookies(referer)
+                        try:
+                            code = re.findall(r'decrypt\("([^"]+)', txt)[0]
+                            decode = base64.b64decode(tor(base64.b64decode(code)))
 
-            try: post = urlparse.parse_qs(urlparse.urlparse(referer).query).values()[0][0]
-            except: post = referer.strip('/').split('/')[-1].split('watch_', 1)[-1].rsplit('#')[0].rsplit('.')[0]
+                            urls = [(i[0], i[1]) for i in re.findall(
+                                '''file\s*:\s*["']([^"']+)['"].+?label\s*:\s*["'](\d+)p["']''', str(decode), re.DOTALL)
+                                    if int(i[1]) >= 720]
+                            for i in urls:
+                                url = i[0]
+                                quality = i[1] + 'p'
+                                sources.append(
+                                    {'source': 'GVIDEO', 'quality': quality, 'language': 'en', 'url': url,
+                                     'direct': True,
+                                     'debridonly': False})
+                        except:
+                            code = re.findall(r'salt\("([^"]+)', txt)[0]
+                            decode = tor(base64.b64decode(tor(code)))
+                            url = client.parseDOM(str(decode), 'iframe', ret='src')[0]
+                            sources.append(
+                                {'source': 'NETU', 'quality': '1080p', 'language': 'en', 'url': url, 'direct': False,
+                                 'debridonly': False})
 
-            post = urllib.urlencode({'v': post})
-
-            url = urlparse.urljoin(self.base_link, '/video_info/iframe')
-
-            r = client.request(url, post=post, headers=h, cookie=c, XHR=True, referer=referer)
-            r = json.loads(r).values()
-            r = [urllib.unquote(i.split('url=')[-1]) for i in r]
-
-            for i in r:
-                try: sources.append({'source': 'gvideo', 'quality': directstream.googletag(i)[0]['quality'], 'language': 'en', 'url': i, 'direct': True, 'debridonly': False})
+                except:
+                    pass
+                try:
+                    valid, host = source_utils.is_host_valid(url, hostDict)
+                    if not valid: continue
+                    sources.append({'source': host, 'quality': 'SD', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
                 except: pass
 
             return sources
         except:
             return sources
 
-    def __get_cookies(self, url):
-        h = {'User-Agent': client.randomagent()}
-
-        c = client.request(url, headers=h, output='cookie')
-        c = client.request(urlparse.urljoin(self.base_link, '/av'), cookie=c, output='cookie', headers=h, referer=url)
-        c = client.request(url, cookie=c, headers=h, referer=url, output='cookie')
-
-        return c, h
-
     def resolve(self, url):
-        return directstream.googlepass(url)
+        return url
 
 
+def tor(txt):
+    try:
+        map = {}
+        tmp = "abcdefghijklmnopqrstuvwxyz"
+        buf = ""
+        j = 0;
+        for c in tmp:
+            x = tmp[j]
+            y = tmp[(j + 13) % 26]
+            map[x] = y;
+            map[x.upper()] = y.upper()
+            j += 1
+
+        j = 0
+        for c in txt:
+            c = txt[j]
+            if c >= 'A' and c <= 'Z' or c >= 'a' and c <= 'z':
+                buf += map[c]
+            else:
+                buf += c
+            j += 1
+
+        return buf
+    except:
+        return

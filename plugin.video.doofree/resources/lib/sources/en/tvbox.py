@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -17,52 +17,37 @@ from resources.lib.modules import dom_parser
 
 class source:
     def __init__(self):       
-        self.priority = 0
+        self.priority = 1
         self.language = ['en']
         self.domains = ['tvbox.ag']
         self.base_link = 'https://tvbox.ag'
-        self.search_link = 'https://tvbox.ag/search?q=%s'
+        self.search_link_tv = 'https://tvbox.ag/tvshows'
+        self.search_link_movie = 'https://tvbox.ag/movies'
 
     
     def movie(self, imdb, title, localtitle, aliases, year):
-        try:            
-            query = self.search_link % urllib.quote_plus(cleantitle.query(title))           
-            for i in range(3):
-                result = client.request(query, timeout=10)
-                if not result == None: break
-
-            t = [title] + [localtitle] + source_utils.aliases_to_array(aliases)
-            t = [cleantitle.get(i) for i in set(t) if i]
-            items = dom_parser.parse_dom(result, 'div', attrs={'class':'result'})
-            url = None
-            for i in items:
-                result = re.findall(r'href="([^"]+)">(.*)<', i.content)
-                if re.sub('<[^<]+?>', '', cleantitle.get(cleantitle.normalize(result[0][1]))) in t and year in result[0][1]: url = result[0][0]
-                if not url == None: break 
-
-            url = url.encode('utf-8')
+        try:
+            result = client.request(self.search_link_movie)
+            m = client.parseDOM(result, 'div', attrs={'class': 'masonry'})[0]
+            m = dom_parser.parse_dom(m, 'a', req='href')
+            m = [(i.attrs['href'], i.content) for i in m]
+            m = [(urlparse.urljoin(self.base_link,i[0]), i[1]) for i in m if
+                 cleantitle.get(title) == cleantitle.get(i[1])]
+            url = m[0][0]
             return url
         except:
             return
 
     def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
+
         try:
-
-            query = self.search_link % urllib.quote_plus(cleantitle.query(tvshowtitle))
-            for i in range(3):
-                result = client.request(query, timeout=10)
-                if not result == None: break
-
-            t = [tvshowtitle] + source_utils.aliases_to_array(aliases)
-            t = [cleantitle.get(i) for i in set(t) if i]
-            items = dom_parser.parse_dom(result, 'div', attrs={'class':'result'})
-            url = None
-            for i in items:
-                result = re.findall(r'href="([^"]+)">(.*)<', i.content)
-                if re.sub('<[^<]+?>', '', cleantitle.get(cleantitle.normalize(result[0][1]))) in t and year in result[0][1]: url = result[0][0]
-                if not url == None: break 
-
-            url = url.encode('utf-8')
+            result = client.request(self.search_link_tv)
+            m = client.parseDOM(result, 'div', attrs={'class': 'masonry'})[0]
+            m = dom_parser.parse_dom(m, 'a', req='href')
+            m = [(i.attrs['href'], i.content) for i in m]
+            m = [(urlparse.urljoin(self.base_link, i[0]), i[1]) for i in m if
+                 cleantitle.get(tvshowtitle) == cleantitle.get(i[1])]
+            url = m[0][0]
             return url
         except:
             return
@@ -83,7 +68,6 @@ class source:
             result = re.findall(r'<h\d>Season\s+%s<\/h\d>(.*?<\/table>)' % season, result)[0]
             result = dom_parser.parse_dom(result, 'a', attrs={'href': re.compile('.*?episode-%s/' % episode)}, req='href')[0]
             url = result.attrs['href']
-
             url = url.encode('utf-8')
             return url
         except:
@@ -121,7 +105,6 @@ class source:
             return sources
         except:
             return sources
-
 
     def resolve(self, url):
         return url

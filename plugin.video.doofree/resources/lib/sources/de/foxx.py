@@ -2,20 +2,7 @@
 
 """
     DooFree Add-on
-    Copyright (C) 2016 Viper2k4
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2017 Mpie
 """
 
 import base64
@@ -89,55 +76,65 @@ class source:
 
             url = urlparse.urljoin(self.base_link, url)
 
-            r = client.request(url)
+            r = client.request(url, output='extended')
+
+            headers = r[3]
+            headers.update({'Cookie': r[2].get('Set-Cookie'), 'Referer': self.base_link})
+            r = r[0]
 
             rels = dom_parser.parse_dom(r, 'nav', attrs={'class': 'player'})
             rels = dom_parser.parse_dom(rels, 'ul', attrs={'class': 'idTabs'})
             rels = dom_parser.parse_dom(rels, 'li')
             rels = [(dom_parser.parse_dom(i, 'a', attrs={'class': 'options'}, req='href'), dom_parser.parse_dom(i, 'img', req='src')) for i in rels]
-            rels = [(i[0][0].attrs['href'][1:], re.findall('\/flags\/(\w+)\.png$', i[1][0].attrs['src'])) for i in rels if i[0] and i[1]]
+            rels = [(i[0][0].attrs['href'][1:], re.findall('/flags/(\w+)\.png$', i[1][0].attrs['src'])) for i in rels if i[0] and i[1]]
             rels = [i[0] for i in rels if len(i[1]) > 0 and i[1][0].lower() == 'de']
 
             r = [dom_parser.parse_dom(r, 'div', attrs={'id': i}) for i in rels]
 
             links = re.findall('''(?:link|file)["']?\s*:\s*["'](.+?)["']''', ''.join([i[0].content for i in r]))
-            links += [l.attrs['src'] for l in dom_parser.parse_dom(i, 'iframe', attrs={'class': 'metaframe'}, req='src') for i in r]
-            links += [l.attrs['src'] for l in dom_parser.parse_dom(i, 'source', req='src') for i in r]
+            links += [l.attrs['src'] for i in r for l in dom_parser.parse_dom(i, 'iframe', attrs={'class': 'metaframe'}, req='src')]
+            links += [l.attrs['src'] for i in r for l in dom_parser.parse_dom(i, 'source', req='src')]
 
             for i in links:
                 try:
                     i = re.sub('\[.+?\]|\[/.+?\]', '', i)
                     i = client.replaceHTMLCodes(i)
 
+                    if '/play/' in i: i = urlparse.urljoin(self.base_link, i)
+
                     if self.domains[0] in i:
-                        i = client.request(i, referer=url)
+                        i = client.request(i, headers=headers, referer=url)
 
                         for x in re.findall('''\(["']?(.*)["']?\)''', i):
-                            try: i += jsunpack.unpack(base64.decodestring(re.sub('"\s*\+\s*"', '', x)))
+                            try: i += jsunpack.unpack(base64.decodestring(re.sub('"\s*\+\s*"', '', x))).replace('\\', '')
                             except: pass
 
-                        s = re.compile('(eval\(function.*?)</script>', re.DOTALL).findall(i)
-
-                        for x in s:
-                            try: i += jsunpack.unpack(x)
+                        for x in re.findall('(eval\s*\(function.*?)</script>', i, re.DOTALL):
+                            try: i += jsunpack.unpack(x).replace('\\', '')
                             except: pass
 
-                        i = [(match[0], match[1]) for match in re.findall('''['"]?file['"]?\s*:\s*['"]([^'"]+)['"][^}]*['"]?label['"]?\s*:\s*['"]([^'"]*)''', i, re.DOTALL)]
-                        i = [(x[0].replace('\/', '/'), source_utils.label_to_quality(x[1])) for x in i]
+                        links = [(match[0], match[1]) for match in re.findall('''['"]?file['"]?\s*:\s*['"]([^'"]+)['"][^}]*['"]?label['"]?\s*:\s*['"]([^'"]*)''', i, re.DOTALL)]
+                        links = [(x[0].replace('\/', '/'), source_utils.label_to_quality(x[1])) for x in links if '/no-video.mp4' not in x[0]]
 
-                        for url, quality in i:
+                        doc_links = [directstream.google('https://drive.google.com/file/d/%s/view' % match) for match in re.findall('''file:\s*["'](?:[^"']+youtu.be/([^"']+))''', i, re.DOTALL)]
+                        doc_links = [(u['url'], u['quality']) for x in doc_links if x for u in x]
+                        links += doc_links
+
+                        for url, quality in links:
+                            if self.base_link in url:
+                                url = url + '|Referer=' + self.base_link
+
                             sources.append({'source': 'gvideo', 'quality': quality, 'language': 'de', 'url': url, 'direct': True, 'debridonly': False})
                     else:
                         try:
+                            # as long as URLResolver get no Update for this URL (So just a Temp-Solution)
+                            did = re.findall('youtube.googleapis.com.*?docid=(\w+)', i)
+                            if did: i = 'https://drive.google.com/file/d/%s/view' % did[0]
+
                             valid, host = source_utils.is_host_valid(i, hostDict)
                             if not valid: continue
 
-                            urls = []
-                            if 'google' in i: host = 'gvideo'; direct = True; urls = directstream.google(i);
-                            if 'google' in i and not urls and directstream.googletag(i):  host = 'gvideo'; direct = True; urls = [{'quality': directstream.googletag(i)[0]['quality'], 'url': i}]
-                            elif 'ok.ru' in i: host = 'vk'; direct = True; urls = directstream.odnoklassniki(i)
-                            elif 'vk.com' in i: host = 'vk'; direct = True; urls = directstream.vk(i)
-                            else: direct = False; urls = [{'quality': 'SD', 'url': i}]
+                            urls, host, direct = source_utils.check_directstreams(i, host)
 
                             for x in urls: sources.append({'source': host, 'quality': x['quality'], 'language': 'de', 'url': x['url'], 'direct': direct, 'debridonly': False})
                         except:

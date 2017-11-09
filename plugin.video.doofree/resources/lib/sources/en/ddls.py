@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 DooFree
+    Copyright (C) 2017 Mpie
 '''
 
 
@@ -10,18 +10,19 @@ import re,urllib,urlparse
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
-from resources.lib.modules import cache
+from resources.lib.modules import source_utils
 from resources.lib.modules import debrid
+from resources.lib.modules import dom_parser2
 
 
 class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['ddlseries.net', 'ddlseries.me']
-        self.base_link = 'http://www.ddlseries.me'
-        self.search_link = '/?s=%s'
-
+        self.domains = ['ddlseries.net', 'ddlseries.pw']
+        self.base_link = 'http://www.ddlseries.pw'
+        self.search_link = '/?q=%s'
+        self.search_link2 = '/engine/ajax/search.php'
 
     def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
         try:
@@ -31,10 +32,9 @@ class source:
         except:
             return		
 
-
     def episode(self, url, imdb, tvdb, title, premiered, season, episode):
         try:
-            if url == None: return
+            if url is None: return
 
             url = urlparse.parse_qs(url)
             url = dict([(i, url[i][0]) if url[i] else (i, '') for i in url])
@@ -44,70 +44,84 @@ class source:
         except:
             return
 
-
-    def ddlseries_tvcache(self):
-        try:
-            r = urlparse.urljoin(self.base_link, '/tv-series-list.html')
-            r = client.request(r)
-            r = client.parseDOM(r, 'div', attrs = {'class': 'downpara-list'})[0]
-            r = re.compile('<a href="([^"]+)[^>]*>(.*?)</a>').findall(r)
-            r = [i for i in r if not '(Pack)' in i[1]]
-            r = [(i[0], i[1], 'HD') for i in r if 'HD ' in i[1] and not '1080p' in i[1]] + [(i[0], i[1], '1080p') for i in r if '1080p' in i[1]]
-            r = [(i[0], re.findall('(.+?) - (?:S|s)eason (\d*)', i[1]), i[2]) for i in r]
-            r = [(i[0], i[1][0][0], str(i[1][0][1]), i[2]) for i in r if i[1]]
-            return r
-        except:
-            return
-
-	
     def sources(self, url, hostDict, hostprDict):
         try:
-			sources = []
+            sources = []
 
-			if url == None: return sources
+            if url is None: return sources
 
-			if debrid.status() == False: raise Exception()
+            if debrid.status() is False: raise Exception()
 
-			data = urlparse.parse_qs(url)
-			data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
+            data = urlparse.parse_qs(url)
+            data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
-			title = data['tvshowtitle']
-			season = '%01d' % int(data['season'])
-			episode = '%02d' % int(data['episode'])
+            t = data['tvshowtitle']
+            season = '%01d' % int(data['season'])
+            episode = '%02d' % int(data['episode'])
 
-			r = cache.get(self.ddlseries_tvcache, 120)
+            query = cleantitle.getsearch(t)
+            r = urlparse.urljoin(self.base_link, self.search_link2)
+            post = {'query': query}
+            r = client.request(r, post=post)
+            r = dom_parser2.parse_dom(r, 'a')
+            r = [(i.attrs['href'], dom_parser2.parse_dom(i.content, 'span', attrs={'class': 'searchheading'})) for i in
+                 r]
+            try:
+                url = []
+                for i in r:
+                    t1 = i[1][0].content
+                    t2 = re.sub('[Ss]eason\s*\d+', '', t1)
+                    if not str(int(season)) in t1: continue
+                    if cleantitle.get(t) == cleantitle.get(t2) and not 'pack' in i[0]:
+                        url.append(i[0])
+                    if len(url) > 1:
+                        url = [(i) for i in url if 'hd' in i][0]
+                    else:
+                        url = url[0]
 
-			r = [(i[0], i[3]) for i in r if cleantitle.get(title) == cleantitle.get(i[1]) and season == i[2]]
+            except:
+                pass
+            if len(url) < 0:
+                try:
+                    r = urlparse.urljoin(self.base_link, self.search_link)
+                    t = '%s season %s' % (t, season)
+                    post = 'do=search&subaction=search&story=%s' % urllib.quote_plus(cleantitle.getsearch(t))
+                    r = client.request(r, post=post)
+                    r = dom_parser2.parse_dom(r, 'h4')
+                    r = [dom_parser2.parse_dom(i.content, 'a', req=['href']) for i in r if i]
+                    r = [(i[0].attrs['href'], i[0].content) for i in r if i]
+                    r = [(i[0], i[1]) for i in r if t.lower() == i[1].replace(' -', '').lower()]
+                    r = [(i[0]) for i in r if not 'pack' in i[0]]
+                    url = r[0][0]
 
-			links = []
+                except:
+                    pass
 
-			for url, quality in r:
-				try:
-					link = client.request(url)
-					vidlinks = client.parseDOM(link, 'span', attrs = {'class': 'overtr'})[0]
-					match = re.compile('href="([^"]+)[^>]*>\s*Episode\s+(\d+)<').findall(vidlinks)
-					match = [(i[0], quality) for i in match if episode == i[1]]
-					links += match
-				except:
-					pass
+            links = []
 
-			for url, quality in links:
-				try:
-					if "protect-links" in url:
-						redirect = client.request(url)
-						url = re.findall('<a href="(.*?)" target="_blank">', redirect)
-						url = url[0]
+            r = client.request(url)
+            name = re.findall('<b>Release Name :.+?">(.+?)</span>', r, re.DOTALL)[0]
+            link = client.parseDOM(r, 'span', attrs={'class': 'downloads nobr'})
+            link = [(re.findall('<a href="(.+?)"\s*target="_blank">[Ee]pisode\s*(\d+)</a>', i, re.DOTALL)) for i in link]
+            for item in link:
+                link = [(i[0], i[1]) for i in item if i[1] == str(episode)]
+                links.append(link[0][0])
 
-					host = re.findall('([\w]+[.][\w]+)$', urlparse.urlparse(url.strip().lower()).netloc)[0]
-					if not host in hostprDict: raise Exception()
-					host = client.replaceHTMLCodes(host)
-					host = host.encode('utf-8')
+            quality, info = source_utils.get_release_quality(name, None)
 
-					sources.append({'source': host, 'quality': quality, 'language': 'en', 'url': url, 'direct': False, 'debridonly': True})
-				except:
-					pass
+            for url in links:
+                try:
+                    if "protect" in url:
+                        redirect = client.request(url)
+                        url = re.findall('<a href="(.*?)" target="_blank">', redirect)
+                        url = url[0]
 
-			return sources
+                    valid, host = source_utils.is_host_valid(url, hostDict)
+                    sources.append({'source': host, 'quality': quality, 'language': 'en', 'url': url, 'direct': False, 'debridonly': True})
+                except:
+                    pass
+
+            return sources
         except:
             return sources
 

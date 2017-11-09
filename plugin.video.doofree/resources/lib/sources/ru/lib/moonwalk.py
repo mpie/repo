@@ -2,20 +2,7 @@
 
 """
     DooFree Add-on
-    Copyright (C) 2016 Viper2k4
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    Copyright (C) 2017 Mpie
 """
 
 import re
@@ -76,10 +63,13 @@ def __get_moonwalk(url, ref, info=''):
         story = re.findall('''["']X-CSRF-Token["']\s*:\s*[^,]+,\s*["']([\w\-]+)["']\s*:\s*["'](\w+)["']''', r)[0]
         headers.update({'X-CSRF-Token': csrf, story[0]: story[1]})
 
-        varname = re.findall('''var\s*(\w+)\s*=\s*'/sessions/new_session'\s*;''', r)[0]
-        jsid = re.findall('''\.post\(\s*%s\s*,\s*(\w+)''' % varname, r)[0]
+        for i in re.findall('window\[(.*?)\]', r):
+            r = r.replace(i, re.sub('''["']\s*\+\s*["']''', '', i))
 
-        jsdata = re.findall('var\s*%s\s*=\s*({.*?})' % jsid, r, re.DOTALL)[0]
+        varname, post_url = re.findall('''var\s*(\w+)\s*=\s*["'](.*?/all/?)["']\s*;''', r)[0]
+        jsid = re.findall('''\.post\(\s*%s\s*,\s*([^(\);)]+)''' % varname, r)[0]
+
+        jsdata = re.findall('(?:var\s*)?%s\s*=\s*({.*?})' % re.escape(jsid), r, re.DOTALL)[0]
         jsdata = re.sub(r'([\{\s,])(\w+)(:)', r'\1"\2"\3', jsdata)
         jsdata = re.sub(r'''(?<=:)\s*\'''', ' "', jsdata)
         jsdata = re.sub(r'''(?<=\w)\'''', '"', jsdata)
@@ -88,11 +78,12 @@ def __get_moonwalk(url, ref, info=''):
         jsdata = json.loads(jsdata)
 
         mw_key = re.findall('''var\s*mw_key\s*=\s*["'](\w+)["']''', r)[0]
-        newatt = re.findall('''%s\[["'](\w+)["']\]\s*=\s*["'](\w+)["']''' % jsid, r)[0]
+        newatt = re.findall('''%s\[["']([^=]+)["']\]\s*=\s*["']([^;]+)["']''' % re.escape(jsid), r)[0]
+        newatt = [re.sub('''["']\s*\+\s*["']''', '', i) for i in newatt]
 
         jsdata.update({'mw_key': mw_key, newatt[0]: newatt[1]})
 
-        r = client.request(urlparse.urljoin(host, '/sessions/new_session'), post=jsdata, headers=headers, XHR=True)
+        r = client.request(urlparse.urljoin(host, post_url), post=jsdata, headers=headers, XHR=True)
         r = json.loads(r).get('mans', {}).get('manifest_m3u8')
 
         r = client.request(r, headers=headers)
