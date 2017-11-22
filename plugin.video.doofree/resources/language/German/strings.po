@@ -1,4 +1,6 @@
 # Translators:
+# Addon id: plugin.video.doofree
+# Addon Provider: DooFree
 # Translators:
 # Translators:
 # Translators:
@@ -15,8 +17,8 @@
 # Translators:
 # Translators:
 # Translators:
+# Kr1ss, 2017
 # Viper2k4, 2017
-# eidermar, 2016
 # Christian Klippel, 2015
 # eidermar, 2016
 # lambda81, 2016
@@ -92,11 +94,11 @@ msgstr "Sprachen"
 
 msgctxt "#32015"
 msgid "Certificates"
-msgstr "Zertifikate"
+msgstr "MPAA-Einstufung"
 
 msgctxt "#32016"
 msgid "Networks"
-msgstr "TV Sender"
+msgstr "TV-Sender"
 
 msgctxt "#32017"
 msgid "People Watching"
@@ -112,11 +114,11 @@ msgstr "Die meisten Votes"
 
 msgctxt "#32020"
 msgid "Box Office"
-msgstr "Box Office"
+msgstr "Einspielergebnis"
 
 msgctxt "#32021"
 msgid "Oscar Winners"
-msgstr "Oskar Gewinner"
+msgstr "Oskar-Gewinner"
 
 msgctxt "#32022"
 msgid "In Theaters"
@@ -124,11 +126,11 @@ msgstr "In Kinos"
 
 msgctxt "#32023"
 msgid "Highly Rated"
-msgstr "Hochbewertet"
+msgstr "Hoch bewertet"
 
 msgctxt "#32024"
 msgid "Airing today"
-msgstr "Heute ausgestrahlt"
+msgstr "Heute auf Sendung"
 
 msgctxt "#32025"
 msgid "Returning TV Shows"
@@ -140,7 +142,7 @@ msgstr "Neue TV-Serien"
 
 msgctxt "#32027"
 msgid "TV Calendar"
-msgstr "TV Kalender"
+msgstr "TV-Kalender"
 
 msgctxt "#32028"
 msgid "People Search"
@@ -152,7 +154,7 @@ msgstr "Personen (Filme)"
 
 msgctxt "#32030"
 msgid "People (TV)"
-msgstr "Personen (TV)"
+msgstr "Personen (Serien)"
 
 msgctxt "#32031"
 msgid "Discover"
@@ -188,19 +190,19 @@ msgstr "Episoden"
 
 msgctxt "#32039"
 msgid "Movie Lists"
-msgstr "Film Liste"
+msgstr "Film-Listen"
 
 msgctxt "#32040"
 msgid "TV Show Lists"
-msgstr "TV-Serien Liste"
+msgstr "TV-Serien-Listen"
 
 msgctxt "#32041"
 msgid "Episode Lists"
-msgstr "Episoden Liste"
+msgstr "Episoden-Listen"
 
 msgctxt "#32042"
 msgid "No Trakt or IMDb account found."
-msgstr "Kein Trakt oder IMDb Konto gefunden"
+msgstr "Kein Trakt- oder IMDb-Konto gefunden"
 
 msgctxt "#32043"
 msgid "[B]SETTINGS[/B] : General"
@@ -220,7 +222,7 @@ msgstr "[B]EINSTELLUNGEN[/B] : Untertitel"
 
 msgctxt "#32047"
 msgid "[B]SETTINGS[/B] : Providers"
-msgstr "[B]EINSTELLUNGEN[/B] : Index Seiten"
+msgstr "[B]EINSTELLUNGEN[/B] : Indexseiten"
 
 msgctxt "#32048"
 msgid "[B]DOOFREE[/B] : Downloads"
@@ -228,11 +230,11 @@ msgstr "[B]DOOFREE[/B] : Downloads"
 
 msgctxt "#32049"
 msgid "[B]DOOFREE[/B] : Viewtypes"
-msgstr "[B]DOOFREE[/B] : Anzeige Typen"
+msgstr "[B]DOOFREE[/B] : Anzeige-Typen"
 
 msgctxt "#32050"
 msgid "[B]DOOFREE[/B] : Clear providers..."
-msgstr "[B]DOOFREE[/B] : Index Seiten-Cache leeren..."
+msgstr "[B]DOOFREE[/B] : Indexseiten-Cache leeren..."
 
 msgctxt "#32051"
 msgid "[B]DOOFREE[/B] : Clear metadata..."
@@ -264,15 +266,14 @@ msgstr "Vorgang abgeschlossen"
 
 msgctxt "#32058"
 msgid "This will slow down things until they are re-cached!"
-msgstr "Verlangsamung des Systems bis zur Aktualisierung des Cache zu erwarten"
+msgstr "Systems wird bis zur Aktualisierung des Caches verlangsamt"
 
 msgctxt "#32059"
 msgid "CLICK HERE TO SAVE VIEW"
-msgstr "HIER KLICKEN UM ANSICHT ZU SPEICHERN"
+msgstr "HIER KLICKEN, UM ANSICHT ZU SPEICHERN"
 
 msgctxt "#32060"
-msgid ""
-"January|February|March|April|May|June|July|August|September|October|November|December"
+msgid "January|February|March|April|May|June|July|August|September|October|November|December"
 msgstr "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember"
 
 msgctxt "#32061"
@@ -313,11 +314,11 @@ msgstr "In Trakt Ungesehen"
 
 msgctxt "#32070"
 msgid "Trakt Manager"
-msgstr "Trakt Manager"
+msgstr "Trakt-Manager"
 
 msgctxt "#32071"
 msgid "Browse Series"
-msgstr "Durchsuche TV-Serien"
+msgstr "TV-Serie durchsuchen"
 
 msgctxt "#32072"
 msgid "Refresh"
@@ -377,11 +378,11 @@ msgstr "Erscheinungsbild"
 
 msgctxt "#32312"
 msgid "Providers Timeout"
-msgstr "Zeitlimit für Index Seiten"
+msgstr "Zeitlimit für Indexseiten"
 
 msgctxt "#32313"
 msgid "Indicators"
-msgstr "Indikator"
+msgstr "Indikatoren"
 
 msgctxt "#32314"
 msgid "Local"
@@ -437,11 +438,11 @@ msgstr "Episoden"
 
 msgctxt "#32327"
 msgid "Trakt Progress"
-msgstr "Trakt Fortschritt"
+msgstr "Trakt-Fortschritt"
 
 msgctxt "#32328"
 msgid "Trakt Episodes"
-msgstr "Trakt Episoden"
+msgstr "Trakt-Episoden"
 
 msgctxt "#32329"
 msgid "My Lists"
@@ -453,7 +454,7 @@ msgstr "Wiedergabe"
 
 msgctxt "#32331"
 msgid "Default action"
-msgstr "Standard Aktion"
+msgstr "Standard-Aktion"
 
 msgctxt "#32332"
 msgid "Dialog"
@@ -489,7 +490,7 @@ msgstr "Höchste Qualität"
 
 msgctxt "#32340"
 msgid "SD Hosters in Auto Play"
-msgstr "SD Anbieter in Auto-Play"
+msgstr "Nur SD Anbieter in Auto-Play"
 
 msgctxt "#32341"
 msgid "Hosters with captchas"
@@ -497,19 +498,19 @@ msgstr "Dateianbieter mit Captchas"
 
 msgctxt "#32342"
 msgid "Sort by Provider"
-msgstr "Nach Index Seiten sortieren"
+msgstr "Nach Indexseiten sortieren"
 
 msgctxt "#32343"
 msgid "When playback starts..."
-msgstr "Wenn Wiedergabe startet..."
+msgstr "Bei Wiedergabe-Start..."
 
 msgctxt "#32344"
 msgid "Resume Playback"
-msgstr "Wiedergabe fortsetzen"
+msgstr "Fortsetzen"
 
 msgctxt "#32345"
 msgid "Providers"
-msgstr "Index Seiten"
+msgstr "Indexseiten"
 
 msgctxt "#32346"
 msgid "Accounts"
@@ -533,11 +534,11 @@ msgstr "TV-Serien"
 
 msgctxt "#32351"
 msgid "Downloading features are disabled by default."
-msgstr "Herunterladen ist standardmässig deaktiviert"
+msgstr "Herunterladen ist standardmäßig deaktiviert"
 
 msgctxt "#32352"
 msgid "Set up your download folders in order to enable them."
-msgstr "Bitte geben Sie Ihre Ordner Pfade an um sie zu aktivieren"
+msgstr "Bitte geben Sie Ihre Ordnerpfade an, um sie zu aktivieren"
 
 msgctxt "#32353"
 msgid "Subtitles"
@@ -569,7 +570,7 @@ msgstr "In diesem Fall eigene Untertitel verwenden."
 
 msgctxt "#32360"
 msgid "Providers Language"
-msgstr "Sprache für Index Seiten"
+msgstr "Sprache für Indexseiten"
 
 msgctxt "#32363"
 msgid "HEVC"
@@ -577,11 +578,11 @@ msgstr "HEVC"
 
 msgctxt "#32372"
 msgid "When playback ends..."
-msgstr "Wenn Wiedergabe endet..."
+msgstr "Bei Wiedergabe-Ende..."
 
 msgctxt "#32373"
 msgid "Force container refresh"
-msgstr "Container aktualisieren"
+msgstr "Verzeichnis neu laden"
 
 msgctxt "#32401"
 msgid "No stream available"
@@ -589,7 +590,7 @@ msgstr "Keine Streams verfügbar"
 
 msgctxt "#32402"
 msgid "Playback outside DooFree is not allowed"
-msgstr "Eine Wiedergabe ausserhalb von DooFree ist nicht erlaubt"
+msgstr "Eine Wiedergabe außerhalb von DooFree ist nicht erlaubt"
 
 msgctxt "#32403"
 msgid "Download"
@@ -605,7 +606,7 @@ msgstr "%s Sekunden"
 
 msgctxt "#32406"
 msgid "Remaining providers: %s"
-msgstr "Verbleibende Index Seiten: %s"
+msgstr "Verbleibende Indexseiten: %s"
 
 msgctxt "#32407"
 msgid "Are you sure?"
@@ -621,7 +622,7 @@ msgstr "Vom Anfang abspielen"
 
 msgctxt "#32502"
 msgid "Resume from %s"
-msgstr "Fortsetzen von %s"
+msgstr "Fortsetzen ab : %s"
 
 msgctxt "#32503"
 msgid "Resume"
@@ -633,7 +634,7 @@ msgstr "Konto ist bereits vorhanden"
 
 msgctxt "#32512"
 msgid "Do you want to reset?"
-msgstr "Möchten Sie zurücksetzen?"
+msgstr "Möchten Sie es zurücksetzen?"
 
 msgctxt "#32513"
 msgid "1) Visit : [COLOR skyblue]%s[/COLOR]"
@@ -641,11 +642,11 @@ msgstr "1) Besuche : [COLOR skyblue]%s[/COLOR]"
 
 msgctxt "#32514"
 msgid "2) When prompted enter : [COLOR skyblue]%s[/COLOR]"
-msgstr "2) Wenn angewiesen folgendes eingeben: [COLOR skyblue]%s[/COLOR]"
+msgstr "2) Wenn angewiesen, bitte eingeben: [COLOR skyblue]%s[/COLOR]"
 
 msgctxt "#32515"
 msgid "Trakt Manager"
-msgstr "Trakt Manager"
+msgstr "Trakt-Manager"
 
 msgctxt "#32516"
 msgid "Add to [B]Collection[/B]"
@@ -681,7 +682,7 @@ msgstr "Konto ist bereits vorhanden"
 
 msgctxt "#32532"
 msgid "Do you want to reset?"
-msgstr "Möchten Sie zurücksetzen?"
+msgstr "Möchten Sie es zurücksetzen?"
 
 msgctxt "#32533"
 msgid "1) Visit : [COLOR skyblue]%s[/COLOR]"
@@ -689,7 +690,7 @@ msgstr "1) Besuche : [COLOR skyblue]%s[/COLOR]"
 
 msgctxt "#32534"
 msgid "2) When prompted enter : [COLOR skyblue]%s[/COLOR]"
-msgstr "2) Wenn angewiesen folgendes eingeben: [COLOR skyblue]%s[/COLOR]"
+msgstr "2) Wenn angewiesen, bitte eingeben: [COLOR skyblue]%s[/COLOR]"
 
 msgctxt "#32535"
 msgid "Play Random"
@@ -701,7 +702,7 @@ msgstr "Spiele"
 
 msgctxt "#32537"
 msgid "Nothing found to play"
-msgstr "Nichts gefunden zum abspielen"
+msgstr "Nichts gefunden zum Abspielen"
 
 msgctxt "#32538"
 msgid "DEBRID-SERVICE"
@@ -720,9 +721,7 @@ msgid "Library"
 msgstr "Bibliothek"
 
 msgctxt "#32542"
-msgid ""
-"DooFree folders will be imported to library if they are added to media "
-"sources."
+msgid "DooFree folders will be imported to library if they are added to media sources."
 msgstr "DooFree-Ordner werden in die Bibliothek importiert, wenn sie zu Medienquellen hinzugefügt werden."
 
 msgctxt "#32543"
@@ -751,11 +750,11 @@ msgstr "Doppelte Einträge vermeiden"
 
 msgctxt "#32549"
 msgid "Check movie before adding it"
-msgstr "Film vor dem hinzufügen prüfen"
+msgstr "Film vor dem Hinzufügen prüfen"
 
 msgctxt "#32550"
 msgid "Check first episode of season before adding it"
-msgstr "Erste Episode der Staffel vor dem hinzufügen prüfen"
+msgstr "Erste Episode der Staffel vor dem Hinzufügen prüfen"
 
 msgctxt "#32551"
 msgid "Add to Library"
@@ -787,7 +786,7 @@ msgstr "[B]BIBLIOTHEK[/B] : Einstellungen"
 
 msgctxt "#32558"
 msgid "[B]DOOFREE[/B] : Update library..."
-msgstr "[B]DOOFREE[/B] : Bibliothek updaten..."
+msgstr "[B]DOOFREE[/B] : Bibliothek aktualisieren..."
 
 msgctxt "#32559"
 msgid "[B]DOOFREE[/B] : Movie folder..."
@@ -795,23 +794,23 @@ msgstr "[B]DOOFREE[/B] : Film-Ordner..."
 
 msgctxt "#32560"
 msgid "[B]DOOFREE[/B] : TV folder..."
-msgstr "[B]DOOFREE[/B] : TV-Serien-Ordner..."
+msgstr "[B]DOOFREE[/B] : Serien-Ordner..."
 
 msgctxt "#32561"
 msgid "[B]TRAKT[/B] : Import Collection..."
-msgstr "[B]TRAKT[/B] : Sammlung importieren..."
+msgstr "[B]TRAKT[/B] : Film-Sammlung importieren..."
 
 msgctxt "#32562"
 msgid "[B]TRAKT[/B] : Import Watchlist..."
-msgstr "[B]TRAKT[/B] : Merkliste importieren..."
+msgstr "[B]TRAKT[/B] : Film-Merkliste importieren..."
 
 msgctxt "#32563"
 msgid "[B]TRAKT[/B] : Import TV Collection..."
-msgstr "[B]TRAKT[/B] : TV Sammlung importieren..."
+msgstr "[B]TRAKT[/B] : Serien-Sammlung importieren..."
 
 msgctxt "#32564"
 msgid "[B]TRAKT[/B] : Import TV Watchlist..."
-msgstr "[B]TRAKT[/B] : TV Merkliste importieren..."
+msgstr "[B]TRAKT[/B] : Serien-Merkliste importieren..."
 
 msgctxt "#32565"
 msgid "Include episodes with unknown air dates"
@@ -819,7 +818,8 @@ msgstr "Episoden mit unbekanntem Ausstrahlungsdatum einbeziehen"
 
 msgctxt "#32570"
 msgid "Show unaired seasons/episodes"
-msgstr "Noch nicht ausgestrahlte Staffeln/Episoden anzeigen"
+msgstr "Noch nicht gesendete Staffeln/Episoden anzeigen"
+
 msgctxt "#32571"
 msgid "Hide movies in cinema"
 msgstr "Nur Filme älter als 90 Tage anzeigen"
@@ -827,3 +827,87 @@ msgstr "Nur Filme älter als 90 Tage anzeigen"
 msgctxt "#32572"
 msgid "Protected Link. Please enter account credentials in the settings."
 msgstr "Geschützter Link. Bitte Accountdaten in den Einstellungen eintragen."
+
+msgctxt "#32580"
+msgid "Films/TV Movies"
+msgstr "Neue Releases"
+
+msgctxt "#32581"
+msgid "Results Limit"
+msgstr "Limit für Ergebnisse"
+
+msgctxt "#32582"
+msgid "Personal API keys provide quicker API responses."
+msgstr "Personliche API-Keys verkürzen die Antwortzeiten"
+
+msgctxt "#32583"
+msgid "Become a VIP member for many benefits at: https://fanart.tv/vip"
+msgstr "Werde VIP-Mitglied, genieße viele Vorteile: https://fanart.tv/vip"
+
+msgctxt "#32584"
+msgid "Sort order for Trakt Watched Progress"
+msgstr "Trakt-Fortschritt sortieren nach"
+
+msgctxt "#32585"
+msgid "Recently aired"
+msgstr "kürzlich gesendet"
+
+msgctxt "#32586"
+msgid "Recently watched"
+msgstr "kürzlich gesehen"
+
+msgctxt "#32587"
+msgid "Show Extra Source Info"
+msgstr "Zusatzinfo für Quellen anzeigen"
+
+msgctxt "#32588"
+msgid "Premium Source Identifier Color"
+msgstr "Textfarbe für Premium-Links"
+
+msgctxt "#32589"
+msgid "Blue"
+msgstr "Blau"
+
+msgctxt "#32590"
+msgid "Red"
+msgstr "Rot"
+
+msgctxt "#32591"
+msgid "Yellow"
+msgstr "Gelb"
+
+msgctxt "#32592"
+msgid "Deep Pink"
+msgstr "Altrosa"
+
+msgctxt "#32593"
+msgid "Cyan"
+msgstr "Cyan"
+
+msgctxt "#32594"
+msgid "Lawn Green"
+msgstr "Grasgrün"
+
+msgctxt "#32595"
+msgid "Gold"
+msgstr "Gold"
+
+msgctxt "#32596"
+msgid "Magenta"
+msgstr "Magenta"
+
+msgctxt "#32597"
+msgid "Yellow Green"
+msgstr "Gelbgrün"
+
+msgctxt "#32598"
+msgid "No Color"
+msgstr "Ohne Farbe"
+
+msgctxt "#32599"
+msgid "Getting genre information from Trakt"
+msgstr "Hole Genre-Info von Trakt"
+
+msgctxt "#32600"
+msgid "Preparing sources"
+msgstr "Quellen werden vorbereitet"

@@ -6,7 +6,7 @@
 '''
 
 
-import re,sys,json,time,xbmc
+import re,sys,json,time,xbmc,xbmcplugin
 import hashlib,urllib,os,base64,codecs,xmlrpclib
 import gzip, StringIO
 
