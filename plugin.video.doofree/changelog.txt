@@ -1,3 +1,7 @@
+[B]4.4.2[/B]
+- Updated domains
+- Updated UrlResolver
+
 [B]4.4.1[/B]
 - Fixed Live tv
 - Fixed new search label

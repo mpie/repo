@@ -19,8 +19,8 @@ class source:
         '''
         self.priority = 0
         self.language = ['en']
-        self.domains = ['putlocker.rs']
-        self.base_link = 'https://putlocker.sk'
+        self.domains = ['putlockertv.to']
+        self.base_link = 'https://putlockertv.to'
         self.movie_search_path = ('search?keyword=%s')
         self.episode_search_path = ('/filter?keyword=%s&sort=post_date:Adesc'
                                     '&type[]=series')
@@ -178,6 +178,7 @@ class source:
             sources_dom_list = client.parseDOM(
                 film_response, 'ul', attrs={'class': 'episodes range active'})
 
+            xbmc.log(sources_dom_list)
             if not re.findall(
              '([^\/]*)\">' + episode + '[^0-9]', sources_dom_list[0]):
                 episode = '%02d' % int(episode)

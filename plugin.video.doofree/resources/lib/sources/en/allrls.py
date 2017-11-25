@@ -6,7 +6,7 @@
 '''
 
 
-import re,urllib,urlparse,json
+import re,urllib,urlparse,json,xbmc
 
 
 from resources.lib.modules import cleantitle
@@ -18,9 +18,9 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['allrls.me']
-        self.base_link = 'http://allrls.me'
-        self.search_link = '/search/%s/feed/rss2'
+        self.domains = ['http://allrls.pw']
+        self.base_link = 'http://allrls.pw'
+        self.search_link = '?s=%s&go=Search'
 
 
     def movie(self, imdb, title, localtitle, aliases, year):
@@ -86,6 +86,8 @@ class source:
 
             url = self.search_link % urllib.quote_plus(query)
             url = urlparse.urljoin(self.base_link, url)
+            xbmc.log('hhhhhhh')
+            xbmc.log(url)
 
             
             r = client.request(url)

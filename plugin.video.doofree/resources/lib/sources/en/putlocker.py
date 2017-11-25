@@ -20,8 +20,8 @@ class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.domains = ['putlocker.systems', 'putlocker-movies.tv', 'cartoonhd.website', 'cartoonhd.online', 'cartoonhd.cc']
-        self.base_link = 'https://cartoonhd.in'
+        self.domains = ['putlockers.global']
+        self.base_link = 'https://cartoonhd.life'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:

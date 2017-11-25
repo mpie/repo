@@ -5,7 +5,7 @@
     Copyright (C) 2017 Mpie
 '''
 
-import re, urlparse, urllib
+import re, urlparse, urllib, xbmc
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
@@ -21,6 +21,7 @@ class source:
         self.domains = ['movie4u.ch']
         self.base_link = 'http://movie4u.ch'
         self.search_link = '/?s=%s'
+        xbmc.log('hieraaa')
 
 
     def movie(self, imdb, title, localtitle, aliases, year):
@@ -63,7 +64,11 @@ class source:
             if not url:
                 return
 
+            print t
             t = url.split('/')[2]
+            t = t.replace('the-', '')
+            xbmc.log('hiero')
+            xbmc.log(t)
             url = self.base_link + '/episodes/%s-%dx%d' % (t, int(season), int(episode))
             return url
         except:
