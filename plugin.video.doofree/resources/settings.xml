@@ -68,6 +68,7 @@
         <setting id="provider.movie4korg" type="bool" label="MOVIE4KORG" default="true" />
         <setting id="provider.movie4uch" type="bool" label="MOVIE4UCH" default="true" />
         <setting id="provider.moviesgold" type="bool" label="MOVIESGOLD" default="true" />
+        <setting id="provider.mpie" type="bool" label="MPIE" default="true" />
         <setting id="provider.mywatchseries" type="bool" label="MYWATCHSERIES" default="true" />
         <setting id="provider.mzmovies" type="bool" label="MZMOVIES" default="true" />
         <setting id="provider.onlinedizi" type="bool" label="ONLINEDIZI" default="true" />

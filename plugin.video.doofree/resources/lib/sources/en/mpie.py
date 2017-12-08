@@ -1,0 +1,147 @@
+# -*- coding: utf-8 -*-
+
+'''
+    DooFree Add-on
+    Copyright (C) 2017 Mpie
+'''
+
+import re, urllib, urlparse, json, base64, time
+
+from resources.lib.modules import cleantitle
+from resources.lib.modules import client
+from resources.lib.modules import dom_parser2
+from resources.lib.modules import directstream
+
+
+class source:
+    def __init__(self):
+        self.priority = 0
+        self.language = ['en']
+        self.base_link = 'https://www.google.com'
+
+    def movie(self, imdb, title, localtitle, aliases, year):
+        try:
+            aliases.append({'country': 'us', 'title': title})
+            url = {'imdb': imdb, 'title': title, 'year': year, 'aliases': aliases}
+            url = urllib.urlencode(url)
+            return url
+        except:
+            return
+
+    def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
+        try:
+            aliases.append({'country': 'us', 'title': tvshowtitle})
+            url = {'imdb': imdb, 'tvdb': tvdb, 'tvshowtitle': tvshowtitle, 'year': year, 'aliases': aliases}
+            url = urllib.urlencode(url)
+            return url
+        except:
+            return
+
+    def episode(self, url, imdb, tvdb, title, premiered, season, episode):
+        try:
+            if url == None: return
+            url = urlparse.parse_qs(url)
+            url = dict([(i, url[i][0]) if url[i] else (i, '') for i in url])
+            url['title'], url['premiered'], url['season'], url['episode'] = title, premiered, season, episode
+            url = urllib.urlencode(url)
+            return url
+        except:
+            return
+
+    def searchShow(self, title, season, episode, aliases, headers):
+        try:
+            for alias in aliases:
+                url = '%s/show/%s/season/%01d/episode/%01d' % (
+                self.base_link, cleantitle.geturl(alias['title']), int(season), int(episode))
+                url = client.request(url, headers=headers, timeout='3')
+                if not url == None and url != self.base_link: break
+            return url
+        except:
+            return
+
+    def searchMovie(self, title, year, aliases, headers):
+        try:
+            theyear = '+' + year
+
+            for alias in aliases:
+                search_term = cleantitle.getsearch(alias['title'])
+                url = '%s/search?q=index+of+%s%s' % (self.base_link, search_term, theyear)
+                if not url == None and url != self.base_link: break
+
+            if url == None:
+                for alias in aliases:
+                    url = '%s/search?q=index+of+%s%s' % (self.base_link, cleantitle.getsearch(alias['title']), theyear)
+                    url = client.request(url, headers=headers, timeout='10')
+                    if not url == None and url != self.base_link: break
+
+            return url
+        except:
+            return
+
+    def sources(self, url, hostDict, hostprDict):
+        try:
+            sources = []
+
+            if url == None: return sources
+
+            data = urlparse.parse_qs(url)
+            data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
+            title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
+            aliases = eval(data['aliases'])
+            headers = {}
+
+            if 'tvshowtitle' in data:
+                url = self.searchShow(title, int(data['season']), int(data['episode']), aliases, headers)
+            else:
+                url = self.searchMovie(title, data['year'], aliases, headers)
+            print 'mpieeeee'
+            print url
+            contents = client.request(url, headers=headers, timeout='3')
+
+            items = dom_parser2.parse_dom(contents, 'h3', attrs={'class': 'r'})
+            items = [dom_parser2.parse_dom(i.content, 'a', req=['href']) for i in items]
+            items = [(i[0].content, i[0].attrs['href']) for i in items]
+            for item in items:
+                NAME = item[0]
+                movie_url = item[1]
+
+                movie_url = movie_url.replace('%2520', '%20')
+                print movie_url
+                if 'index of /' in NAME.replace('<b>', '').replace('</b>', '').lower():
+                    search_term = cleantitle.getsearch(title)
+                    try:
+                        content = client.request(movie_url, headers=headers, timeout='10')
+                    except:
+                        pass
+
+                    match = re.compile('href="(.+?)"').findall(content)
+                    for URL in match:
+                        if not 'http' in URL:
+                            MOVIE = movie_url + URL
+                            print MOVIE
+                            if MOVIE[-4] == '.':
+                                CLEANURL = URL.replace('%20', '.').lower()
+                                print search_term.replace(' ', '.').replace('+', '.')
+                                if search_term.replace(' ', '.').replace('+', '.') in CLEANURL.replace(' ', '.').lower():
+                                    if data['year'] in MOVIE.lower():
+                                        if '1080p' in MOVIE:
+                                            qual = '1080p'
+                                        elif '720p' in MOVIE:
+                                            qual = '720p'
+                                        elif '480p' in MOVIE:
+                                            qual = '480p'
+                                        else:
+                                            qual = 'SD'
+
+                                        if '.mkv' in MOVIE:
+                                            sources.append({'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE, 'direct': True, 'debridonly': False})
+            return sources
+        except:
+            return sources
+
+    def resolve(self, url):
+        if 'google' in url and not 'googleapis' in url:
+            return directstream.googlepass(url)
+        else:
+            return url
+

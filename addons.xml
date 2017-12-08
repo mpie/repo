@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-    <addon id="plugin.video.doofree" name="DooFree" version="4.4.2" provider-name="Mpie">
+    <addon id="plugin.video.doofree" name="DooFree" version="4.4.3" provider-name="Mpie">
         <requires>
             <import addon="xbmc.python" version="2.19.0" />
             <import addon="script.module.urlresolver" version="4.0.12"/>
@@ -21,7 +21,7 @@
                 <screenshot>resources/screenshots/screenshot-02.jpg</screenshot>
                 <screenshot>resources/screenshots/screenshot-03.jpg</screenshot>
             </assets>
-            <news>- Fixed thai shows</news>
+            <news>- Added indexer</news>
         </extension>
     </addon>
     <addon id="plugin.video.kijk" name="Kijk Upload" version="0.0.2" provider-name="Mpie">
