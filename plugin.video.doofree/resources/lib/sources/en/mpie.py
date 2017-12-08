@@ -5,7 +5,7 @@
     Copyright (C) 2017 Mpie
 '''
 
-import re, urllib, urlparse, json, base64, time
+import re, urllib, urllib2, urlparse, json, base64, time
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
@@ -52,7 +52,7 @@ class source:
         try:
             for alias in aliases:
                 url = '%s/show/%s/season/%01d/episode/%01d' % (
-                self.base_link, cleantitle.geturl(alias['title']), int(season), int(episode))
+                    self.base_link, cleantitle.geturl(alias['title']), int(season), int(episode))
                 url = client.request(url, headers=headers, timeout='3')
                 if not url == None and url != self.base_link: break
             return url
@@ -62,15 +62,15 @@ class source:
     def searchMovie(self, title, year, aliases, headers):
         try:
             theyear = '+' + year
-
             for alias in aliases:
                 search_term = cleantitle.getsearch(alias['title'])
-                url = '%s/search?q=index+of+%s%s' % (self.base_link, search_term, theyear)
+                url = self.base_link + '/search?q=-inurl:(htm|html|php)+intitle:"index+of"+%2B(mkv|mp4)+"' + search_term + '"'
                 if not url == None and url != self.base_link: break
 
             if url == None:
                 for alias in aliases:
-                    url = '%s/search?q=index+of+%s%s' % (self.base_link, cleantitle.getsearch(alias['title']), theyear)
+                    search_term = cleantitle.getsearch(alias['title'])
+                    url = self.base_link + '/search?q=-inurl:(htm|html|php)+intitle:"index+of"+%2B(mkv|mp4)+"' + search_term + '"'
                     url = client.request(url, headers=headers, timeout='10')
                     if not url == None and url != self.base_link: break
 
@@ -94,8 +94,7 @@ class source:
                 url = self.searchShow(title, int(data['season']), int(data['episode']), aliases, headers)
             else:
                 url = self.searchMovie(title, data['year'], aliases, headers)
-            print 'mpieeeee'
-            print url
+
             contents = client.request(url, headers=headers, timeout='3')
 
             items = dom_parser2.parse_dom(contents, 'h3', attrs={'class': 'r'})
@@ -106,7 +105,6 @@ class source:
                 movie_url = item[1]
 
                 movie_url = movie_url.replace('%2520', '%20')
-                print movie_url
                 if 'index of /' in NAME.replace('<b>', '').replace('</b>', '').lower():
                     search_term = cleantitle.getsearch(title)
                     try:
@@ -118,23 +116,25 @@ class source:
                     for URL in match:
                         if not 'http' in URL:
                             MOVIE = movie_url + URL
-                            print MOVIE
                             if MOVIE[-4] == '.':
-                                CLEANURL = URL.replace('%20', '.').lower()
-                                print search_term.replace(' ', '.').replace('+', '.')
-                                if search_term.replace(' ', '.').replace('+', '.') in CLEANURL.replace(' ', '.').lower():
-                                    if data['year'] in MOVIE.lower():
-                                        if '1080p' in MOVIE:
-                                            qual = '1080p'
-                                        elif '720p' in MOVIE:
-                                            qual = '720p'
-                                        elif '480p' in MOVIE:
-                                            qual = '480p'
-                                        else:
-                                            qual = 'SD'
+                                if MOVIE.endswith('.mkv') or MOVIE.endswith('.mp4'):
+                                    CLEANURL = URL.replace('%20', '.').lower()
+                                    if search_term.replace(' ', '.').replace('+', '.') in CLEANURL.replace(' ',
+                                                                                                           '.').lower():
+                                        if data['year'] in MOVIE.lower():
+                                            if '1080p' in MOVIE:
+                                                qual = '1080p'
+                                            elif '720p' in MOVIE:
+                                                qual = '720p'
+                                            elif '480p' in MOVIE:
+                                                qual = '480p'
+                                            else:
+                                                qual = 'SD'
 
-                                        if '.mkv' in MOVIE:
-                                            sources.append({'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE, 'direct': True, 'debridonly': False})
+                                            if '.mkv' in MOVIE:
+                                                sources.append(
+                                                    {'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE,
+                                                     'direct': True, 'debridonly': False})
             return sources
         except:
             return sources

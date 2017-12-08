@@ -1,3 +1,6 @@
+[B]4.4.4[/B]
+- Added indexer
+
 [B]4.4.2[/B]
 - Updated domains
 - Updated UrlResolver
