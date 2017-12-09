@@ -49,11 +49,12 @@ class source:
             return
 
     def searchShow(self, title, season, episode, aliases, headers):
+        SS = '%02d' % season
+        EE = '%02d' % episode
         try:
             for alias in aliases:
-                url = '%s/show/%s/season/%01d/episode/%01d' % (
-                    self.base_link, cleantitle.geturl(alias['title']), int(season), int(episode))
-                url = client.request(url, headers=headers, timeout='3')
+                search_term = cleantitle.getsearch(alias['title']) + '+' + 'S' + SS + 'E' + EE
+                url = self.base_link + '/search?q=-inurl:(htm|html|php)+intitle:"index+of"+%2B(mkv|mp4)+"' + search_term + '"'
                 if not url == None and url != self.base_link: break
             return url
         except:
@@ -71,7 +72,7 @@ class source:
                 for alias in aliases:
                     search_term = cleantitle.getsearch(alias['title'])
                     url = self.base_link + '/search?q=-inurl:(htm|html|php)+intitle:"index+of"+%2B(mkv|mp4)+"' + search_term + '"'
-                    url = client.request(url, headers=headers, timeout='10')
+                    url = client.request(url, headers=headers, timeout='3')
                     if not url == None and url != self.base_link: break
 
             return url
@@ -86,6 +87,7 @@ class source:
 
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
+
             title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
             aliases = eval(data['aliases'])
             headers = {}
