@@ -52,11 +52,13 @@
         <setting id="provider.directdl" type="bool" label="DIRECTDL" default="true" />
         <setting id="provider.divxcrawler" type="bool" label="DIVXCRAWLER" default="true" />
         <setting id="provider.dizigold" type="bool" label="DIZIGOLD" default="true" />
+        <setting id="provider.dl3" type="bool" label="DL3" default="true" />
         <setting id="provider.einthusan" type="bool" label="EINTHUSAN" default="true" />
         <setting id="provider.flixanity" type="bool" label="FLIXANITY" default="true" />
         <setting id="provider.fmovied6" type="bool" label="FMOVIED6" default="true" />
         <setting id="provider.genvideos" type="bool" label="GENVIDEOS" default="true" />
         <setting id="provider.gogoanime" type="bool" label="GOGOANIME" default="true" />
+        <setting id="provider.hasthd" type="bool" label="HASTHD" default="true" />
         <setting id="provider.hevcfilm" type="bool" label="HEVCFILM" default="true" />
         <setting id="provider.icefilms" type="bool" label="ICEFILMS" default="true" />
         <setting id="provider.icefilmsis" type="bool" label="ICEFILMSIS" default="true" />
