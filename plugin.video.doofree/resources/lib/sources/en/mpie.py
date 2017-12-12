@@ -52,10 +52,8 @@ class source:
         SS = '%02d' % season
         EE = '%02d' % episode
         try:
-            for alias in aliases:
-                search_term = cleantitle.getsearch(alias['title']) + '+' + 'S' + SS + 'E' + EE
-                url = self.base_link + '/search?q=-inurl:(htm|html|php)+intitle:"index+of"+%2B(mkv|mp4)+"' + search_term + '"'
-                if not url == None and url != self.base_link: break
+            search_term = cleantitle.getsearch(title) + '+' + 'S' + SS + 'E' + EE
+            url = self.base_link + '/search?q=index+of+' + search_term
             return url
         except:
             return
@@ -63,18 +61,8 @@ class source:
     def searchMovie(self, title, year, aliases, headers):
         try:
             theyear = '+' + year
-            for alias in aliases:
-                search_term = cleantitle.getsearch(alias['title'])
-                url = self.base_link + '/search?q=-inurl:(htm|html|php)+intitle:"index+of"+%2B(mkv|mp4)+"' + search_term + '"'
-                if not url == None and url != self.base_link: break
-
-            if url == None:
-                for alias in aliases:
-                    search_term = cleantitle.getsearch(alias['title'])
-                    url = self.base_link + '/search?q=-inurl:(htm|html|php)+intitle:"index+of"+%2B(mkv|mp4)+"' + search_term + '"'
-                    url = client.request(url, headers=headers, timeout='3')
-                    if not url == None and url != self.base_link: break
-
+            search_term = cleantitle.getsearch(title)
+            url = self.base_link + '/search?q=index+of+' + search_term + theyear
             return url
         except:
             return

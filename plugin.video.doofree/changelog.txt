@@ -1,3 +1,6 @@
+[B]4.4.10[/B]
+- Hasthd + dl3 added
+
 [B]4.4.8[/B]
 - Hasthd + dl3 added
 
