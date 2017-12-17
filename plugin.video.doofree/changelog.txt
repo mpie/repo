@@ -1,3 +1,6 @@
+[B]4.4.11[/B]
+- Combined sources
+
 [B]4.4.10[/B]
 - Hasthd + dl3 added
 

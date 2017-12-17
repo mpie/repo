@@ -78,9 +78,9 @@ class source:
                                     elif '720p' in url3:
                                         qual = '720p'
                                     elif '560p' in url3:
-                                        qual = '560p'
+                                        qual = 'SD'
                                     elif '480p' in url3:
-                                        qual = '480p'
+                                        qual = 'SD'
                                     else:
                                         qual = 'SD'
 
