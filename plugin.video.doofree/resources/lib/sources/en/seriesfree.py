@@ -20,7 +20,7 @@ class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.domains = ['watchseriesfree.to','seriesfree.to']
+        self.domains = ['seriesfree.to']
         self.base_link = 'https://seriesfree.to'
         self.search_link = 'https://seriesfree.to/search/%s'
 

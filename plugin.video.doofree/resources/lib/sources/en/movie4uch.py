@@ -64,7 +64,6 @@ class source:
             if not url:
                 return
 
-            print t
             t = url.split('/')[2]
             t = t.replace('the-', '')
             xbmc.log('hiero')
