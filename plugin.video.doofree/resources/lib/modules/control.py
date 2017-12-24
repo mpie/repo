@@ -306,3 +306,22 @@ def idle():
 
 def queueItem():
     return execute('Action(Queue)')
+
+def getSkin(viewType):
+    if (viewType == 'Wall'):
+        skin = 500
+    elif (viewType == 'WideList'):
+        skin = 55
+    elif (viewType == 'Fanart'):
+        skin = 502
+    elif (viewType == 'List'):
+        skin = 50
+    elif (viewType == 'Poster'):
+        skin = 51
+    elif (viewType == 'Shift'):
+        skin = 53
+    elif (viewType == 'InfoWall'):
+        skin = 54
+    elif (viewType == 'Banner'):
+        skin = 501
+    return skin

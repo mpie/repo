@@ -209,7 +209,7 @@ class movies:
             control.idle()
 
             url = self.search_link + urllib.quote_plus(name)
-            url = '%s?action=moviePage&url=%s' % (sys.argv[0], urllib.quote_plus(url))
+            url = '%s?action=moviePage&url=%s&skin=50' % (sys.argv[0], urllib.quote_plus(url))
             control.execute('Container.Update(%s)' % url)
 
     def person(self):
@@ -781,15 +781,6 @@ class movies:
                 plot = trans_item.get('overview') or plot
             except:
                 pass
-
-            try:
-                artmeta = True
-                #if self.fanart_tv_user == '': raise Exception()           
-                art = client.request(self.fanart_tv_art_link % imdb, headers=self.fanart_tv_headers, timeout='10', error=True)
-                try: art = json.loads(art)
-                except: artmeta = False
-            except:
-                pass
                 
             try:
                 poster2 = art['movieposter']
@@ -1015,7 +1006,8 @@ class movies:
 
         control.content(syshandle, 'movies')
         control.directory(syshandle, cacheToDisc=True)
-        views.setView('movies', {'skin.estuary': skin, 'skin.confluence': 500})
+
+        views.setView('movies', {'skin.estuary': control.getSkin(control.setting('movie.viewtype')), 'skin.confluence': 500})
 
 
     def addDirectory(self, items, queue=False):
