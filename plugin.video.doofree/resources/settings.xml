@@ -15,7 +15,7 @@
         <setting id="hidecinema" type="bool" label="32571" default="false" />
         <setting type="lsep" label="Viewtype" />
         <setting id="movie.viewtype" type="select" label="Movies viewtype" values="Wall|WideList|Fanart|List|Poster|Shift|InfoWall" default="Wall" />
-        <setting id="tvshows.viewtype" type="select" label="TV shows viewtype" values="Wall|WideList|Fanart|List|Poster|Shift|InfoWall|Banner" default="WideList" />
+        <setting id="tvshows.viewtype" type="select" label="TV shows viewtype" values="Wall|WideList|Fanart|List|Poster|Shift|InfoWall|Banner" default="InfoWall" />
         <setting type="lsep" label="32319" />
         <setting id="movie.widget" type="enum" label="32320" lvalues="32302|32321|32322|32323|32324|32580" default="1" />
         <setting id="tv.widget.alt" type="enum" label="32325" lvalues="32302|32326|32327|32328" default="2" visible="!eq(-11,)" />
@@ -42,7 +42,7 @@
     <category label="32345">
         <setting label="English" type="lsep" />
         <setting type="sep" />
-        <setting id="provider.123netflix" type="bool" label="123NETFLIX" default="true" />
+        <setting id="provider.123netflix" type="bool" label="123NETFLIX" default="false" />
         <setting id="provider.cmovies" type="bool" label="CMOVIES" default="true" />
         <setting id="provider.divxcrawler" type="bool" label="DIVXCRAWLER" default="true" />
         <setting id="provider.dl3" type="bool" label="DL3" default="true" />

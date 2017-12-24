@@ -2,10 +2,10 @@ from time import sleep
 import logging
 import random
 import re
-from requests.sessions import Session
-from resources.lib.modules import jsunfuck
-from copy import deepcopy
 
+from requests.sessions import Session
+from resources.lib.modules import js2py
+from copy import deepcopy
 try:
     from urlparse import urlparse
 except ImportError:
@@ -32,13 +32,9 @@ class CloudflareScraper(Session):
 
     def request(self, method, url, *args, **kwargs):
         resp = super(CloudflareScraper, self).request(method, url, *args, **kwargs)
-
+	
         # Check if Cloudflare anti-bot is on
-        if ( resp.status_code == 503
-             and resp.headers.get("Server") == "cloudflare-nginx"
-             and b"jschl_vc" in resp.content
-             and b"jschl_answer" in resp.content
-        ):
+        if resp.status_code == 503 and resp.headers.get("Server") == "cloudflare-nginx":
             return self.solve_cf_challenge(resp, **kwargs)
 
         # Otherwise, no Cloudflare anti-bot detected
@@ -76,15 +72,16 @@ class CloudflareScraper(Session):
                           "before submitting a bug report.")
             raise
 
-        try: params["jschl_answer"] = str(int(jsunfuck.cfunfuck(js)) + len(domain))
-        except: pass
+        # Safely evaluate the Javascript expression
+        js = js.replace('return', '')
+        params["jschl_answer"] = str(int(js2py.eval_js(js)) + len(domain))
         # Requests transforms any request into a GET after a redirect,
         # so the redirect has to be handled manually here to allow for
         # performing other types of requests even as the first request.
         method = resp.request.method
-        cloudflare_kwargs["allow_redirects"] = False
+        cloudflare_kwargs['allow_redirects'] = False
         redirect = self.request(method, submit_url, **cloudflare_kwargs)
-        return self.request(method, redirect.headers["Location"], **original_kwargs)
+        return self.request(method, redirect.headers['Location'], **original_kwargs)
 
     def extract_js(self, body):
         js = re.search(r"setTimeout\(function\(\){\s+(var "
@@ -96,13 +93,14 @@ class CloudflareScraper(Session):
         # These characters are not currently used in Cloudflare's arithmetic snippet
         js = re.sub(r"[\n\\']", "", js)
 
-        return js
+        return js.replace("parseInt", "return parseInt")
 
     @classmethod
     def create_scraper(cls, sess=None, **kwargs):
         """
         Convenience function for creating a ready-to-go requests.Session (subclass) object.
         """
+
         scraper = cls()
 
         if sess:
@@ -138,7 +136,7 @@ class CloudflareScraper(Session):
                 cookie_domain = d
                 break
         else:
-            raise ValueError("Unable to find Cloudflare cookies. Does the site actually have Cloudflare IUAM (\"I'm Under Attack Mode\") enabled?")
+            raise ValueError("Unable to find Cloudflare cookies. Does the site actually have Cloudflare IUAM mode enabled?")
 
         return ({
                     "__cfduid": scraper.cookies.get("__cfduid", "", domain=cookie_domain),

@@ -38,7 +38,7 @@ class bollywood:
 
         pageNum = int(page)+1
         query = '%s?action=%s&url=%s&page=%s' % (sysaddon, 'listBollywood', url, pageNum)
-        print query
+
         item = control.item('Next page', iconImage='', thumbnailImage='')
         item.setInfo(type="Video", infoLabels={"Title": 'Page ' + str(page), "OriginalTitle": 'Page ' + str(page)})
         control.addItem(handle=syshandle, url=query, listitem=item, isFolder=True)

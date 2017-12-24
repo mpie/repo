@@ -21,6 +21,15 @@ class source:
         self.search_link = '/?s=%s'
         self.User_Agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
 
+    def movie(self, imdb, title, localtitle, aliases, year):
+        try:
+            aliases.append({'country': 'us', 'title': title})
+            url = {'imdb': imdb, 'title': title, 'year': year, 'aliases': aliases}
+            url = urllib.urlencode(url)
+            return url
+        except:
+            return
+
     def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
         try:
             aliases.append({'country': 'us', 'title': tvshowtitle})
@@ -137,6 +146,7 @@ class source:
             if 'tvshowtitle' in data:
                 scraper = cfscrape.create_scraper()
                 html = scraper.get(url, headers=headers).content
+
                 match = re.compile('class="post-item.+?href="(.+?)" title="(.+?)"', re.DOTALL).findall(html)
                 for url, item_name in match:
                     if cleantitle.getsearch(title).lower() in cleantitle.getsearch(item_name).lower():
@@ -156,6 +166,8 @@ class source:
                                     qual = '480p'
                                 else:
                                     qual = 'SD'
+
+                                sources.append({'source': 'CDN', 'quality': qual, 'language': 'en', 'url': ep_url, 'direct': False, 'debridonly': True, 'debridonly': False})
             else:
                 html = requests.get(url, headers=headers).content
                 match = re.compile('<div class="thumbnail".+?href="(.+?)" title="(.+?)"', re.DOTALL).findall(html)
@@ -169,7 +181,7 @@ class source:
                         else:
                             quality = 'SD'
 
-                        result = scraper.get(url, headers=headers, timeout=10).content
+                        result = requests.get(url, headers=headers, timeout=10).content
                         Regex = re.compile('href="/download.php.+?link=(.+?)"', re.DOTALL).findall(result)
 
                         for link in Regex:
