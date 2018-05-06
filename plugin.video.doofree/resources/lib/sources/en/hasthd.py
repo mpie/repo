@@ -16,7 +16,7 @@ class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.base_link = 'http://dl.hastidl.net/remotes/'
+        self.base_link = 'http://dl.hastidl.me/remotes/'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
