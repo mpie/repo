@@ -97,7 +97,13 @@ class source:
                 movie_url = movie_url.replace('%2520', '%20')
                 if 'index of /' in NAME.replace('<b>', '').replace('</b>', '').lower():
                     search_term = cleantitle.getsearch(title)
-                    if 'plex' not in movie_url and 'lavinmovie' not in movie_url and 'yoozdl' not in movie_url and 'downloadoo' not in movie_url:
+                    if 'plex' not in movie_url \
+                        and 'lavinmovie' not in movie_url \
+                        and 'yoozdl' not in movie_url \
+                        and 'uploadt' not in movie_url \
+                        and 'mihanpix' not in movie_url \
+                        and 'ip-192-99-8' not in movie_url \
+                        and 'downloadoo' not in movie_url:
                         try:
                             content = client.request(movie_url, headers=headers, timeout='10')
                         except:
@@ -106,7 +112,8 @@ class source:
                     match = re.compile('href="(.+?)"').findall(content)
                     for URL in match:
                         if not 'http' in URL:
-                            MOVIE = movie_url + URL
+                            filename = URL.rsplit('/', 1)[-1]
+                            MOVIE = movie_url + filename
                             if MOVIE[-4] == '.':
                                 if MOVIE.endswith('.mkv') or MOVIE.endswith('.mp4'):
                                     CLEANURL = URL.replace('%20', '.').lower()
@@ -116,7 +123,7 @@ class source:
                                             EE = '%02d' % int(data['episode'])
                                             if 's' + SS in CLEANURL.replace(' ', ''):
                                                 if 'e' + EE in CLEANURL.replace(' ', ''):
-                                                    if '1080p' in MOVIE:
+                                                    if '1080p' in MOVIE and 'royamovie' not in MOVIE:
                                                         qual = '1080p'
                                                     elif '720p' in MOVIE:
                                                         qual = '720p'
