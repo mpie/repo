@@ -116,7 +116,7 @@ def request(url, close=True, redirect=True, error=False, proxy=None, post=None, 
         try:
             response = urllib2.urlopen(request, timeout=int(timeout))
         except urllib2.HTTPError as response:
-
+            pass
             if response.code == 503:
                 cf_result = response.read(5242880)
                 try: encoding = response.info().getheader('Content-Encoding')

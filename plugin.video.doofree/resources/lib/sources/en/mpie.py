@@ -97,13 +97,7 @@ class source:
                 movie_url = movie_url.replace('%2520', '%20')
                 if 'index of /' in NAME.replace('<b>', '').replace('</b>', '').lower():
                     search_term = cleantitle.getsearch(title)
-                    if 'tvshowtitle' in data:
-                        if 'plex' not in movie_url:
-                            try:
-                                content = client.request(movie_url, headers=headers, timeout='10')
-                            except:
-                                pass
-                    else:
+                    if 'plex' not in movie_url and 'lavinmovie' not in movie_url and 'yoozdl' not in movie_url and 'downloadoo' not in movie_url:
                         try:
                             content = client.request(movie_url, headers=headers, timeout='10')
                         except:
