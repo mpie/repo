@@ -63,6 +63,7 @@ class source:
             theyear = '+' + year
             search_term = cleantitle.getsearch(title)
             url = self.base_link + '/search?q=index+of+' + search_term + theyear
+            #print url
             return url
         except:
             return
@@ -90,9 +91,12 @@ class source:
             items = dom_parser2.parse_dom(contents, 'h3', attrs={'class': 'r'})
             items = [dom_parser2.parse_dom(i.content, 'a', req=['href']) for i in items]
             items = [(i[0].content, i[0].attrs['href']) for i in items]
+            #print items
             for item in items:
                 NAME = item[0]
                 movie_url = item[1]
+
+                #print movie_url
 
                 movie_url = movie_url.replace('%2520', '%20')
                 if 'index of /' in NAME.replace('<b>', '').replace('</b>', '').lower():
@@ -104,26 +108,40 @@ class source:
                         and 'mihanpix' not in movie_url \
                         and 'ip-192-99-8' not in movie_url \
                         and 'downloadoo' not in movie_url:
-                        try:
-                            content = client.request(movie_url, headers=headers, timeout='10')
-                        except:
-                            pass
+                        #print 'passed'
+                        #print movie_url
+                        content = client.request(movie_url, headers=headers, timeout='10')
 
-                    match = re.compile('href="(.+?)"').findall(content)
-                    for URL in match:
-                        if not 'http' in URL:
-                            filename = URL.rsplit('/', 1)[-1]
-                            MOVIE = movie_url + filename
-                            if MOVIE[-4] == '.':
-                                if MOVIE.endswith('.mkv') or MOVIE.endswith('.mp4'):
-                                    CLEANURL = URL.replace('%20', '.').lower()
-                                    if search_term.replace(' ', '.').replace('+', '.') in CLEANURL.replace(' ', '.').lower():
-                                        if 'tvshowtitle' in data:
-                                            SS = '%02d' % int(data['season'])
-                                            EE = '%02d' % int(data['episode'])
-                                            if 's' + SS in CLEANURL.replace(' ', ''):
-                                                if 'e' + EE in CLEANURL.replace(' ', ''):
-                                                    if '1080p' in MOVIE and 'royamovie' not in MOVIE:
+                        match = re.compile('href="(.+?)"').findall(content)
+                        for URL in match:
+                            if not 'http' in URL:
+                                filename = URL.rsplit('/', 1)[-1]
+                                MOVIE = movie_url + filename
+                                print MOVIE
+                                if MOVIE[-4] == '.':
+                                    if MOVIE.endswith('.mkv') or MOVIE.endswith('.mp4'):
+                                        CLEANURL = URL.replace('%20', '.').lower()
+                                        if search_term.replace(' ', '.').replace('+', '.') in CLEANURL.replace(' ', '.').lower():
+                                            if 'tvshowtitle' in data:
+                                                SS = '%02d' % int(data['season'])
+                                                EE = '%02d' % int(data['episode'])
+                                                if 's' + SS in CLEANURL.replace(' ', ''):
+                                                    if 'e' + EE in CLEANURL.replace(' ', ''):
+                                                        if '1080p' in MOVIE and 'royamovie' not in MOVIE:
+                                                            qual = '1080p'
+                                                        elif '720p' in MOVIE:
+                                                            qual = '720p'
+                                                        elif '480p' in MOVIE:
+                                                            qual = 'SD'
+                                                        else:
+                                                            qual = 'SD'
+
+                                                        if '.mkv' in MOVIE or '.mp4' in MOVIE:
+                                                            sources.append(
+                                                                {'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE, 'direct': True, 'debridonly': False})
+                                            else:
+                                                if data['year'] in MOVIE.lower():
+                                                    if '1080p' in MOVIE:
                                                         qual = '1080p'
                                                     elif '720p' in MOVIE:
                                                         qual = '720p'
@@ -133,21 +151,7 @@ class source:
                                                         qual = 'SD'
 
                                                     if '.mkv' in MOVIE or '.mp4' in MOVIE:
-                                                        sources.append(
-                                                            {'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE, 'direct': True, 'debridonly': False})
-                                        else:
-                                            if data['year'] in MOVIE.lower():
-                                                if '1080p' in MOVIE:
-                                                    qual = '1080p'
-                                                elif '720p' in MOVIE:
-                                                    qual = '720p'
-                                                elif '480p' in MOVIE:
-                                                    qual = 'SD'
-                                                else:
-                                                    qual = 'SD'
-
-                                                if '.mkv' in MOVIE or '.mp4' in MOVIE:
-                                                    sources.append({'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE, 'direct': True, 'debridonly': False})
+                                                        sources.append({'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE, 'direct': True, 'debridonly': False})
             return sources
         except:
             return sources
