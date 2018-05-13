@@ -107,6 +107,8 @@ class source:
                         and 'uploadt' not in movie_url \
                         and 'mihanpix' not in movie_url \
                         and 'ip-192-99-8' not in movie_url \
+                        and 'my-film' not in movie_url \
+                        and 'funsaber' not in movie_url \
                         and 'downloadoo' not in movie_url:
                         #print 'passed'
                         #print movie_url
@@ -117,7 +119,7 @@ class source:
                             if not 'http' in URL:
                                 filename = URL.rsplit('/', 1)[-1]
                                 MOVIE = movie_url + filename
-                                print MOVIE
+                                #print MOVIE
                                 if MOVIE[-4] == '.':
                                     if MOVIE.endswith('.mkv') or MOVIE.endswith('.mp4'):
                                         CLEANURL = URL.replace('%20', '.').lower()
