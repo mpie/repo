@@ -109,6 +109,7 @@ class source:
                         and 'ip-192-99-8' not in movie_url \
                         and 'my-film' not in movie_url \
                         and 'funsaber' not in movie_url \
+                        and 'timepassbd' not in movie_url \
                         and 'downloadoo' not in movie_url:
                         #print 'passed'
                         #print movie_url
