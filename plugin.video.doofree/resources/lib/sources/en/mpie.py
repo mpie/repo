@@ -143,7 +143,7 @@ class source:
                                                                 {'source': 'CDN', 'quality': qual, 'language': 'en', 'url': MOVIE, 'direct': True, 'debridonly': False})
                                             else:
                                                 if data['year'] in MOVIE.lower():
-                                                    if '1080p' in MOVIE:
+                                                    if '1080p' in MOVIE and 'download-movie' not in MOVIE:
                                                         qual = '1080p'
                                                     elif '720p' in MOVIE:
                                                         qual = '720p'
