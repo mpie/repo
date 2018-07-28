@@ -41,7 +41,7 @@ class source:
 
             search_id = cleantitle.getsearch(title.lower())
             query = urlparse.urljoin(self.base_link, self.search_link % (search_id.replace(' ','+')))
-            result = client.request(query)
+            result = client.request(query, timeout=3)
 
             links = re.compile('<header>.+?href="(.+?)" title="(.+?)"', re.DOTALL).findall(result)
             for m_url, m_title in links:

@@ -16,7 +16,7 @@ class source:
         self.priority = 1
         self.language = ['en']
         self.domains = ['filmxy.me']
-        self.base_link = 'http://www.filmxy.me'
+        self.base_link = 'https://www1.filmxy.me/'
         self.search_link = '/?s=%s'
 
     def movie(self, imdb, title, localtitle, aliases, year):
