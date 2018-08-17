@@ -61,21 +61,20 @@ class navigator:
 
 
     def thaiShows(self):
-        self.addDirectoryItem('ละครไทย (ออนแอร์) / Thai Dramas (on air)', 'listShows&catid=18', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ละครไทย (อวสาน) / Thai Dramas (ended)', 'listShows&catid=27', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ซีรี่ย์เกาหลี / Korean Series', 'listShows&catid=17', '', 'DefaultMovies.png')
-        self.addDirectoryItem('หนังจีนชุด / Chinese Series', 'listShows&catid=37', '', 'DefaultMovies.png')
-        self.addDirectoryItem('รายการอาหาร / Cooking Shows', 'listShows&catid=15', '', 'DefaultMovies.png')
-        self.addDirectoryItem('วาไรตี้โชว์ / Variety Shows', 'listShows&catid=8', '', 'DefaultMovies.png')
-        self.addDirectoryItem('เรียลลิตี้โชว์ / Reality & Singing Contest', 'listShows&catid=84', '', 'DefaultMovies.png')
-        self.addDirectoryItem('เกมส์โชว์ / Game Shows', 'listShows&catid=2', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ข่าว / Thai News', 'listShows&catid=4', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ทอล์กโชว์ / Talk Shows', 'listShows&catid=3', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ภาพยนตร์ไทย / Thai Movies', 'listShows&catid=92', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ภาพยนตร์ฝรั่งใหม่ / US Movies (Thai dubbed)', 'listShows&catid=98', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ซีรี่ย์ฝรั่ง / US Series (Thai dubbed)', 'listShows&catid=38', '', 'DefaultMovies.png')
-        self.addDirectoryItem('ภาพยนตร์แอนนิเมชั่น / Animation', 'listShows&catid=93', '', 'DefaultMovies.png')
-        self.endDirectory()
+        self.addDirectoryItem('ละครไทย (ออนแอร์) / Thai Dramas (on air)', 'listShows&catid=18&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ละครไทย (อวสาน) / Thai Dramas (ended)', 'listShows&catid=27&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ซีรี่ย์เกาหลี / Korean Series', 'listShows&catid=17&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('หนังจีนชุด / Chinese Series', 'listShows&catid=37&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('รายการอาหาร / Cooking Shows', 'listShows&catid=15&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('วาไรตี้โชว์ / Variety Shows', 'listShows&catid=8&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('เรียลลิตี้โชว์ / Reality & Singing Contest', 'listShows&catid=84&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('เกมส์โชว์ / Game Shows', 'listShows&catid=2&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ข่าว / Thai News', 'listShows&catid=4&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ทอล์กโชว์ / Talk Shows', 'listShows&catid=3&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ภาพยนตร์ไทย / Thai Movies', 'listShows&catid=92&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ภาพยนตร์ฝรั่งใหม่ / US Movies (Thai dubbed)', 'listShows&catid=98&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ซีรี่ย์ฝรั่ง / US Series (Thai dubbed)', 'listShows&catid=38&page=1', '', 'DefaultMovies.png')
+        self.addDirectoryItem('ภาพยนตร์แอนนิเมชั่น / Animation', 'listShows&catid=93&page=1', '', 'DefaultMovies.png')
 
 
     def thaiShows2(self):

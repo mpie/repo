@@ -21,11 +21,13 @@ sysaddon = sys.argv[0]
 class thai:
     def __init__(self):
         self.list = []
-        self.main_link       = 'http://www.seesantv.com/seesantv_2014/%s'
-        self.shows_link      = self.main_link % 'program.php?id=%s'
-        self.shows_ajax_link = self.main_link % 'program_ajax3.php?id=%s&page=%s'
-        self.episodes_ajax_link = self.main_link % 'change_page_ajax.php?page=%s&program_id=%s'
-        self.episodes_link = self.main_link % 'program_detail.php?page=%s&id=%s'
+        self.host            = 'http://www.seesantv.com/'
+        self.main_link       = 'http://www.seesantv.com/seesantv2017/%s'
+        self.shows_link      = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s&page=%s'
+        #self.shows_ajax_link = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s&page=%s&all_page=%s'
+        #self.episodes_ajax_link = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s'
+        self.episodes_link = self.main_link % 'program-%s&datapage=%s'
+        self.player_link = self.main_link % 'player-%s'
         self.member_id = 205812  # expires 15 jun 2019
         self.view_server_name = 'gm2'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
         self.replace_server = 'gm99'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
@@ -36,26 +38,27 @@ class thai:
     def listShows(self, catid, page):
         syshandle = int(sys.argv[1])
         limatch = []
-        url = self.shows_link % (catid)
+        url = self.shows_link % (catid, page)
 
+        print url
         try: result = client.request(url)
         except: pass
 
-        pageContent = ''.join(result.splitlines()).replace('\'','"')
-        pages = re.compile('id="a_page_(.+?)" href').findall(pageContent)
+        data = json.loads(result)
+        pageContent = data['content'].encode('utf-8')
 
-        if str(page) in pages:
-            pageUrl = self.shows_ajax_link % (catid, str(page))
-            result = client.request(pageUrl)
-            limatch+=re.compile('<figure>(.+?)</a></li>').findall(result)
+        # todo: fix pagination
+        pages = range(2, 6)
+
+        limatch += re.compile('<figure>(.+?)</a></li>').findall(pageContent)
 
         for li_content in limatch:
-            show = re.compile('<a href=".+?id=(.+?)"><img src="(.+?)" alt="(.+?)" w').findall(li_content)
-            #print show
+            show = re.compile('program-(.+?)" target.+?src="(.+?)".+?h5>(.+?)</h5').findall(li_content)
             title = show[0][2].decode('iso-8859-11')
             showid = show[0][0]
             image = show[0][1]
-            image = image.replace('//', 'https://')
+            image = image.replace('../../', self.host)
+            image = image.replace('../', self.host)
 
             self.list.append({'name': title, 'showid': showid, 'image': image})
 
@@ -64,14 +67,14 @@ class thai:
             showid = show['showid']
             image = show['image']
             action = 'listEpisodes'
-            query = '?action=%s&name=%s&catid=%s&showid=%s&image=%s' % (action, name, catid, showid, image)
+            query = '?action=%s&name=%s&catid=%s&showid=%s&image=%s&page=1' % (action, name, catid, showid, image)
             url = '%s%s' % (sysaddon, query)
             item = control.item(name, iconImage=image, thumbnailImage=image)
             if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
             item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
             control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
 
-        nextPage = int(page) + 1
+        nextPage = int(page)
         if nextPage <= len(pages):
             if 'first' in pages:
                 pages.remove('first')
@@ -84,7 +87,7 @@ class thai:
 
             for page in pages:
                 action = 'listShows'
-                pageNumber = int(page) + 1
+                pageNumber = int(page)
                 query = '?action=%s&page=%d&name=%s&catid=%s' % (action, int(page), 'Page ' + str(pageNumber), catid)
                 url = '%s%s' % (sysaddon, query)
                 item = control.item('Page ' + str(pageNumber), iconImage='', thumbnailImage='')
@@ -102,24 +105,22 @@ class thai:
     '''
     def listEpisodes(self, catid, showid, page, image):
         syshandle = int(sys.argv[1])
-        url = self.episodes_link % (page, showid)
+        url = self.episodes_link % (showid, page)
         try: result = client.request(url)
         except: pass
         link = ''.join(result.splitlines()).replace('\'','"')
-        link = ''.join(link.splitlines()).replace('<i class="icon-new"></i>','')
+        link = ''.join(link.splitlines()).replace('<i class="fa fa-play-circle-white"></i>','')
 
-        episodematch = re.compile('<table class="program-archive">(.+?)</table>').findall(link)
-        episodes = re.compile('<a href="(.+?)" >(.+?)</a>.+?</td>\t\t\t\t\t\t\t<td> \t\t\t\t\t\t\t\t<a href="(.+?)" ><img').findall(episodematch[0])
+        episodematch = re.compile('class="chapterList">(.+?)</li>').findall(link)
 
-        programMeta = re.compile('<div class="program-meta">(.+?)</div>').findall(link)
-        image = re.compile('<img src="(.+?)" alt').findall(programMeta[0])[0]
-        image = image.replace('//', 'https://')
-
-        # episodes per page
-        for episode in episodes:
-            name = episode[1].decode('iso-8859-11')
-            u = 'http://www.seesantv.com/seesantv_2014/' + episode[0] + '&bitrate=high'
-            self.list.append({'name': name, 'url': urllib.quote_plus(u), 'image': image})
+        for em in episodematch:
+            episodes = re.compile('player-(.+)">(.+)</a>').findall(em)
+            print em
+            print episodes
+            for episode in episodes:
+                name = episode[1].decode('iso-8859-11')
+                url = self.player_link % (episode[0])
+                self.list.append({'name': name, 'url': urllib.quote_plus(url), 'image': image})
 
         for episode in self.list:
             name = episode['name'].encode('utf-8')
@@ -135,17 +136,17 @@ class thai:
             control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=False)
 
         # Pagination
-        paginator = re.compile('<div class="page_list"  align="center">(.+?)</ul>').findall(link)[0]
-        pages = re.compile('>(\d+)</a>').findall(paginator)
-        nextPage = int(page) + 1
-        if nextPage < len(pages):
-            action = 'listEpisodes'
-            query = '?action=%s&page=%d&name=%s&catid=%s&showid=%s&image=%s' % (action, nextPage, 'Next Page', catid, showid, image)
-            url = '%s%s' % (sysaddon, query)
-            item = control.item('Next Page', iconImage=image, thumbnailImage=image)
-            if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
-            item.setInfo(type="Video", infoLabels={"Title": 'Next Page', "OriginalTitle": 'Next Page'})
-            control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
+        # paginator = re.compile('<div class="page_list"  align="center">(.+?)</ul>').findall(link)[0]
+        # pages = re.compile('>(\d+)</a>').findall(paginator)
+        # nextPage = int(page) + 1
+        # if nextPage < len(pages):
+        #     action = 'listEpisodes'
+        #     query = '?action=%s&page=%d&name=%s&catid=%s&showid=%s&image=%s' % (action, nextPage, 'Next Page', catid, showid, image)
+        #     url = '%s%s' % (sysaddon, query)
+        #     item = control.item('Next Page', iconImage=image, thumbnailImage=image)
+        #     if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
+        #     item.setInfo(type="Video", infoLabels={"Title": 'Next Page', "OriginalTitle": 'Next Page'})
+        #     control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
 
         control.content(syshandle, 'episodes')
         control.directory(syshandle, cacheToDisc=True)
@@ -156,12 +157,14 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        cookie = 'view_server_name=%s; member_id=%d' % (self.view_server_name, self.member_id)
+        cookie = 'view_server_name=%s; ssMemberID=%d' % (self.view_server_name, self.member_id)
 
         try: result = client.request(url, cookie=cookie)
         except: pass
 
         videoUrl = re.compile('file: "(.+?)"').findall(result)[0]
+
+        videoUrl = videoUrl.replace('s.mp4', '.mp4')
 
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo(type='Video', infoLabels={'title': name})
