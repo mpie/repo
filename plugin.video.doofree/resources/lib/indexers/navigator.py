@@ -75,6 +75,7 @@ class navigator:
         self.addDirectoryItem('ภาพยนตร์ฝรั่งใหม่ / US Movies (Thai dubbed)', 'listShows&catid=98&page=1', '', 'DefaultMovies.png')
         self.addDirectoryItem('ซีรี่ย์ฝรั่ง / US Series (Thai dubbed)', 'listShows&catid=38&page=1', '', 'DefaultMovies.png')
         self.addDirectoryItem('ภาพยนตร์แอนนิเมชั่น / Animation', 'listShows&catid=93&page=1', '', 'DefaultMovies.png')
+        self.endDirectory()
 
 
     def thaiShows2(self):
