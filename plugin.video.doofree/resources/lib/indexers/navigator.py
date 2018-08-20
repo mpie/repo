@@ -80,15 +80,6 @@ class navigator:
 
     def thaiShows2(self):
         self.addDirectoryItem('Thai Drama (on air)', 'listShows2&catid=8&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2015)', 'listShows2&catid=287&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2014)', 'listShows2&catid=70&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2013)', 'listShows2&catid=49&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2012)', 'listShows2&catid=47&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2011)', 'listShows2&catid=46&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2010)', 'listShows2&catid=45&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2009)', 'listShows2&catid=44&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (2008)', 'listShows2&catid=43&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
-        self.addDirectoryItem('Thai Drama (classic)', 'listShows2&catid=42&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
         self.addDirectoryItem('K-J Series', 'listShows2&catid=10&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
         self.addDirectoryItem('C-T Series', 'listShows2&catid=11&page=1&limit=64&channel=0', '', 'DefaultMovies.png')
         self.addDirectoryItem('K-J Series (Thai Dub)', 'listShows2&catid=41&page=1&limit=64&channel=0', '', 'DefaultMovies.png')

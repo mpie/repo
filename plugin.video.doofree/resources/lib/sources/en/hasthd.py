@@ -16,7 +16,9 @@ class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.base_link = 'http://dl.hastidl.me/remotes/'
+        # self.base_link = 'http://dl.hastidl.me/remotes/'
+        self.base_link = 'http://79.127.126.110/Film/1900-2016/'
+        self.base_link_2 = 'http://79.127.126.110/Film/2016/'
 
     def movie(self, imdb, title, localtitle, aliases, year):
         try:
@@ -110,6 +112,30 @@ class source:
 
                             url = self.base_link + url
                             sources.append({'source': 'CDN', 'quality': qual, 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+
+            # 2016 folder
+            url = self.base_link_2
+
+            contents = client.request(url, headers=headers, timeout='3')
+
+            match = re.compile('<a href="(.+?)">(.+?)</a>').findall(contents)
+            for url,name in match:
+                new_title = name.split('20')[0]
+                if cleantitle.get(title).lower() in cleantitle.get(new_title).lower():
+                    if data['year'] in url:
+                        if '3D' in url:
+                            qual = '3D'
+                        elif '1080p' in url:
+                            qual = '1080p'
+                        elif '720p' in url:
+                            qual = '720p'
+                        elif '480p' in url:
+                            qual = 'SD'
+                        else:
+                            qual = 'SD'
+
+                        url = self.base_link_2 + url
+                        sources.append({'source': 'CDN', 'quality': qual, 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
 
             return sources
         except:

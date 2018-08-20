@@ -25,11 +25,11 @@ class thai:
         self.cdn             = 'http://cdn.thaiflix.com/media/files/images-large/%s'
         self.shows_link      = self.main_link % 'medias/newest?page=%s&pageLimit=%s&channel_id=%s&category_id=%s'
         self.shows_link_old      = self.main_link % 'medias/recently_updated?page=%s&pageLimit=%s&channel_id=%s&category_id=%s'
-        self.episodes_link   = 'http://www.dootv.com/ajax/mediaItemRow_json_ajax.php?media_id=%s'
+        self.episodes_link   = self.main_link % 'medias/%s/media-items'
         self.stream_link_sd1     = 'http://01-0115-03.thaimediaserver.com/streaming/21ca59dbdf10c176696b54f69b292bf0/56c7b7cc%s'
         self.stream_link_sd2     = 'http://edge4-04.thaimediaserver.com/%s/_definst_/vod%s'
         self.stream_link_hd     = 'http://edge6-09.thaimediaserver.com/%s/_definst_/vod/HD%s'
-        self.player_link     = self.main_link % 'player/?media_id=%d&customers_id=137288&media_item_id=%d&HD=1&server=EU'
+        self.player_link     = self.main_link % 'player/?media_id=%d&customers_id=137288&media_item_id=%d&HD=1&country_server=EU'
 
     '''
     List all the shows from a specific category
@@ -83,18 +83,25 @@ class thai:
     '''
     def listEpisodes(self, showid, page, image):
         syshandle = int(sys.argv[1])
+
+        username = 'b359980@trbvn.com'
+        password = 'rinus123'
+
+        cj = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+        login_data = urllib.urlencode({'email': username, 'password': password, 'remember': 'false'})
+        opener.open('http://service.thaiflix.com/api/v1/auth/login', login_data)
         url = self.episodes_link % (showid)
-        try: result = client.request(url)
+        try: resp = opener.open(url)
         except: pass
-        result = re.compile('(.+?)]').findall(result)[0] + ']'
-        shows = json.loads(result)
+        shows = json.loads(resp.read())
 
         self.list.append({'name': '[UPPERCASE][COLOR orange]Try again if a show does not play![/COLOR][/UPPERCASE]', 'url': '', 'image': ''})
         # episodes per page
-        for show in shows:
-            if 'Not Show' == show['item_title']:
+        for show in shows['data']:
+            if 'Not Show' == show['title_en']:
                 continue
-            name = show['date_added'] + ' ' + show['item_title']
+            name = show['date_added'] + ' ' + show['title_en']
             u = self.player_link % (show['media_id'], show['media_item_id'])
 
             self.list.append({'name': name, 'url': urllib.quote_plus(u), 'image': image})
@@ -121,7 +128,6 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        print url
 
         username = 'b359980@trbvn.com'
         password = 'rinus123'

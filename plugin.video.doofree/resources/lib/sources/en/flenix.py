@@ -56,16 +56,13 @@ class source:
 
                     phpsessid = re.compile('.+PHPSESSID=(.+)?').findall(c)[0]
                     cookie = 'PHPSESSID=' + phpsessid + '; uppodhtml5_volume=1; _gat=1'
-                    print cookie
                     headers = {'Host': 'flenix.tv', 'Origin': self.base_link, 'Referer': url, 'User-Agent': self.User_Agent}
 
                     # The first request is really important
                     client.request(url, headers=headers, cookie=cookie)
                     result = client.request(query, XHR=True, post=post, headers=headers, cookie=cookie)
 
-                    print result
                     movies = result.split(',')
-                    print movies
                     for movie in movies:
                         if '1080%' in movie:
                             quality = '1080p'

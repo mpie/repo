@@ -40,7 +40,6 @@ class thai:
         limatch = []
         url = self.shows_link % (catid, page)
 
-        print url
         try: result = client.request(url)
         except: pass
 
@@ -54,7 +53,7 @@ class thai:
 
         for li_content in limatch:
             show = re.compile('program-(.+?)" target.+?src="(.+?)".+?h5>(.+?)</h5').findall(li_content)
-            title = show[0][2].decode('iso-8859-11')
+            title = show[0][2].decode('utf-8')
             showid = show[0][0]
             image = show[0][1]
             image = image.replace('../../', self.host)
@@ -115,10 +114,8 @@ class thai:
 
         for em in episodematch:
             episodes = re.compile('player-(.+)">(.+)</a>').findall(em)
-            print em
-            print episodes
             for episode in episodes:
-                name = episode[1].decode('iso-8859-11')
+                name = episode[1].decode('utf-8')
                 url = self.player_link % (episode[0])
                 self.list.append({'name': name, 'url': urllib.quote_plus(url), 'image': image})
 
