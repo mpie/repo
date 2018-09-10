@@ -21,7 +21,8 @@ sysaddon = sys.argv[0]
 class thai:
     def __init__(self):
         self.list = []
-        self.host            = 'http://www.seesantv.com/'
+        self.img1            = 'https://seesantv.com/'
+        self.img2            = 'http://www.seesantv.com/seesantv2017/file_management/images/programs'
         self.main_link       = 'http://www.seesantv.com/seesantv2017/%s'
         self.shows_link      = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s&page=%s'
         #self.shows_ajax_link = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s&page=%s&all_page=%s'
@@ -29,7 +30,7 @@ class thai:
         self.episodes_link = self.main_link % 'program-%s&datapage=%s'
         self.player_link = self.main_link % 'player-%s'
         self.member_id = 205812  # expires 15 jun 2019
-        self.view_server_name = 'gm2'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
+        self.view_server_id = 405
         self.replace_server = 'gm99'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
 
     '''
@@ -40,9 +41,12 @@ class thai:
         limatch = []
         url = self.shows_link % (catid, page)
 
+        print url
+
         try: result = client.request(url)
         except: pass
 
+        print result
         data = json.loads(result)
         pageContent = data['content'].encode('utf-8')
 
@@ -56,8 +60,12 @@ class thai:
             title = show[0][2].decode('utf-8')
             showid = show[0][0]
             image = show[0][1]
-            image = image.replace('../../', self.host)
-            image = image.replace('../', self.host)
+
+            if 'program_pic/program_' in image:
+                image = image.replace('../', self.img1)
+            else:
+                image = image.replace('../', self.img2)
+                image = image.replace('program_pic', '')
 
             self.list.append({'name': title, 'showid': showid, 'image': image})
 
@@ -154,7 +162,7 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        cookie = 'view_server_name=%s; ssMemberID=%d' % (self.view_server_name, self.member_id)
+        cookie = 'viewServersID=%s; ssMemberID=%d' % (self.view_server_id, self.member_id)
 
         try: result = client.request(url, cookie=cookie)
         except: pass
@@ -169,15 +177,17 @@ class thai:
         item.setProperty('IsPlayable', 'true')
         control.playlist.clear()
 
-        try:
-            connection = urllib2.urlopen(videoUrl)
-            connection.close()
-        except urllib2.HTTPError, e:
-            videoUrl = videoUrl.replace('gm99', 'uk88')
-            try:
-                connection = urllib2.urlopen(videoUrl)
-                connection.close()
-            except urllib2.HTTPError, e:
-                videoUrl = videoUrl.replace('uk88', 'as88')
+        print videoUrl
+
+        # try:
+        #     connection = urllib2.urlopen(videoUrl)
+        #     connection.close()
+        # except urllib2.HTTPError, e:
+        #     videoUrl = videoUrl.replace('gm99', 'uk88')
+        #     try:
+        #         connection = urllib2.urlopen(videoUrl)
+        #         connection.close()
+        #     except urllib2.HTTPError, e:
+        #         videoUrl = videoUrl.replace('uk88', 'as88')
 
         control.player.play(videoUrl + '|Referer:' + url, item)
