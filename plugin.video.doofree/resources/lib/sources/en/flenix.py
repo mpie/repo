@@ -82,8 +82,8 @@ class source:
                         match = re.compile('<a href="(.+?)" class="ml-mask jt" oldtitle="(.+?)".+?>').findall(result)
                         #print match
                         for episode_url, name in match:
-                            episode_chk = '%sx%s' % (season, episode)
-                            episode_chkx = '%sx%s' % (seasonx, episode)
+                            episode_chk = '%sx%s/' % (season, episode)
+                            episode_chkx = '%sx%s/' % (seasonx, episode)
                             if episode_chk.lower() in episode_url.lower() or episode_chkx.lower() in episode_url.lower():
                                 #print episode_url
                                 result = client.request(episode_url)
