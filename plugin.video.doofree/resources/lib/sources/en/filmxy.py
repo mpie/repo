@@ -89,8 +89,9 @@ class source:
             title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
             year = data['year']
 
-            search_id = cleantitle.getsearch(title.lower())
-            query = urlparse.urljoin(self.base_link, self.search_link % (search_id.replace(' ','+')))
+            search_id = cleantitle.geturl(title.lower())
+            query = urlparse.urljoin(self.base_link, self.search_link % (search_id.replace('-', '+')))
+            # print query
             result = client.request(query)
 
             match = re.compile('class="single-post".+?href="(.+?)".+?<h2>(.+?)</h2>', re.DOTALL).findall(result)
