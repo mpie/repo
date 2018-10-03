@@ -113,10 +113,11 @@ class source:
                             sources.append({'source': 'CDN', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
 
                         if 'streamango' in url:
-                            sources.append({'source': 'streamango.com', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+                            sources.append({'source': 'Streamango', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
                         if 'openload' in url:
-                            sources.append({'source': 'openload.co', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+                            url = url.replace('embed', 'f')
+                            sources.append({'source': 'Openload', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
 
             return sources
