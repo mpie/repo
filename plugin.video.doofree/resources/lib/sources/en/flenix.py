@@ -16,7 +16,7 @@ class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.base_link = 'https://www1.flenix.cc/'
+        self.base_link = 'https://www2.flenix.cc/'
         self.gomo_link = 'https://gomostream.com/decoding_v3.php'
         self.search_link = 'search?s=%s'
         self.movie_link = '/engine/ajax/get.php'
@@ -26,6 +26,26 @@ class source:
         try:
             aliases.append({'country': 'us', 'title': title})
             url = {'imdb': imdb, 'title': title, 'year': year, 'aliases': aliases}
+            url = urllib.urlencode(url)
+            return url
+        except:
+            return
+
+    def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
+        try:
+            aliases.append({'country': 'us', 'title': tvshowtitle})
+            url = {'imdb': imdb, 'tvdb': tvdb, 'tvshowtitle': tvshowtitle, 'year': year, 'aliases': aliases}
+            url = urllib.urlencode(url)
+            return url
+        except:
+            return
+
+    def episode(self, url, imdb, tvdb, title, premiered, season, episode):
+        try:
+            if url == None: return
+            url = urlparse.parse_qs(url)
+            url = dict([(i, url[i][0]) if url[i] else (i, '') for i in url])
+            url['title'], url['premiered'], url['season'], url['episode'] = title, premiered, season, episode
             url = urllib.urlencode(url)
             return url
         except:
@@ -43,16 +63,39 @@ class source:
             title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
 
             query = urlparse.urljoin(self.base_link, self.search_link % cleantitle.getsearch(title))
-            print query
+            #print query
             result = client.request(query)
             match = re.compile('<a href="(.+?)" class="ml-mask jt" oldtitle="(.+?)".+?>').findall(result)
+            #print match
+
             for url, name in match:
                 if cleantitle.getsearch(title).lower() == cleantitle.getsearch(name).lower():
-                    result = client.request(url)
-                    match = re.compile('<a href="(.+?)" title="(.+?)" class="thumb mvi-cover"').findall(result)[0]
+                    # need an extra step for tvshows
+                    if 'tvshowtitle' in data:
+                        season = '%02d' % int(data['season'])
+                        seasonx = '%d' % int(data['season'])
+                        episode = '%d' % int(data['episode'])
+                        url += '?season=%s' % (season)
 
+                        #print url
+                        result = client.request(url)
+                        match = re.compile('<a href="(.+?)" class="ml-mask jt" oldtitle="(.+?)".+?>').findall(result)
+                        #print match
+                        for episode_url, name in match:
+                            episode_chk = '%sx%s' % (season, episode)
+                            episode_chkx = '%sx%s' % (seasonx, episode)
+                            if episode_chk.lower() in episode_url.lower() or episode_chkx.lower() in episode_url.lower():
+                                #print episode_url
+                                result = client.request(episode_url)
+                                video = re.compile('<a href="(.+?)" title="(.+?)" class="thumb mvi-cover"').findall(result)[0]
+
+                    else:
+                        result = client.request(url)
+                        video = re.compile('<a href="(.+?)" title="(.+?)" class="thumb mvi-cover"').findall(result)[0]
+
+                    #print video
                     # video player
-                    result = client.request(match[0])
+                    result = client.request(video[0])
                     iframe = re.compile('<iframe src="(.+?)"').findall(result)[0]
 
                     # get video src
@@ -68,6 +111,13 @@ class source:
                     for url in urls:
                         if 'gomostream' in url:
                             sources.append({'source': 'CDN', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+
+                        if 'streamango' in url:
+                            sources.append({'source': 'streamango.com', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+
+                        if 'openload' in url:
+                            sources.append({'source': 'openload.co', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+
 
             return sources
         except:
