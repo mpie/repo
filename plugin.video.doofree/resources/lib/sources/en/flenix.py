@@ -61,6 +61,7 @@ class source:
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
             title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
+            title = title.replace('Marvel\'s ', '')
 
             query = urlparse.urljoin(self.base_link, self.search_link % cleantitle.getsearch(title))
             #print query
