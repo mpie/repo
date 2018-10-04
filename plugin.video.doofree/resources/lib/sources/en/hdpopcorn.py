@@ -64,7 +64,6 @@ class source:
             result = client.request(query, timeout=3)
 
             match = re.compile('<a href="(.+?)" data-url.+?oldtitle="(.+?)".+?>').findall(result)
-            print match
 
             for url, name in match:
                 if cleantitle.getsearch(title).lower() == cleantitle.getsearch(name).lower():
@@ -75,21 +74,27 @@ class source:
                         url = url[:-1]
                         url = url.replace('/series/', '/episode/')
                         url += '-season-%s-episode-%s/' % (season, episode)
-                        print url
 
                     result = client.request(url)
                     url = re.compile('<iframe src="(.+?)"').findall(result)[0]
 
-                    if 'openload' in url:
-                        sources.append({'source': 'Openload', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+                    host = url.split('//')[1].replace('www.', '')
+                    host = host.split('/')[0].lower()
+                    if not self.filter_host(host):
+                        continue
+                    sources.append({'source': host, 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
-            print sources
             return sources
         except:
             return sources
 
     def resolve(self, url):
         return url
+
+    def filter_host(self, host):
+        if host not in ['openload.co', 'yourupload.com', 'streamango.com', 'rapidvideo.com']:
+            return False
+        return True
 
 
 

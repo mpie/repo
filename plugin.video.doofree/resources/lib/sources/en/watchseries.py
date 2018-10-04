@@ -18,8 +18,8 @@ class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.domains = ['watch-series.io']
-        self.base_link = 'https://watch-series.io'
+        self.domains = ['watchserieshd.io']
+        self.base_link = 'https://www4.watchserieshd.io'
         self.search_link = 'search.html?keyword=%s'
 
     def movie(self, imdb, title, localtitle, aliases, year):
@@ -86,7 +86,6 @@ class source:
                         sources.append({'source': source_name, 'quality': quality, 'language': 'en', 'url': playlink, 'direct': False, 'debridonly': False})
                 else:
                     sources.append({'source': source_name, 'quality': 'SD', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
-
 
             return sources
         except:

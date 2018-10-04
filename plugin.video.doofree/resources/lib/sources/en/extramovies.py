@@ -51,7 +51,7 @@ class source:
             return
 
     def filter_host(self, host):
-        if host not in ['openload.co']:
+        if host not in ['openload.co', 'yourupload.com', 'streamango.com', 'rapidvideo.com']:
             return False
         return True
 
