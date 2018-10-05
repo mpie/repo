@@ -124,6 +124,7 @@ class source:
                                 #print MOVIE
                                 if MOVIE[-4] == '.':
                                     if MOVIE.endswith('.mkv') or MOVIE.endswith('.mp4'):
+                                        MOVIE = MOVIE.replace('?C=S&amp;O=D', '')
                                         CLEANURL = URL.replace('%20', '.').lower()
                                         if search_term.replace(' ', '.').replace('+', '.') in CLEANURL.replace(' ', '.').lower():
                                             if 'tvshowtitle' in data:

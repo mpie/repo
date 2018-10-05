@@ -10,15 +10,14 @@ import re,urllib,urlparse,json
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
-from resources.lib.modules import directstream
 
 
 class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['miradetodo.io']
-        self.base_link = 'http://miradetodo.io'
+        self.domains = ['miradetodo.net']
+        self.base_link = 'https://miradetodo.net'
         self.gk_url = self.base_link + '/stream/plugins/gkpluginsphp.php'
         self.search_link = '/?s=%s'
         self.episode_link = '/episodio/%s-%sx%s'
@@ -103,81 +102,75 @@ class source:
             result = client.request(r)
 
             f = client.parseDOM(result, 'div', attrs = {'class': 'movieplay'})
-            print f
+
             if not f:
                 f = client.parseDOM(result, 'div', attrs={'class': 'embed2'})
                 f = client.parseDOM(f, 'div')
 
             f = client.parseDOM(f, 'iframe', ret='data-lazy-src')
 
-            dupes = []
-            print 'hierp'
-            print f
             for u in f:
                 try:
                     html = client.request(u)
-                    fragment = client.parseDOM(html, 'nav', attrs = {'class': 'nav'})
-                    print fragment
+                    fragment = client.parseDOM(html, 'nav', attrs={'class': 'nav'})
+
+                    # movies
                     if fragment:
                         stream_url = client.parseDOM(fragment[0], 'a', ret='href')
-                        print 'stream_url'
-                        print stream_url
-                        if stream_url:
-                            print 'html'
-                            print stream_url[0]
-                            html = client.request(stream_url[0])
-                            print html
 
-                            # Amazon player
-                            match = re.search('AmazonPlayer.*?file\s*:\s*"([^"]+)', html, re.DOTALL)
-                            if match:
-                                html = client.request(match.group(1))
-                                print 'amazon'
-                                print html
-                                if html.startswith('http'):
-                                    sources.append({'source': 'cdn', 'quality': '720p', 'language': 'en', 'url': i['file'], 'direct': True, 'debridonly': False})
+                        for stream in stream_url:
+                            if 'streamango' in stream:
+                                html = client.request(stream)
+                                url = client.parseDOM(html, 'iframe', ret='src')[0]
+                                sources.append({'source': 'Streamango', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
-                            # Link 1 palyer
-                            match = re.search('{link\s*:\s*"([^"]+)', html)
-                            if match:
-                                iframe_url = match.group(1)
-                                data = {'link': iframe_url}
-                                headers = {'Referer': iframe_url}
-                                html = client.request(self.gk_url, post=data, headers=headers)
-                                url = json.loads(html)
-                                print 'json'
-                                print url
-                                js_data = scraper_utils.parse_json(html, self.gk_url)
-                                links = js_data.get('link', [])
-                                if isinstance(links, basestring):
-                                    links = [{'link': links}]
+                            if 'ol.php' in stream:
+                                html = client.request(stream)
+                                url = client.parseDOM(html, 'iframe', ret='src')[0]
+                                url = url.replace('embed', 'f')
+                                sources.append({'source': 'Openload', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
-                                for link in links:
-                                    stream_url = link['link']
-                                    if scraper_utils.get_direct_hostname(self, stream_url) == 'gvideo':
-                                        quality = scraper_utils.gv_get_quality(stream_url)
-                                        direct = True
-                                    elif 'label' in link:
-                                        quality = scraper_utils.height_get_quality(link['label'])
-                                        direct = True
-                                    else:
-                                        quality = QUALITIES.HIGH
-                                        direct = False
+                            if 'cdnvi' in stream:
+                                html = client.request(stream)
+                                url = client.parseDOM(html, 'iframe', ret='src')[0]
+                                sources.append({'source': 'Rapidvideo', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
-                            match = re.search('proxy\.link=([^"&]+)', html)
-                            if match:
-                                print 'match 2'
-                                proxy_link = match.group(1)
-                                proxy_link = proxy_link.split('*', 1)[-1]
-                                if len(proxy_link) <= 224:
-                                    vid_url = scraper_utils.gk_decrypt(self.get_name(), GK_KEY1, proxy_link)
-                                else:
-                                    vid_url = scraper_utils.gk_decrypt(self.get_name(), GK_KEY2, proxy_link)
+                            if 'your.php' in stream:
+                                html = client.request(stream)
+                                url = client.parseDOM(html, 'iframe', ret='src')[0]
+                                sources.append({'source': 'Yourupload', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
-                                if scraper_utils.get_direct_hostname(self, vid_url) == 'gvideo':
-                                    for source in self._parse_gdocs(vid_url):
-                                        sources[source] = {'quality': scraper_utils.gv_get_quality(source),
-                                                           'direct': True}
+                            if 'fastplay.php' in stream:
+                                html = client.request(stream)
+                                url = client.parseDOM(html, 'iframe', ret='src')[0]
+                                sources.append({'source': 'Fastplay', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+
+                    # series
+                    else:
+                        if 'streamango' in u:
+                            html = client.request(u)
+                            url = client.parseDOM(html, 'iframe', ret='src')[0]
+                            sources.append({'source': 'Streamango', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+                        if 'ol.php' in u:
+                            html = client.request(u)
+                            url = client.parseDOM(html, 'iframe', ret='src')[0]
+                            url = url.replace('embed', 'f')
+                            sources.append({'source': 'Openload', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+
+                        if 'cdnvi' in u:
+                            html = client.request(u)
+                            url = client.parseDOM(html, 'iframe', ret='src')[0]
+                            sources.append({'source': 'Rapidvideo', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+
+                        if 'your.php' in u:
+                            html = client.request(u)
+                            url = client.parseDOM(html, 'iframe', ret='src')[0]
+                            sources.append({'source': 'Yourupload', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+
+                        if 'fastplay.php' in u:
+                            html = client.request(u)
+                            url = client.parseDOM(html, 'iframe', ret='src')[0]
+                            sources.append({'source': 'Fastplay', 'quality': '720p', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
                 except:
                     pass
@@ -187,7 +180,7 @@ class source:
             return sources
 
     def resolve(self, url):
-        return directstream.googlepass(url)
+        return url
 
     def __get_amazon_links(self, html):
         sources = {}
