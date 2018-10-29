@@ -185,32 +185,32 @@ class movies:
         navigator.navigator().endDirectory()
         
     def search_new(self):
-            control.idle()
+        control.idle()
 
-            t = control.lang(32010).encode('utf-8')
-            k = control.keyboard('', t) ; k.doModal()
-            q = k.getText() if k.isConfirmed() else None
+        t = control.lang(32010).encode('utf-8')
+        k = control.keyboard('', t) ; k.doModal()
+        q = k.getText() if k.isConfirmed() else None
 
-            if (q == None or q == ''): return
-            
-            try: from sqlite3 import dbapi2 as database
-            except: from pysqlite2 import dbapi2 as database
-            
-            dbcon = database.connect(control.searchFile)
-            dbcur = dbcon.cursor()
-            dbcur.execute("INSERT INTO movies VALUES (?,?)", (None,q))
-            dbcon.commit()
-            dbcur.close()
-            url = self.search_link + urllib.quote_plus(q)
-            url = '%s?action=moviePage&url=%s' % (sys.argv[0], urllib.quote_plus(url))
-            control.execute('Container.Update(%s)' % url)
+        if (q == None or q == ''): return
+
+        try: from sqlite3 import dbapi2 as database
+        except: from pysqlite2 import dbapi2 as database
+
+        dbcon = database.connect(control.searchFile)
+        dbcur = dbcon.cursor()
+        dbcur.execute("INSERT INTO movies VALUES (?,?)", (None,q))
+        dbcon.commit()
+        dbcur.close()
+        url = self.search_link + urllib.quote_plus(q)
+        url = '%s?action=moviePage&url=%s' % (sys.argv[0], urllib.quote_plus(url))
+        control.execute('Container.Update(%s)' % url)
 
     def search_term(self, name):
-            control.idle()
+        control.idle()
 
-            url = self.search_link + urllib.quote_plus(name)
-            url = '%s?action=moviePage&url=%s&skin=50' % (sys.argv[0], urllib.quote_plus(url))
-            control.execute('Container.Update(%s)' % url)
+        url = self.search_link + urllib.quote_plus(name)
+        url = '%s?action=moviePage&url=%s' % (sys.argv[0], urllib.quote_plus(url))
+        control.execute('Container.Update(%s)' % url)
 
     def person(self):
         try:
@@ -687,7 +687,7 @@ class movies:
         self.meta = []
         total = len(self.list)
 
-        self.fanart_tv_headers = {'api-key': 'NDZkZmMyN2M1MmE0YTc3MjY3NWQ4ZTMyYjdiY2E2OGU='.decode('base64')}
+        self.fanart_tv_headers = {'api-key': '04cd6efd5628ec6082644538a6045bdc'}
         if not self.fanart_tv_user == '':
             self.fanart_tv_headers.update({'client-key': self.fanart_tv_user})
 
@@ -781,7 +781,14 @@ class movies:
                 plot = trans_item.get('overview') or plot
             except:
                 pass
-                
+
+            artmeta = True
+            art = client.request(self.fanart_tv_art_link % imdb, headers=self.fanart_tv_headers, timeout='10', error=True)
+            try:
+                art = json.loads(art)
+            except:
+                artmeta = False
+
             try:
                 poster2 = art['movieposter']
                 poster2 = [x for x in poster2 if x.get('lang') == self.lang][::-1] + [x for x in poster2 if x.get('lang') == 'en'][::-1] + [x for x in poster2 if x.get('lang') in ['00', '']][::-1]
