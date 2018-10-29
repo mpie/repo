@@ -128,17 +128,19 @@ class source:
             session = self._createSession(self.User_Agent)
 
             if data['season'] != '1':
-                localTitle = cleantitle.get(title).lower() + ' ' + data['season']
+                localTitle = cleantitle.geturl(title) + '-' + data['season']
                 extraLocalTitle = ''
             else:
-                localTitle = cleantitle.get(title).lower()
-                extraLocalTitle = cleantitle.get(title).lower() + ' ' + data['season']
+                localTitle = cleantitle.geturl(title)
+                extraLocalTitle = cleantitle.geturl(title) + '-' + data['season']
 
+            localTitle = localTitle.replace('dcs-', '')
             stringConstant, search_response, timeStamp = self._getSearch(localTitle, session)
 
             r = re.compile('class="name" href="(.+?)">(.+?)</a>', re.DOTALL).findall(search_response)
             for url, item_name in r:
-                if localTitle == item_name.lower() or extraLocalTitle == item_name.lower():
+                remoteTitle = cleantitle.geturl(str(item_name))
+                if localTitle == remoteTitle or extraLocalTitle == remoteTitle:
                     film_id = url.split('.')[-1:]
                     info_url = urlparse.urljoin(self.base_link, self.server_path % film_id[0])
 
@@ -172,7 +174,6 @@ class source:
             return sources
 
     def resolve(self, url):
-        print url
         try:
             return self._getHost(url)
         except:
@@ -186,18 +187,14 @@ class source:
             return type('FailedResponse', (object,), {'ok': False})
 
     def _requestJSON(self, url):
-        print url
         try:
             return json.loads(url)
         except:
             return None
 
     def _getHost(self, url):
-        print url
         r = client.request(url)
         jsonData = json.loads(r)
-
-        print jsonData
 
         if jsonData:
             return jsonData['target']
@@ -233,7 +230,7 @@ class source:
         token = self._makeToken(data, stringConstant)
 
         info_url = urlparse.urljoin(self.base_link, (self.search_path % (timeStamp, token, lowerTitle)))
-        print info_url
+
         servers = client.request(info_url)
         jsonData = json.loads(servers)
 
