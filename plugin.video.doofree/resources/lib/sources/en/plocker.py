@@ -129,41 +129,43 @@ class source:
 
             if data['season'] != '1':
                 localTitle = cleantitle.get(title).lower() + ' ' + data['season']
+                extraLocalTitle = ''
             else:
                 localTitle = cleantitle.get(title).lower()
+                extraLocalTitle = cleantitle.get(title).lower() + ' ' + data['season']
+
             stringConstant, search_response, timeStamp = self._getSearch(localTitle, session)
 
-            if 'tvshowtitle' in data:
-                r = re.compile('class="name" href="(.+?)">(.+?)</a>', re.DOTALL).findall(search_response)
-                for url, item_name in r:
-                    if localTitle == cleantitle.get(item_name).lower():
-                        film_id = url.split('.')[-1:]
-                        info_url = urlparse.urljoin(self.base_link, self.server_path % film_id[0])
+            r = re.compile('class="name" href="(.+?)">(.+?)</a>', re.DOTALL).findall(search_response)
+            for url, item_name in r:
+                if localTitle == item_name.lower() or extraLocalTitle == item_name.lower():
+                    film_id = url.split('.')[-1:]
+                    info_url = urlparse.urljoin(self.base_link, self.server_path % film_id[0])
 
-                        servers = client.request(info_url)
-                        r = json.loads(servers)['html']
+                    servers = client.request(info_url)
+                    r = json.loads(servers)['html']
 
-                        EE = '%02d' % int(data['episode'])
+                    EE = '%02d' % int(data['episode'])
 
-                        tempTokenData = {'ts': timeStamp, 'id': None, 'server': None, 'update': '0'}
-                        baseInfoURL = urlparse.urljoin(self.base_link, self.info_path)
+                    tempTokenData = {'ts': timeStamp, 'id': None, 'server': None, 'update': '0'}
+                    baseInfoURL = urlparse.urljoin(self.base_link, self.info_path)
 
-                        servers = re.compile('data-type="iframe" data-id="(.+?)">.+?</i>(.+?)</label>.+?<ul(.+?)</ul>').findall(r.replace('\n', ' ').replace('\r', ''))
+                    servers = re.compile('data-type="iframe" data-id="(.+?)">.+?</i>(.+?)</label>.+?<ul(.+?)</ul>').findall(r.replace('\n', ' ').replace('\r', ''))
 
-                        for serverId, hostName, episodesList in servers:
-                            tempTokenData['server'] = serverId
-                            hostName = self.DEBRID_HOSTS.get(hostName.lower().strip(), hostName.strip())
+                    for serverId, hostName, episodesList in servers:
+                        tempTokenData['server'] = serverId
+                        hostName = self.DEBRID_HOSTS.get(hostName.lower().strip(), hostName.strip())
 
-                            episodes = re.compile('data-id="(.+?)".+?>(.+?)</a>').findall(episodesList)
+                        episodes = re.compile('data-id="(.+?)".+?>(.+?)</a>').findall(episodesList)
 
-                            for hostID, label in episodes:
-                                if EE == label:
-                                    quality = '720p'
-                                    tempTokenData['id'] = hostID
-                                    tempToken = self._makeToken(tempTokenData, stringConstant)
-                                    url = baseInfoURL % (timeStamp, tempToken, hostID, tempTokenData['server'])
+                        for hostID, label in episodes:
+                            if EE == label or 'tvshowtitle' not in data:
+                                quality = '720p'
+                                tempTokenData['id'] = hostID
+                                tempToken = self._makeToken(tempTokenData, stringConstant)
+                                url = baseInfoURL % (timeStamp, tempToken, hostID, tempTokenData['server'])
 
-                                    sources.append({'source': hostName, 'quality': quality, 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+                                sources.append({'source': hostName, 'quality': quality, 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
 
             return sources
         except:
@@ -231,6 +233,7 @@ class source:
         token = self._makeToken(data, stringConstant)
 
         info_url = urlparse.urljoin(self.base_link, (self.search_path % (timeStamp, token, lowerTitle)))
+        print info_url
         servers = client.request(info_url)
         jsonData = json.loads(servers)
 
