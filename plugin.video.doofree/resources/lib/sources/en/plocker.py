@@ -38,62 +38,12 @@ class source:
         }
 
     def movie(self, imdb, title, localtitle, aliases, year):
-        '''
-        Takes movie information and returns a set name value pairs, encoded as
-        url params. These params include ts
-        (a unqiue identifier, used to grab sources) and list of source ids
-
-        Keyword arguments:
-
-        imdb -- string - imdb movie id
-        title -- string - name of the movie
-        localtitle -- string - regional title of the movie
-        year -- string - year the movie was released
-
-        Returns:
-
-        url -- string - url encoded params
-
-        '''
         try:
-            clean_title = cleantitle.geturl(title)
-            query = (self.search_path % (clean_title))
-            url = urlparse.urljoin(self.base_link, query)
-
-            search_response = client.request(url)
-
-            results_list = client.parseDOM(
-                search_response, 'div', attrs={'class': 'item'})[0]
-            film_id = re.findall('(\/watch\/)([^\"]*)', results_list)[0][1]
-
-            query = (self.film_path % film_id)
-            url = urlparse.urljoin(self.base_link, query)
-
-            film_response = client.request(url)
-
-            ts = re.findall('(data-ts=\")(.*?)(\">)', film_response)[0][1]
-
-            sources_dom_list = client.parseDOM(
-                film_response, 'ul', attrs={'class': 'episodes range active'})
-            sources_list = []
-
-            for i in sources_dom_list:
-                source_id = re.findall('([\/])(.{0,6})(\">)', i)[0][1]
-                sources_list.append(source_id)
-
-            data = {
-                'imdb': imdb,
-                'title': title,
-                'localtitle': localtitle,
-                'year': year,
-                'ts': ts,
-                'sources': sources_list
-            }
-            url = urllib.urlencode(data)
-
+            aliases.append({'country': 'us', 'title': title})
+            url = {'imdb': imdb, 'title': title, 'year': year, 'aliases': aliases}
+            url = urllib.urlencode(url)
             return url
-
-        except Exception:
+        except:
             return
 
     def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
@@ -123,23 +73,32 @@ class source:
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
-            title = data['tvshowtitle'] if 'tvshowtitle' in data else data['title']
+            if 'tvshowtitle' in data:
+                title = data['tvshowtitle']
+                isMovie = False
+            else:
+                title = data['title']
+                isMovie = True
 
             session = self._createSession(self.User_Agent)
+            extraLocalTitle = ''
 
-            if data['season'] != '1':
+            if not isMovie and data['season'] != '1':
                 localTitle = cleantitle.geturl(title) + '-' + data['season']
-                extraLocalTitle = ''
             else:
                 localTitle = cleantitle.geturl(title)
-                extraLocalTitle = cleantitle.geturl(title) + '-' + data['season']
+                if not isMovie:
+                    extraLocalTitle = cleantitle.geturl(title) + '-' + data['season']
 
             localTitle = localTitle.replace('dcs-', '')
+
             stringConstant, search_response, timeStamp = self._getSearch(localTitle, session)
 
-            r = re.compile('class="name" href="(.+?)">(.+?)</a>', re.DOTALL).findall(search_response)
-            for url, item_name in r:
+            r = re.compile('class="name" href="(.+?)">(.+?)</a>.+?text-danger">(.+?)</span', re.DOTALL).findall(search_response)
+
+            for url, item_name, year in r:
                 remoteTitle = cleantitle.geturl(str(item_name))
+                #print remoteTitle, localTitle, year
                 if localTitle == remoteTitle or extraLocalTitle == remoteTitle:
                     film_id = url.split('.')[-1:]
                     info_url = urlparse.urljoin(self.base_link, self.server_path % film_id[0])
@@ -147,7 +106,8 @@ class source:
                     servers = client.request(info_url)
                     r = json.loads(servers)['html']
 
-                    EE = '%02d' % int(data['episode'])
+                    if not isMovie:
+                        EE = '%02d' % int(data['episode'])
 
                     tempTokenData = {'ts': timeStamp, 'id': None, 'server': None, 'update': '0'}
                     baseInfoURL = urlparse.urljoin(self.base_link, self.info_path)
@@ -161,7 +121,7 @@ class source:
                         episodes = re.compile('data-id="(.+?)".+?>(.+?)</a>').findall(episodesList)
 
                         for hostID, label in episodes:
-                            if EE == label or 'tvshowtitle' not in data:
+                            if (not isMovie and EE == label) or isMovie:
                                 quality = '720p'
                                 tempTokenData['id'] = hostID
                                 tempToken = self._makeToken(tempTokenData, stringConstant)
@@ -230,7 +190,7 @@ class source:
         token = self._makeToken(data, stringConstant)
 
         info_url = urlparse.urljoin(self.base_link, (self.search_path % (timeStamp, token, lowerTitle)))
-
+        #print info_url
         servers = client.request(info_url)
         jsonData = json.loads(servers)
 
