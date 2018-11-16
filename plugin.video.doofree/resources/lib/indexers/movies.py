@@ -209,7 +209,7 @@ class movies:
         control.idle()
 
         url = self.search_link + urllib.quote_plus(name)
-        url = '%s?action=moviePage&url=%s' % (sys.argv[0], urllib.quote_plus(url))
+        url = '%s?action=moviePage&url=%s&skin=50' % (sys.argv[0], urllib.quote_plus(url))
         control.execute('Container.Update(%s)' % url)
 
     def person(self):
