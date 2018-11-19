@@ -160,6 +160,20 @@ elif action == 'sourcePage2':
 
     thai2.thai().sourcePage(url, name, image)
 
+elif action == 'dutchTV':
+    from resources.lib.indexers import dutchtv
+
+    dutchtv.dutchtv().index()
+
+elif action == 'listDutchShow':
+    from resources.lib.indexers import dutchtv
+
+    dutchtv.dutchtv().list(url)
+
+elif action == 'playDutchShow':
+    from resources.lib.indexers import dutchtv
+
+    dutchtv.dutchtv().play(name, url, image)
 
 
 

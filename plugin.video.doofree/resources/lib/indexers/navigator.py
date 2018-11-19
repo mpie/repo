@@ -36,7 +36,7 @@ class navigator:
         if (traktIndicators == True and not control.setting('tv.widget.alt') == '0') or (traktIndicators == False and not control.setting('tv.widget') == '0'):
             self.addDirectoryItem(32006, 'tvWidget', 'latest-episodes.png', 'DefaultRecentlyAddedEpisodes.png')
 
-        self.addDirectoryItem('Live TV', 'liveTV', 'root_livetv.png', 'DefaultMovies.png')
+        self.addDirectoryItem('Dutch TV Shows', 'dutchTV', 'DefaultMovies.png', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Live TV', 'thaiLiveTV', 'root_thaitv.png', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows', 'thaiShows', 'root_thaishows.png', 'DefaultMovies.png')
         self.addDirectoryItem('Thai Shows 2', 'thaiShows2', 'root_thaishows2.png', 'DefaultMovies.png')
