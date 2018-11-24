@@ -98,8 +98,14 @@ class source:
 
             for url, item_name, year in r:
                 remoteTitle = cleantitle.geturl(str(item_name))
-                #print remoteTitle, localTitle, year
+                # print remoteTitle, localTitle, year
+
+                if isMovie and int(data['year']) != int(year):
+                    print 'skipping', remoteTitle, year
+                    continue
+
                 if localTitle == remoteTitle or extraLocalTitle == remoteTitle:
+                    print remoteTitle, localTitle, year, data['year']
                     film_id = url.split('.')[-1:]
                     info_url = urlparse.urljoin(self.base_link, self.server_path % film_id[0])
 
