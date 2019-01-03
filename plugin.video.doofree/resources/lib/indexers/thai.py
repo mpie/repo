@@ -41,12 +41,9 @@ class thai:
         limatch = []
         url = self.shows_link % (catid, page)
 
-        print url
-
         try: result = client.request(url)
         except: pass
 
-        print result
         data = json.loads(result)
         pageContent = data['content'].encode('utf-8')
 
@@ -113,7 +110,9 @@ class thai:
     def listEpisodes(self, catid, showid, page, image):
         syshandle = int(sys.argv[1])
         url = self.episodes_link % (showid, page)
-        try: result = client.request(url)
+        cookie = 'ssMemberID=%d' % (self.member_id)
+
+        try: result = client.request(url, cookie=cookie)
         except: pass
         link = ''.join(result.splitlines()).replace('\'','"')
         link = ''.join(link.splitlines()).replace('<i class="fa fa-play-circle-white"></i>','')
@@ -162,8 +161,15 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        cookie = 'viewServersID=%s; ssMemberID=%d' % (self.view_server_id, self.member_id)
+        response = urllib.urlopen('http://api.ipstack.com/check?access_key=527d4ea99987d55558c10b3a7d6c7b9b');
+        data = json.loads(response.read())
 
+        if (data['country_code'] == 'TH'):
+            viewServerId = 409
+        else:
+            viewServerId = self.view_server_id
+
+        cookie = 'viewServersID=%s; ssMemberID=%d' % (viewServerId, self.member_id)
         try: result = client.request(url, cookie=cookie)
         except: pass
 
@@ -177,7 +183,6 @@ class thai:
         item.setProperty('IsPlayable', 'true')
         control.playlist.clear()
 
-        print videoUrl
 
         # try:
         #     connection = urllib2.urlopen(videoUrl)
