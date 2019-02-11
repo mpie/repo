@@ -93,7 +93,13 @@ class source:
         if 'google' in url and not 'googleapis' in url:
             return directstream.googlepass(url)
         else:
-            return url
+            result = client.request(url)
+            match = re.compile('"(.+?).m3u8"').findall(result)
+            if len(match):
+                return match[0] + '.m3u8'
+            else:
+                match = re.compile(',"(.+?).mp4"').findall(result)
+                return match[0] + '.mp4'
 
     def tsd(self, tokenCode):
         _13x48X = tokenCode
