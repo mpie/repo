@@ -29,8 +29,8 @@ class thai:
         #self.episodes_ajax_link = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s'
         self.episodes_link = self.main_link % 'program-%s&datapage=%s'
         self.player_link = self.main_link % 'player-%s'
-        self.member_id = 205812  # expires 15 jun 2019
-        self.view_server_id = 405
+        self.member_id = 169754  # expires 15 jun 2019
+        self.view_server_id = 400
         self.replace_server = 'gm99'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
 
     '''
@@ -169,30 +169,18 @@ class thai:
         else:
             viewServerId = self.view_server_id
 
-        cookie = 'viewServersID=%s; ssMemberID=%d' % (viewServerId, self.member_id)
+        cookie = 'viewLivePlatform=%s; viewEmbedServersID=%d; viewServersID=%d; ssMemberID=%d' % ('pc', viewServerId, viewServerId, self.member_id)
+
         try: result = client.request(url, cookie=cookie)
         except: pass
 
-        videoUrl = re.compile('file: "(.+?)"').findall(result)[0]
-
-        videoUrl = videoUrl.replace('s.mp4', '.mp4')
+        vidFile = re.compile('file: "(.+?)"').findall(result)[0]
+        videoUrl = vidFile.replace('s.mp4', '.mp4')
 
         item = control.item(path=url, iconImage=image, thumbnailImage=image)
         item.setInfo(type='Video', infoLabels={'title': name})
         item.setProperty('Video', 'true')
         item.setProperty('IsPlayable', 'true')
         control.playlist.clear()
-
-
-        # try:
-        #     connection = urllib2.urlopen(videoUrl)
-        #     connection.close()
-        # except urllib2.HTTPError, e:
-        #     videoUrl = videoUrl.replace('gm99', 'uk88')
-        #     try:
-        #         connection = urllib2.urlopen(videoUrl)
-        #         connection.close()
-        #     except urllib2.HTTPError, e:
-        #         videoUrl = videoUrl.replace('uk88', 'as88')
 
         control.player.play(videoUrl + '|Referer:' + url, item)

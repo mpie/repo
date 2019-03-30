@@ -48,30 +48,30 @@ class navigator:
 
 
     def thaiLiveTV(self):
-        # live4 is asia, uk99 is uk
+        self.addDirectoryItem('ONE',
+                              'playThaiLiveTV&url=http://live3.thaimomo.com/live/chone1/playlist.m3u8&name=ONE_HD&image=ch1hd.png',
+                              'ch1hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('3HD',
-                              'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/ch3hd1&name=3HD&image=ch3hd.png',
+                              'playThaiLiveTV&url=http://live3.thaimomo.com/live/ch3hd3b/playlist.m3u8&name=3HD&image=ch3hd.png',
                               'ch3hd.png', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('3SD', 'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/ch3SD1', 'ch3sd.png',
+        self.addDirectoryItem('3SD', 'playThaiLiveTV&url=http://live3.thaimomo.com/live/ch3SD1/playlist.m3u8',
+                              'ch3sd.png',
                               'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('3Family',
-                              'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/ch3family1&name=3Family&image=ch3family.png',
+                              'playThaiLiveTV&url=http://live3.thaimomo.com/live/ch3family1/playlist.m3u8&name=3Family&image=ch3family.png',
                               'ch3family.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('5HD',
-                              'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/ch5hd1&name=5HD&image=ch5hd.png',
+                              'playThaiLiveTV&url=http://live3.thaimomo.com/live/ch5hd1/playlist.m3u8&name=5HD&image=ch5hd.png',
                               'ch5hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('7HD',
-                              'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/ch7hd1&name=7HD&image=ch7hd.png',
+                              'playThaiLiveTV&url=http://live3.thaimomo.com/live/ch7hd1/playlist.m3u8&name=7HD&image=ch7hd.png',
                               'ch7hd.png', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('8',
-                              'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/cheight1&name=8HD&image=ch8hd.png',
+        self.addDirectoryItem('8HD',
+                              'playThaiLiveTV&url=http://live3.thaimomo.com/live/cheight1/playlist.m3u8&name=8HD&image=ch8hd.png',
                               'ch8hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('WorkPoint',
-                              'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/chworkpoint1&name=WORKPOINT&image=chworkpoint.png',
+                              'playThaiLiveTV&url=http://live3.thaimomo.com/live/chworkpoint1/playlist.m3u8&name=WORKPOINT&image=chworkpoint.png',
                               'chworkpoint.png', 'DefaultMovies.png', isFolder=False)
-        self.addDirectoryItem('ONE',
-                              'playThaiLiveTV&url=rtmp://uk99.thai2live.com/as99/chone1&name=ONE_HD&image=ch1hd.png',
-                              'ch1hd.png', 'DefaultMovies.png', isFolder=False)
         self.endDirectory()
 
 
