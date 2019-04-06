@@ -10,6 +10,7 @@ import re, urllib, urlparse, json
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
 from resources.lib.modules import directstream
+from resources.lib.modules import jsunpack
 
 
 class source:
@@ -53,6 +54,7 @@ class source:
 
     def sources(self, url, hostDict, hostprDict):
         try:
+            print url
             sources = []
 
             if url == None: return sources
@@ -90,13 +92,24 @@ class source:
             return sources
 
     def resolve(self, url):
+        print url
         if 'google' in url and not 'googleapis' in url:
             return directstream.googlepass(url)
         else:
             result = client.request(url)
-            match = re.compile('"(.+?).m3u8"').findall(result)
-            if len(match):
-                return match[0] + '.m3u8'
+
+            for x in re.findall('(eval\s*\(function.*?)</script>', result, re.DOTALL):
+                try:
+                    result += jsunpack.unpack(x).replace('\\', '')
+                except:
+                    pass
+
+            result = jsunpack.unpack(result)
+            result = unicode(result, 'utf-8')
+            links = [(match[0], match[1]) for match in re.findall('''['"]?file['"]?\s*:\s*['"]([^'"]+)['"][^}]*['"]?label['"]?\s*:\s*['"]([^'"]*)''', result, re.DOTALL)]
+            print links
+            if len(links):
+                return links[0][0]
             else:
                 match = re.compile(',"(.+?).mp4"').findall(result)
                 return match[0] + '.mp4'

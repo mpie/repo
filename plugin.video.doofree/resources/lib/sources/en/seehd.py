@@ -1,11 +1,10 @@
-# -*- coding: UTF-8 -*-
-'''
-    seehd scraper for Exodus forks.
-    Nov 9 2018 - Checked
+# -*- coding: utf-8 -*-
 
-    Updated and refactored by someone.
-    Originally created by others.
 '''
+    DooFree Add-on
+    Copyright (C) 2019 Mpie
+'''
+
 import re
 
 from resources.lib.modules import cleantitle

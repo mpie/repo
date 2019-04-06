@@ -2,7 +2,7 @@
 
 '''
     DooFree Add-on
-    Copyright (C) 2017 Mpie
+    Copyright (C) 2019 Mpie
 '''
 
 import re, urllib, urllib2, urlparse, json, base64, time
