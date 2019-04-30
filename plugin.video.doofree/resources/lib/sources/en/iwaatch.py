@@ -34,9 +34,6 @@ class source:
         url = data[0]
         title = data[1]
 
-        print 'hieroooooo'
-        print title
-
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
             'Accept': '*/*',
@@ -47,9 +44,6 @@ class source:
             'Cache-Control': 'no-cache',
             'DNT': '1'
         }
-
-        print 'hierodaaaaaaaooooo'
-        print headers
 
         response = requests.get(url, headers=headers).content
         regex = '<div class="col-xs-.+?a href="(.+?)".+?div class="post-title">(.+?)<'

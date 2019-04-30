@@ -19,8 +19,8 @@ class source:
         self.language = ['en']
         self.base_link = 'https://gomostream.com/'
         self.gomo_link = 'https://gomostream.com/decoding_v3.php'
-        self.tvshow_search_link = 'show/%s/%s-%s?src=mirror1'
-        self.movie_search_link = 'movie/%s?src=mirror1'
+        self.tvshow_search_link = 'show/%s/%s-%s?src=mirror%s'
+        self.movie_search_link = 'movie/%s?src=mirror%s'
         self.User_Agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
 
     def movie(self, imdb, title, localtitle, aliases, year):
@@ -62,31 +62,36 @@ class source:
             data = urlparse.parse_qs(url)
             data = dict([(i, data[i][0]) if data[i] else (i, '') for i in data])
 
-            if 'tvshowtitle' in data:
-                season = '%02d' % int(data['season'])
-                episode = '%02d' % int(data['episode'])
-                title = data['tvshowtitle']
-                query = urlparse.urljoin(self.base_link, self.tvshow_search_link % (cleantitle.geturl(title), season, episode))
-            else:
-                title = data['title']
-                query = urlparse.urljoin(self.base_link, self.movie_search_link % cleantitle.geturl(title))
+            mirrors = [1, 2, 3, 4, 5, 6]
 
-            result = client.request(query)
+            for mirror in mirrors:
+                if 'tvshowtitle' in data:
+                    season = '%02d' % int(data['season'])
+                    episode = '%02d' % int(data['episode'])
+                    title = data['tvshowtitle']
+                    query = urlparse.urljoin(self.base_link, self.tvshow_search_link % (cleantitle.geturl(title), season, episode, mirror))
+                else:
+                    title = data['title']
+                    query = urlparse.urljoin(self.base_link, self.movie_search_link % cleantitle.geturl(title), mirror)
 
-            tc = re.compile('tc = \'(.+?)\';').findall(result)[0]
+                print query
+                result = client.request(query)
 
-            if (tc):
-                token = re.compile('"_token": "(.+?)",').findall(result)[0]
+                tc = re.compile('tc = \'(.+?)\';').findall(result)[0]
 
-                post = {'tokenCode': tc, '_token': token}
-                headers = {'Host': 'gomostream.com', 'Referer': query, 'User-Agent': self.User_Agent, 'x-token': self.tsd(tc)}
-                result = client.request(self.gomo_link, XHR=True, post=post, headers=headers)
+                if (tc):
+                    token = re.compile('"_token": "(.+?)",').findall(result)[0]
 
-                urls = json.loads(result)
-                for url in urls:
-                    if 'gomostream' in url:
-                        sources.append({'source': 'CDN', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+                    post = {'tokenCode': tc, '_token': token}
+                    headers = {'Host': 'gomostream.com', 'Referer': query, 'User-Agent': self.User_Agent, 'x-token': self.tsd(tc)}
+                    result = client.request(self.gomo_link, XHR=True, post=post, headers=headers)
 
+                    urls = json.loads(result)
+                    for url in urls:
+                        if 'gomostream' in url:
+                            sources.append({'source': 'CDN', 'quality': '720p', 'language': 'en', 'url': url, 'direct': True, 'debridonly': False})
+
+            print sources
             return sources
         except:
             return sources
