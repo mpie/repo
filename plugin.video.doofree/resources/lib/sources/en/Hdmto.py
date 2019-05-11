@@ -34,7 +34,7 @@ class source:
             try:
                 match = re.compile('<iframe.+?src="(.+?)"').findall(r)
                 for url in match:
-                    sources.append({'source': 'Openload.co','quality': '720','language': 'en','url': url,'direct': False,'debridonly': False})
+                    sources.append({'source': 'Openload','quality': '720p','language': 'en','url': url,'direct': False,'debridonly': False})
             except:
                 return
         except Exception:
