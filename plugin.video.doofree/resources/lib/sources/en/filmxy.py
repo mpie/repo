@@ -18,7 +18,7 @@ class source:
         self.priority = 1
         self.language = ['en']
         self.domains = ['filmxy.me']
-        self.base_link = 'https://www.filmxy.ws/'
+        self.base_link = 'https://www.filmxy.live/'
         self.search_link = 'search/%s/feed/rss2/'
         self.scraper = cfscrape.create_scraper()
 
