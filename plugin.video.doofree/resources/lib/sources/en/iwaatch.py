@@ -3,6 +3,7 @@ import re
 import urlparse
 
 from resources.lib.modules import cleantitle
+from resources.lib.modules import client
 
 class source:
     def __init__(self):
@@ -23,7 +24,6 @@ class source:
             #    return
 
     def sources(self, url, hostDict, hostprDict):
-        import requests
         self.sources2 = []
 
         if url is None:
@@ -45,13 +45,13 @@ class source:
             'DNT': '1'
         }
 
-        response = requests.get(url, headers=headers).content
-        regex = '<div class="col-xs-.+?a href="(.+?)".+?div class="post-title">(.+?)<'
+        response = client.request(url, headers=headers)
+        regex = '<div class="banner".+?<div class="col-xs-.+?a href="(.+?)".+?div class="post-title">(.+?)<'
         match2 = re.compile(regex, re.DOTALL).findall(response)
 
         for link_in, title_in in match2:
             if title in title_in:
-                x = requests.get(link_in.replace('movie', 'view'), headers=headers).content
+                x = client.request(link_in.replace('movie', 'view'), headers=headers)
                 regex = "file: '(.+?)'.+?label: '(.+?)'"
                 match3 = re.compile(regex, re.DOTALL).findall(x)
 
