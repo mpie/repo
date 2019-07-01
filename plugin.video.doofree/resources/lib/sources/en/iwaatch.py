@@ -4,6 +4,7 @@ import urlparse
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
+from resources.lib.modules import dom_parser
 
 class source:
     def __init__(self):
@@ -46,10 +47,12 @@ class source:
         }
 
         response = client.request(url, headers=headers)
-        regex = '<div class="banner".+?<div class="col-xs-.+?a href="(.+?)".+?div class="post-title">(.+?)<'
-        match2 = re.compile(regex, re.DOTALL).findall(response)
+        r = dom_parser.parse_dom(response, 'div', attrs={'class': ['col-xs-12', 'col-sm-6', 'col-md-3']})
+        r = dom_parser.parse_dom(r, 'a', req='href')
+        r = [(i.attrs['href'], i.content) for i in r if i]
+        r = [(i[0], re.findall('<div class="post-title">(.+?)</div>', i[1], re.IGNORECASE)) for i in r]
 
-        for link_in, title_in in match2:
+        for link_in, title_in in r:
             if title in title_in:
                 x = client.request(link_in.replace('movie', 'view'), headers=headers)
                 regex = "file: '(.+?)'.+?label: '(.+?)'"
