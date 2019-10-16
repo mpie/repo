@@ -6,7 +6,7 @@
 '''
 
 
-import os,sys,re,json,urllib,urllib2,urlparse,base64,datetime
+import os,sys,re,json,urllib,urllib2,urlparse,base64,datetime,requests
 
 try: action = dict(urlparse.parse_qsl(sys.argv[2].replace('?','')))['action']
 except: action = None
@@ -22,16 +22,16 @@ class thai:
     def __init__(self):
         self.list = []
         self.img1            = 'https://seesantv.com/'
-        self.img2            = 'http://www.seesantv.com/seesantv2017/file_management/images/programs'
-        self.main_link       = 'http://www.seesantv.com/seesantv2017/%s'
+        self.img2            = 'https://www.seesantv.com/seesantv2020/file_management/images/programs'
+        self.main_link       = 'https://seesantv.com/seesantv2020/%s'
+        self.login_link      = self.main_link % 'apps/index.php?module=members&task=checkLogin'
         self.shows_link      = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s&page=%s'
-        #self.shows_ajax_link = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s&page=%s&all_page=%s'
-        #self.episodes_ajax_link = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s'
-        self.episodes_link = self.main_link % 'program-%s&datapage=%s'
+        self.episodes_link = self.main_link % 'apps/index.php?module=programs&task=setLoadChapterListByPages2020&program_id=%s&page=%s'
         self.player_link = self.main_link % 'player-%s'
         self.member_id = 169754  # expires 15 jun 2019
-        self.view_server_id = 400
+        self.view_server_id = 405
         self.replace_server = 'gm99'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
+        self.User_Agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
 
     '''
     List all the shows from a specific category
@@ -40,7 +40,6 @@ class thai:
         syshandle = int(sys.argv[1])
         limatch = []
         url = self.shows_link % (catid, page)
-
         try: result = client.request(url)
         except: pass
 
@@ -111,23 +110,20 @@ class thai:
         syshandle = int(sys.argv[1])
         url = self.episodes_link % (showid, page)
         cookie = 'ssMemberID=%d' % (self.member_id)
-
         try: result = client.request(url, cookie=cookie)
         except: pass
-        link = ''.join(result.splitlines()).replace('\'','"')
-        link = ''.join(link.splitlines()).replace('<i class="fa fa-play-circle-white"></i>','')
 
-        episodematch = re.compile('class="chapterList">(.+?)</li>').findall(link)
+        data = json.loads(result)
+        r = client.parseDOM(data['list'].encode('utf-8'), 'li')
+        episodes = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in r]
 
-        for em in episodematch:
-            episodes = re.compile('player-(.+)">(.+)</a>').findall(em)
-            for episode in episodes:
-                name = episode[1].decode('utf-8')
-                url = self.player_link % (episode[0])
-                self.list.append({'name': name, 'url': urllib.quote_plus(url), 'image': image})
+        for episode in episodes:
+            name = re.compile('<i class="fas fa-play-circle-player "></i> (.+)').findall(episode[1][0].encode('utf-8'))[0]
+            url = episode[0][0]
+            self.list.append({'name': name, 'url': urllib.quote_plus(url), 'image': image})
 
         for episode in self.list:
-            name = episode['name'].encode('utf-8')
+            name = episode['name']
             url = episode['url']
             image = episode['image']
             action = 'sourcePage'
@@ -139,19 +135,6 @@ class thai:
             item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
             control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=False)
 
-        # Pagination
-        # paginator = re.compile('<div class="page_list"  align="center">(.+?)</ul>').findall(link)[0]
-        # pages = re.compile('>(\d+)</a>').findall(paginator)
-        # nextPage = int(page) + 1
-        # if nextPage < len(pages):
-        #     action = 'listEpisodes'
-        #     query = '?action=%s&page=%d&name=%s&catid=%s&showid=%s&image=%s' % (action, nextPage, 'Next Page', catid, showid, image)
-        #     url = '%s%s' % (sysaddon, query)
-        #     item = control.item('Next Page', iconImage=image, thumbnailImage=image)
-        #     if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
-        #     item.setInfo(type="Video", infoLabels={"Title": 'Next Page', "OriginalTitle": 'Next Page'})
-        #     control.addItem(handle=syshandle, url=url, listitem=item, isFolder=True)
-
         control.content(syshandle, 'episodes')
         control.directory(syshandle, cacheToDisc=True)
         views.setView('episodes', {'skin.estuary': 55, 'skin.confluence': 50})
@@ -161,7 +144,7 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        response = urllib.urlopen('http://api.ipstack.com/check?access_key=527d4ea99987d55558c10b3a7d6c7b9b');
+        response = urllib.urlopen('http://api.ipstack.com/check?access_key=527d4ea99987d55558c10b3a7d6c7b9b')
         data = json.loads(response.read())
 
         if (data['country_code'] == 'TH'):
@@ -169,9 +152,10 @@ class thai:
         else:
             viewServerId = self.view_server_id
 
-        cookie = 'viewLivePlatform=%s; viewEmbedServersID=%d; viewServersID=%d; ssMemberID=%d' % ('pc', viewServerId, viewServerId, self.member_id)
+        cookie = 'viewServersID=%d; ssMemberID=%d; ssMemberUsername=%s; ssMemberEmail=%s; ssMemberPassword=%d' % (viewServerId, self.member_id, 'pewnaka%40hotmail.com', 'pewnaka%40hotmail.com', 54377)
+        headers = {'Host': 'www.seesantv.com', 'Referer': url, 'User-Agent': self.User_Agent}
 
-        try: result = client.request(url, cookie=cookie)
+        try: result = client.request(url, cookie=cookie, headers=headers)
         except: pass
 
         vidFile = re.compile('file: "(.+?)"').findall(result)[0]
