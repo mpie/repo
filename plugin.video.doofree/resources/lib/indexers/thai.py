@@ -28,7 +28,7 @@ class thai:
         self.shows_link      = self.main_link % 'apps/index.php?module=programs&task=setLoadListTypeAll&category=%s&page=%s'
         self.episodes_link = self.main_link % 'apps/index.php?module=programs&task=setLoadChapterListByPages2020&program_id=%s&page=%s'
         self.player_link = self.main_link % 'player-%s'
-        self.member_id = 169754  # expires 15 jun 2019
+        self.member_id = 217286
         self.view_server_id = 405
         self.replace_server = 'gm99'  # uk1, uk2, gm1, gm2, us1, us3, us4, as1, as2, jp1, jp2
         self.User_Agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
@@ -152,7 +152,7 @@ class thai:
         else:
             viewServerId = self.view_server_id
 
-        cookie = 'viewServersID=%d; ssMemberID=%d; ssMemberUsername=%s; ssMemberEmail=%s; ssMemberPassword=%d' % (viewServerId, self.member_id, 'pewnaka%40hotmail.com', 'pewnaka%40hotmail.com', 54377)
+        cookie = 'ssCheckLogin2=1; viewServersID=%d; ssMemberID=%d; ssMemberUsername=%s; ssMemberPassword=%s' % (viewServerId, self.member_id, 'endy.adorian%40niickel.us', 'test12345')
         headers = {'Host': 'www.seesantv.com', 'Referer': url, 'User-Agent': self.User_Agent}
 
         try: result = client.request(url, cookie=cookie, headers=headers)
