@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-    <addon id="plugin.video.doofree" name="DooFree" version="4.16.0" provider-name="Mpie">
+    <addon id="plugin.video.doofree" name="DooFree" version="4.17.0" provider-name="Mpie">
         <requires>
             <import addon="xbmc.python" version="2.19.0" />
             <import addon="script.module.urlresolver" version="5.0.55"/>
