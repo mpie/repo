@@ -113,6 +113,7 @@ class thai:
         try: result = client.request(url, cookie=cookie)
         except: pass
 
+        print url
         data = json.loads(result)
         r = client.parseDOM(data['list'].encode('utf-8'), 'li')
         episodes = [(client.parseDOM(i, 'a', ret='href'), client.parseDOM(i, 'a')) for i in r]
@@ -134,6 +135,28 @@ class thai:
             if not addonFanart == None: item.setProperty('Fanart_Image', addonFanart)
             item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
             control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=False)
+
+        # Check if we need next/prev page link
+        last_item = self.list[-1]
+        episode_number = re.findall(r'\d+', last_item['name'])[-1]
+        show_next_page = int(episode_number) > 1
+        show_prev_page = int(page) > 1
+
+        if show_next_page:
+            name = 'Next page'
+            item = control.item(name, iconImage='', thumbnailImage='')
+            item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
+            query = '?action=listEpisodes&name=%s&catid=%s&showid=%s&image=''&page=%d' % (name, catid, showid, int(page) + 1)
+            url = '%s%s' % (sysaddon, query)
+            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
+
+        if show_prev_page:
+            name = 'Previous page'
+            item = control.item(name, iconImage='', thumbnailImage='')
+            item.setInfo(type="Video", infoLabels={"Title": name, "OriginalTitle": name})
+            query = '?action=listEpisodes&name=%s&catid=%s&showid=%s&image=''&page=%d' % (name, catid, showid, int(page) - 1)
+            url = '%s%s' % (sysaddon, query)
+            control.addItem(handle=int(sys.argv[1]), url=url, listitem=item, isFolder=True)
 
         control.content(syshandle, 'episodes')
         control.directory(syshandle, cacheToDisc=True)
