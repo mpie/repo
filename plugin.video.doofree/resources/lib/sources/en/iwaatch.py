@@ -4,7 +4,6 @@ import urlparse
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
-from resources.lib.modules import dom_parser
 
 class source:
     def __init__(self):
@@ -12,17 +11,13 @@ class source:
         self.language = ['en']
         self.domains = ['iwaatch.com']
         self.base_link = 'https://iwaatch.com/'
-        self.search_link = 'https://iwaatch.com/?q=%s'
+        self.search_link = 'https://iwaatch.com/api/api.php?page=moviesearch&q=%s'
         self.sources2 = []
 
     def movie(self, imdb, title, localtitle, aliases, year):
-        if 1:  # try:
-            clean_title = cleantitle.geturl(title).replace('-', '%20')
-            url = urlparse.urljoin(self.base_link, (
-            self.search_link % (clean_title))) + '$$$$$' + title + '$$$$$' + year + '$$$$$' + 'movie'
-            return url
-            # except:
-            #    return
+        clean_title = cleantitle.geturl(title).replace('-', '%20')
+        url = urlparse.urljoin(self.base_link, (self.search_link % clean_title)) + '$$$$$' + title + '$$$$$' + year + '$$$$$' + 'movie'
+        return url
 
     def sources(self, url, hostDict, hostprDict):
         self.sources2 = []
@@ -47,20 +42,18 @@ class source:
         }
 
         response = client.request(url, headers=headers)
-        r = dom_parser.parse_dom(response, 'div', attrs={'class': ['col-xs-12', 'col-sm-6', 'col-md-3']})
-        r = dom_parser.parse_dom(r, 'a', req='href')
-        r = [(i.attrs['href'], i.content) for i in r if i]
-        r = [(i[0], re.findall('<div class="post-title">(.+?)</div>', i[1], re.IGNORECASE)) for i in r]
+        regex = "href=\"(.+?)\">\n.+\n\s+(.+)\n.+>(.+?)<"
+        r = re.findall(regex, response)
 
-        for link_in, title_in in r:
-            if title in title_in:
-                x = client.request(link_in.replace('movie', 'view'), headers=headers)
-                regex = "file: '(.+?)'.+?label: '(.+?)'"
-                match3 = re.compile(regex, re.DOTALL).findall(x)
+        for links in r:
+            if title == links[1]:
+                x = client.request(links[0].replace('movie', 'view'), headers=headers)
+                regex = "src:.+'(.+?)',.+\n.+\n.+size:.+'(.+)'"
+                match3 = re.findall(regex, x)
 
-                for url, q in match3:
+                for url in match3:
                     self.sources2.append(
-                        {'source': 'Direct', 'quality': q, 'language': 'en', 'url': url+'|Referer=https://iwaatch.com/view/' + title, 'direct': True, 'debridonly': False})
+                        {'source': 'Direct', 'quality': url[1] + 'p', 'language': 'en', 'url': url[0] + '|Referer=https://iwaatch.com/view/' + title, 'direct': True, 'debridonly': False})
 
         return self.sources2
 
