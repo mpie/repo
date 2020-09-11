@@ -17,7 +17,6 @@ class source:
 
 
 	def movie(self, imdb, title, localtitle, aliases, year):
-		print 'hier'
 		try:
 			t = cleantitle.geturl(title).replace('-', '+').replace('++', '+')
 			self.title = t

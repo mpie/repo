@@ -27,8 +27,8 @@ class source:
 
         data = url.split('$$$$$')
 
-        url = data[0]
-        title = data[1]
+        url = data[0] + '-' + data[2]
+        title = data[1] + '-' + data[2]
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
@@ -54,6 +54,23 @@ class source:
                 for url in match3:
                     self.sources2.append(
                         {'source': 'Direct', 'quality': url[1] + 'p', 'language': 'en', 'url': url[0] + '|Referer=https://iwaatch.com/view/' + title, 'direct': True, 'debridonly': False})
+
+        # Try without year
+        response = client.request(data[0], headers=headers)
+        regex = "href=\"(.+?)\">\n.+\n\s+(.+)\n.+>(.+?)<"
+        r = re.findall(regex, response)
+
+        for links in r:
+            if data[1] == links[1]:
+                x = client.request(links[0].replace('movie', 'view'), headers=headers)
+                regex = "src:.+'(.+?)',.+\n.+\n.+size:.+'(.+)'"
+                match3 = re.findall(regex, x)
+
+                for url in match3:
+                    self.sources2.append(
+                        {'source': 'Direct', 'quality': url[1] + 'p', 'language': 'en',
+                         'url': url[0] + '|Referer=https://iwaatch.com/view/' + title, 'direct': True,
+                         'debridonly': False})
 
         return self.sources2
 

@@ -110,7 +110,6 @@ class source:
 
 
 	def _get_sources(self, url, name, hostDict, hostprDict):
-		print url
 		try:
 			urls = []
 			result = client.request(url)
