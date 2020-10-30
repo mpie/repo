@@ -63,14 +63,14 @@ class source:
 				tit = i['value']
 
 				if cleantitle.get(title) != cleantitle.get(tit):
-					raise Exception()
+					continue
 				slink = i['seo']
 				slink = urlparse.urljoin(self.base_link, slink)
 
 				r = client.request(slink)
 
 				if not data['imdb'] in r:
-					raise Exception()
+					continue
 
 				data = client.parseDOM(r, 'div', {'class': 'el-item\s*'})
 
@@ -84,7 +84,7 @@ class source:
 					try:
 						valid, host = source_utils.is_host_valid(url, hostDict)
 						if not valid:
-							raise Exception()
+							continue
 
 						if host in ['mixdrop.co', 'upstream.to']:
 							sources.append({'source': host, 'quality': 'SD', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
