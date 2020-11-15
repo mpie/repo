@@ -53,7 +53,7 @@ class navigator:
                               'ch3hd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('3SD',
                               'playThaiLiveTV&url=http://live3.thaimomo.com/live/ch3sd-3/playlist.m3u8&name=3SD&image=ch3sd.png',
-                              'DefaultMovies.png', isFolder=False)
+                              'ch3sd.png', 'DefaultMovies.png', isFolder=False)
         self.addDirectoryItem('GMM',
                               'playThaiLiveTV&url=http://live3.thaimomo.com/live/chgmmchannel-2/playlist.m3u8&name=3Family&image=ch3family.png',
                               'ch3family.png', 'DefaultMovies.png', isFolder=False)
