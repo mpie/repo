@@ -33,7 +33,7 @@ def geturl(title):
 			title = title.replace(c, '')
 
 	title = title.replace('/', '-')
-	title = title.replace('’', '')
+	title = title.replace('’', '\'')
 	title = title.replace(' ', '-')
 	title = title.replace('--', '-')
 	return title
