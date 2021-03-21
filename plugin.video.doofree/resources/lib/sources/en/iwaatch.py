@@ -15,8 +15,8 @@ class source:
         self.sources2 = []
 
     def movie(self, imdb, title, localtitle, aliases, year):
-        clean_title = cleantitle.geturl(title).replace('-', '%20')
-        url = urlparse.urljoin(self.base_link, (self.search_link % clean_title)) + '$$$$$' + title + '$$$$$' + year + '$$$$$' + 'movie'
+        clean_title = cleantitle.geturl(title).replace('-', '%20').replace('None', '')
+        url = urlparse.urljoin(self.base_link, (self.search_link % clean_title)) + '$$$$$' + clean_title
         return url
 
     def sources(self, url, hostDict, hostprDict):
@@ -27,8 +27,8 @@ class source:
 
         data = url.split('$$$$$')
 
-        url = data[0] + '-' + data[2]
-        title = data[1] + '-' + data[2]
+        url = data[0]
+        title = data[1].replace('\'', '')
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36',
@@ -46,7 +46,7 @@ class source:
         r = re.findall(regex, response)
 
         for links in r:
-            if title == links[1]:
+            if title == cleantitle.geturl(links[1]).replace('-', '%20'):
                 x = client.request(links[0].replace('movie', 'view'), headers=headers)
                 regex = "src:.+'(.+?)',.+\n.+\n.+size:.+'(.+)'"
                 match3 = re.findall(regex, x)
@@ -54,23 +54,6 @@ class source:
                 for url in match3:
                     self.sources2.append(
                         {'source': 'Direct', 'quality': url[1] + 'p', 'language': 'en', 'url': url[0] + '|Referer=https://iwaatch.com/view/' + title, 'direct': True, 'debridonly': False})
-
-        # Try without year
-        response = client.request(data[0], headers=headers)
-        regex = "href=\"(.+?)\">\n.+\n\s+(.+)\n.+>(.+?)<"
-        r = re.findall(regex, response)
-
-        for links in r:
-            if data[1] == links[1]:
-                x = client.request(links[0].replace('movie', 'view'), headers=headers)
-                regex = "src:.+'(.+?)',.+\n.+\n.+size:.+'(.+)'"
-                match3 = re.findall(regex, x)
-
-                for url in match3:
-                    self.sources2.append(
-                        {'source': 'Direct', 'quality': url[1] + 'p', 'language': 'en',
-                         'url': url[0] + '|Referer=https://iwaatch.com/view/' + title, 'direct': True,
-                         'debridonly': False})
 
         return self.sources2
 
