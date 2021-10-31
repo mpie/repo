@@ -167,10 +167,10 @@ class thai:
     Start playing the video
     '''
     def sourcePage(self, url, name, image):
-        response = urllib.urlopen('http://api.ipstack.com/check?access_key=527d4ea99987d55558c10b3a7d6c7b9b')
+        response = urllib.urlopen('http://ip-api.com/json/')
         data = json.loads(response.read())
 
-        if (data['country_code'] == 'TH'):
+        if (data['countryCode'] == 'TH'):
             viewServerId = 409
         else:
             viewServerId = self.view_server_id
